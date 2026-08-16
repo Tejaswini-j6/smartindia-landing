@@ -1,0 +1,14 @@
+# Vercel
+.vercel
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
+.vscode/
+
+# Dependencies (none today, but keep the door shut)
+node_modules/
+npm-debug.log*

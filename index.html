@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05070C">
+<title>SmartIndia.ai — Bringing AI and People Together</title>
+<meta name="description" content="SmartIndia.ai is an AI-powered platform and IT solutions company from Tiruppur, Tamil Nadu — building intelligent search, dynamic web platforms, e-commerce and multi-vendor systems.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="is-booting">
+
+<!-- ══════════════════════════════════════════════════════════════
+     MASTER BRAND LOGO  —  single source of truth.
+     Cloned into the reveal, the nav and the footer so the mark is
+     never re-drawn, re-proportioned or distorted anywhere.
+     ══════════════════════════════════════════════════════════════ -->
+<template id="si-logo-src">
+<svg class="si-logo" viewBox="0 0 1000 480" role="img" aria-label="SmartIndia.ai — Bringing AI and People Together" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="siGold" x1="0" y1="88" x2="0" y2="262" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE7B0"/>
+      <stop offset=".28" stop-color="#F0C97A"/>
+      <stop offset=".62" stop-color="#C08A34"/>
+      <stop offset="1" stop-color="#6E4413"/>
+    </linearGradient>
+    <linearGradient id="siGoldFade" x1="0" y1="0" x2="1000" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6E4413" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#C08A34" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#6E4413" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="siSaffronRule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FF9933" stop-opacity="0"/>
+      <stop offset="1" stop-color="#FF9933"/>
+    </linearGradient>
+    <linearGradient id="siGreenRule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#138808"/>
+      <stop offset="1" stop-color="#138808" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ─── skyline of Indian monuments ─── -->
+  <g class="si-skyline" fill="url(#siGold)">
+    <rect x="10" y="257" width="980" height="3" fill="url(#siGoldFade)"/>
+
+    <!-- gopuram (left) -->
+    <rect x="17" y="236" width="110" height="24"/>
+    <rect x="24" y="216" width="96" height="20"/>
+    <rect x="31" y="198" width="82" height="18"/>
+    <rect x="38" y="182" width="68" height="16"/>
+    <rect x="45" y="168" width="54" height="14"/>
+    <rect x="52" y="156" width="40" height="12"/>
+    <rect x="58" y="146" width="28" height="10"/>
+    <path d="M56 146 L50 130 H94 L88 146 Z"/>
+    <rect x="59" y="118" width="2" height="9"/><circle cx="60" cy="126" r="3.4"/>
+    <rect x="71" y="111" width="2" height="13"/><circle cx="72" cy="124" r="4.4"/>
+    <rect x="83" y="118" width="2" height="9"/><circle cx="84" cy="126" r="3.4"/>
+    <rect x="127" y="250" width="6" height="10"/>
+
+    <!-- small shikhara -->
+    <rect x="132" y="240" width="56" height="20"/>
+    <path d="M140 240 C144 214 150 194 160 184 C170 194 176 214 180 240 Z"/>
+    <ellipse cx="160" cy="183" rx="10" ry="4.5"/>
+    <rect x="159" y="166" width="2" height="14"/><circle cx="160" cy="164" r="3.8"/>
+    <rect x="188" y="252" width="10" height="8"/>
+
+    <!-- golden temple -->
+    <rect x="196" y="246" width="122" height="14"/>
+    <rect x="212" y="198" width="90" height="48"/>
+    <path d="M230 198 C230 172 242 152 257 149 C272 152 284 172 284 198 Z"/>
+    <rect x="255.5" y="132" width="3" height="18"/><circle cx="257" cy="130" r="4.8"/>
+    <path d="M212 198 C212 185 216 177 222 176 C228 177 232 185 232 198 Z"/>
+    <path d="M282 198 C282 185 286 177 292 176 C298 177 302 185 302 198 Z"/>
+    <rect x="221" y="167" width="2" height="10"/><circle cx="222" cy="165" r="2.8"/>
+    <rect x="291" y="167" width="2" height="10"/><circle cx="292" cy="165" r="2.8"/>
+    <path d="M196 246 C196 238 199 233 203 232 C207 233 210 238 210 246 Z"/>
+    <path d="M304 246 C304 238 307 233 311 232 C315 233 318 238 318 246 Z"/>
+    <rect x="318" y="250" width="16" height="10"/>
+
+    <!-- qutub minar -->
+    <path d="M334 260 L342 116 H358 L366 260 Z"/>
+    <rect x="331" y="196" width="38" height="7"/>
+    <rect x="333" y="160" width="34" height="6"/>
+    <rect x="335" y="130" width="30" height="5"/>
+    <path d="M341 116 C341 106 345 100 350 99 C355 100 359 106 359 116 Z"/>
+    <rect x="349" y="90" width="2" height="10"/><circle cx="350" cy="88" r="2.9"/>
+    <rect x="366" y="248" width="14" height="12"/>
+
+    <!-- taj mahal -->
+    <rect x="378" y="244" width="244" height="16"/>
+    <path d="M391 244 L393 156 H403 L405 244 Z"/>
+    <rect x="389" y="212" width="18" height="5"/><rect x="389.5" y="184" width="17" height="4.5"/>
+    <path d="M392 156 C392 146 395 140 398 139 C401 140 404 146 404 156 Z"/>
+    <rect x="397" y="130" width="2" height="10"/><circle cx="398" cy="128" r="2.9"/>
+    <path d="M595 244 L597 156 H607 L609 244 Z"/>
+    <rect x="593" y="212" width="18" height="5"/><rect x="593.5" y="184" width="17" height="4.5"/>
+    <path d="M596 156 C596 146 599 140 602 139 C605 140 608 146 608 156 Z"/>
+    <rect x="601" y="130" width="2" height="10"/><circle cx="602" cy="128" r="2.9"/>
+    <path d="M428 244 L430 176 H438 L440 244 Z"/>
+    <rect x="426" y="214" width="16" height="4.5"/>
+    <path d="M429 176 C429 167 432 162 434 161 C436 162 439 167 439 176 Z"/>
+    <rect x="433" y="152" width="2" height="9"/><circle cx="434" cy="150" r="2.5"/>
+    <path d="M560 244 L562 176 H570 L572 244 Z"/>
+    <rect x="558" y="214" width="16" height="4.5"/>
+    <path d="M561 176 C561 167 564 162 566 161 C568 162 571 167 571 176 Z"/>
+    <rect x="565" y="152" width="2" height="9"/><circle cx="566" cy="150" r="2.5"/>
+    <path fill-rule="evenodd" d="M446 244 V212 L462 198 H538 L554 212 V244 Z M486 244 V224 A14 16 0 0 1 514 224 V244 Z"/>
+    <path d="M450 198 C450 184 454 176 460 174 C466 176 470 184 470 198 Z"/>
+    <path d="M530 198 C530 184 534 176 540 174 C546 176 550 184 550 198 Z"/>
+    <rect x="459" y="163" width="2" height="12"/><circle cx="460" cy="161" r="2.8"/>
+    <rect x="539" y="163" width="2" height="12"/><circle cx="540" cy="161" r="2.8"/>
+    <rect x="474" y="190" width="52" height="10"/>
+    <path d="M470 192 C463 168 473 142 500 136 C527 142 537 168 530 192 Z"/>
+    <rect x="498.5" y="108" width="3" height="28"/><circle cx="500" cy="106" r="5"/>
+    <rect x="620" y="250" width="10" height="10"/>
+
+    <!-- nagara shikhara -->
+    <rect x="628" y="238" width="74" height="22"/>
+    <path d="M630 238 C632 220 636 208 642 202 C648 208 652 220 654 238 Z"/>
+    <path d="M676 238 C678 220 682 208 688 202 C694 208 698 220 700 238 Z"/>
+    <path d="M640 238 C644 198 652 166 665 152 C678 166 686 198 690 238 Z"/>
+    <ellipse cx="665" cy="150" rx="11" ry="5"/>
+    <rect x="664" y="130" width="2" height="16"/><circle cx="665" cy="128" r="3.8"/>
+    <rect x="702" y="250" width="8" height="10"/>
+
+    <!-- charminar / mosque -->
+    <rect x="708" y="240" width="94" height="20"/>
+    <path d="M710 240 L713 172 H721 L724 240 Z"/>
+    <path d="M786 240 L789 172 H797 L800 240 Z"/>
+    <rect x="708" y="206" width="18" height="4"/><rect x="784" y="206" width="18" height="4"/>
+    <path d="M712 172 C712 163 715 158 717 157 C719 158 722 163 722 172 Z"/>
+    <path d="M788 172 C788 163 791 158 793 157 C795 158 798 163 798 172 Z"/>
+    <rect x="716" y="146" width="2" height="12"/><circle cx="717" cy="144" r="2.5"/>
+    <rect x="792" y="146" width="2" height="12"/><circle cx="793" cy="144" r="2.5"/>
+    <rect x="722" y="204" width="66" height="36"/>
+    <path d="M722 204 C722 192 726 185 731 184 C736 185 740 192 740 204 Z"/>
+    <path d="M770 204 C770 192 774 185 779 184 C784 185 788 192 788 204 Z"/>
+    <path d="M736 204 C733 184 742 168 755 164 C768 168 777 184 774 204 Z"/>
+    <rect x="753.5" y="140" width="3" height="26"/><circle cx="755" cy="138" r="4.4"/>
+    <rect x="802" y="250" width="8" height="10"/>
+
+    <!-- stepped deul -->
+    <rect x="808" y="236" width="84" height="24"/>
+    <rect x="814" y="218" width="72" height="18"/>
+    <rect x="820" y="202" width="60" height="16"/>
+    <rect x="826" y="188" width="48" height="14"/>
+    <rect x="832" y="176" width="36" height="12"/>
+    <rect x="838" y="166" width="24" height="10"/>
+    <ellipse cx="850" cy="163" rx="15" ry="5"/>
+    <rect x="849" y="144" width="2" height="16"/><circle cx="850" cy="142" r="3.8"/>
+    <rect x="892" y="250" width="8" height="10"/>
+
+    <!-- gopuram (right) -->
+    <rect x="898" y="238" width="100" height="22"/>
+    <rect x="904" y="220" width="88" height="18"/>
+    <rect x="910" y="204" width="76" height="16"/>
+    <rect x="916" y="190" width="64" height="14"/>
+    <rect x="922" y="178" width="52" height="12"/>
+    <rect x="928" y="168" width="40" height="10"/>
+    <rect x="934" y="160" width="28" height="8"/>
+    <path d="M932 160 L927 146 H969 L964 160 Z"/>
+    <rect x="936" y="134" width="2" height="9"/><circle cx="937" cy="142" r="3"/>
+    <rect x="947" y="129" width="2" height="12"/><circle cx="948" cy="140" r="4"/>
+    <rect x="958" y="134" width="2" height="9"/><circle cx="959" cy="142" r="3"/>
+  </g>
+
+  <!-- ─── wordmark ─── -->
+  <g class="si-wordmark">
+    <text class="si-wm" x="500" y="402" text-anchor="middle" font-size="128">
+      <tspan fill="#FFFFFF">Smart</tspan><tspan fill="#FF9933">In</tspan><tspan fill="#FFFFFF">d</tspan><tspan class="si-slot" fill="none">n</tspan><tspan fill="#138808">a</tspan><tspan font-size="88" fill="#FFFFFF">.ai</tspan>
+    </text>
+    <!-- Ashoka Chakra: positioned onto the reserved slot at runtime -->
+    <g class="si-chakra" fill="none" stroke="#1B3A8F" stroke-width="1.6">
+      <g class="si-chakra-spin">
+        <circle r="30" stroke-width="3.4"/>
+        <circle r="4.6" fill="#1B3A8F" stroke="none"/>
+        <g class="si-spokes" stroke-width="2.1" stroke-linecap="round">
+          <line y1="-28" y2="-6"/><line y1="-28" y2="-6" transform="rotate(15)"/>
+          <line y1="-28" y2="-6" transform="rotate(30)"/><line y1="-28" y2="-6" transform="rotate(45)"/>
+          <line y1="-28" y2="-6" transform="rotate(60)"/><line y1="-28" y2="-6" transform="rotate(75)"/>
+          <line y1="-28" y2="-6" transform="rotate(90)"/><line y1="-28" y2="-6" transform="rotate(105)"/>
+          <line y1="-28" y2="-6" transform="rotate(120)"/><line y1="-28" y2="-6" transform="rotate(135)"/>
+          <line y1="-28" y2="-6" transform="rotate(150)"/><line y1="-28" y2="-6" transform="rotate(165)"/>
+          <line y1="-28" y2="-6" transform="rotate(180)"/><line y1="-28" y2="-6" transform="rotate(195)"/>
+          <line y1="-28" y2="-6" transform="rotate(210)"/><line y1="-28" y2="-6" transform="rotate(225)"/>
+          <line y1="-28" y2="-6" transform="rotate(240)"/><line y1="-28" y2="-6" transform="rotate(255)"/>
+          <line y1="-28" y2="-6" transform="rotate(270)"/><line y1="-28" y2="-6" transform="rotate(285)"/>
+          <line y1="-28" y2="-6" transform="rotate(300)"/><line y1="-28" y2="-6" transform="rotate(315)"/>
+          <line y1="-28" y2="-6" transform="rotate(330)"/><line y1="-28" y2="-6" transform="rotate(345)"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- ─── tagline ─── -->
+  <g class="si-tagline">
+    <rect class="si-rule si-rule-l" x="120" y="445.5" width="92" height="2" fill="url(#siSaffronRule)"/>
+    <rect class="si-rule si-rule-r" x="788" y="445.5" width="92" height="2" fill="url(#siGreenRule)"/>
+    <text x="503" y="453" text-anchor="middle" font-size="18" letter-spacing="6.4" fill="#E9E4DA">BRINGING AI AND PEOPLE TOGETHER</text>
+  </g>
+</svg>
+</template>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     3D LOGO REVEAL
+     ══════════════════════════════════════════════════════════════ -->
+<div id="reveal" class="reveal" role="status" aria-label="SmartIndia.ai intro">
+  <canvas id="reveal-canvas" class="reveal__canvas" aria-hidden="true"></canvas>
+  <div class="reveal__horizon" aria-hidden="true"></div>
+  <div class="reveal__stage">
+    <div class="reveal__depth" id="reveal-depth">
+      <div class="reveal__extrude" id="reveal-extrude" aria-hidden="true"></div>
+      <div class="reveal__face" id="reveal-face"></div>
+      <div class="reveal__sweep" aria-hidden="true"></div>
+    </div>
+  </div>
+  <div class="reveal__bloom" id="reveal-bloom" aria-hidden="true"></div>
+
+  <!-- outro beat: the brand line lands as the logo pushes past the camera -->
+  <div class="reveal__outro" aria-hidden="true">
+    <p class="reveal__line"><span><i>Brings</i></span><span class="hl"><i>AI</i></span><span><i>and</i></span><span><i>People</i></span><span><i>together</i></span></p>
+    <em class="reveal__rule"></em>
+  </div>
+
+  <button class="reveal__skip" id="reveal-skip" type="button">Skip intro</button>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     NAV
+     ══════════════════════════════════════════════════════════════ -->
+<div class="scrollbar" aria-hidden="true"><i id="scroll-progress"></i></div>
+
+<header class="nav" id="nav">
+  <a class="nav__brand" href="#top" aria-label="SmartIndia.ai home">
+    <span class="nav__logo" id="nav-logo"></span>
+  </a>
+
+  <nav class="nav__links" aria-label="Primary">
+    <a href="#about" data-nav>About</a>
+    <a href="#platform" data-nav>Platform</a>
+    <a href="#services" data-nav>Solutions</a>
+    <a href="#work" data-nav>Work</a>
+    <a href="#contact" data-nav>Contact</a>
+  </nav>
+
+  <a class="btn btn--gold nav__cta magnetic" href="#contact">
+    <span>Start a Project</span>
+  </a>
+
+  <button class="nav__burger" id="nav-burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+    <i></i><i></i>
+  </button>
+</header>
+
+<div class="menu" id="menu" hidden>
+  <nav class="menu__inner" aria-label="Mobile">
+    <a href="#about"    data-nav><em>01</em>About</a>
+    <a href="#platform" data-nav><em>02</em>Platform</a>
+    <a href="#services" data-nav><em>03</em>Solutions</a>
+    <a href="#work"     data-nav><em>04</em>Work</a>
+    <a href="#why"      data-nav><em>05</em>Why Us</a>
+    <a href="#contact"  data-nav><em>06</em>Contact</a>
+  </nav>
+  <div class="menu__foot">
+    <a href="mailto:info@smartindia.ai">info@smartindia.ai</a>
+    <a href="tel:+919994900470">+91 99949 00470</a>
+  </div>
+</div>
+
+
+<main id="top">
+
+<!-- ══════════════════════════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <canvas id="hero-canvas" class="hero__canvas" aria-hidden="true"></canvas>
+  <div class="hero__skyline" id="hero-skyline" aria-hidden="true"></div>
+  <div class="hero__veil" aria-hidden="true"></div>
+
+  <div class="hero__inner">
+    <p class="eyebrow reveal-up">
+      <span class="dot"></span> Bringing AI and People Together
+    </p>
+
+    <h1 class="hero__title">
+      <span class="line"><span>Explore.</span></span>
+      <span class="line"><span>Discover.</span></span>
+      <span class="line"><span>Connect. <em>With AI.</em></span></span>
+    </h1>
+
+    <p class="hero__lede reveal-up">
+      SmartIndia.ai brings the power of artificial intelligence and the world of
+      information together in one intelligent platform — and builds the web
+      platforms that businesses run on.
+    </p>
+
+    <div class="hero__actions reveal-up">
+      <a class="btn btn--gold magnetic" href="#platform"><span>Explore SmartIndia.ai</span></a>
+      <a class="btn btn--ghost magnetic" href="#contact"><span>Get Started</span></a>
+    </div>
+
+    <ul class="hero__meta reveal-up">
+      <li><b data-count="2025" data-plain>2025</b><span>Founded</span></li>
+      <li><b data-count="130" data-suffix="+" data-live="total">0</b><span>Live platforms</span></li>
+      <li><b data-count="300" data-suffix="+">0</b><span>Customers served</span></li>
+      <li><b>India</b><span>Built with an India-first vision</span></li>
+    </ul>
+  </div>
+
+  <a class="hero__scroll" href="#about" aria-label="Scroll to About">
+    <span></span><i></i>
+  </a>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     TICKER
+     ══════════════════════════════════════════════════════════════ -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__row" id="ticker-row"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     ABOUT
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section about" id="about">
+  <div class="wrap">
+    <header class="sect-head">
+      <p class="eyebrow reveal-up"><span class="dot"></span> About SmartIndia.ai</p>
+      <h2 class="display reveal-up">Making information <em>smarter</em>, simpler<br>and more accessible.</h2>
+    </header>
+
+    <div class="about__grid">
+      <div class="about__body reveal-up">
+        <p class="lead">SmartIndia.ai is an AI-powered platform designed to bring people and
+        artificial intelligence closer together.</p>
+        <p>Our goal is to make discovering information more intelligent, convenient and
+        accessible. By combining AI capabilities with multiple sources of information,
+        SmartIndia.ai helps users explore the digital world through a smarter search
+        experience.</p>
+        <p>Founded in 2025 and based in Tiruppur, Tamil Nadu, SmartIndia.ai is focused on
+        building technology that makes AI more useful in everyday life — and on engineering
+        the dynamic websites, e-commerce systems and multi-vendor platforms that carry
+        our clients' businesses online.</p>
+      </div>
+
+      <div class="about__arches reveal-up" aria-hidden="true">
+        <div class="arch arch--1"><i></i></div>
+        <div class="arch arch--2"><i></i></div>
+        <div class="arch arch--3"><i></i></div>
+      </div>
+    </div>
+
+    <div class="mv">
+      <article class="mv__card tilt reveal-up">
+        <span class="mv__no">Mission</span>
+        <h3>To make AI-powered information discovery simple, accessible and useful for everyone.</h3>
+        <div class="mv__glow" aria-hidden="true"></div>
+      </article>
+      <article class="mv__card tilt reveal-up">
+        <span class="mv__no">Vision</span>
+        <h3>To build an intelligent digital ecosystem where people can seamlessly interact with information through AI.</h3>
+        <div class="mv__glow" aria-hidden="true"></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     PLATFORM / PRODUCTS
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section platform" id="platform">
+  <div class="wrap">
+    <header class="sect-head sect-head--split">
+      <div>
+        <p class="eyebrow reveal-up"><span class="dot"></span> The Platform</p>
+        <h2 class="display reveal-up">One intelligent surface<br>for everything you look for.</h2>
+      </div>
+      <p class="sect-head__note reveal-up">Three connected experiences that make up SmartIndia.ai.</p>
+    </header>
+
+    <div class="prod">
+      <article class="prod__card tilt reveal-up" data-idx="01">
+        <div class="prod__vis" aria-hidden="true"><canvas class="mini" data-mini="search"></canvas></div>
+        <h3>Smart Search</h3>
+        <p>AI-powered search designed to help users explore information efficiently.</p>
+      </article>
+      <article class="prod__card tilt reveal-up" data-idx="02">
+        <div class="prod__vis" aria-hidden="true"><canvas class="mini" data-mini="discover"></canvas></div>
+        <h3>AI Discovery</h3>
+        <p>A smarter way to discover information and explore different topics.</p>
+      </article>
+      <article class="prod__card tilt reveal-up" data-idx="03">
+        <div class="prod__vis" aria-hidden="true"><canvas class="mini" data-mini="experience"></canvas></div>
+        <h3>Intelligent Digital Experience</h3>
+        <p>A user-friendly interface connecting people with AI-powered information.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     SERVICES / IT SOLUTIONS
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section services" id="services">
+  <div class="wrap">
+    <header class="sect-head">
+      <p class="eyebrow reveal-up"><span class="dot"></span> What We Offer</p>
+      <h2 class="display reveal-up">IT solutions, engineered<br>to be lived in.</h2>
+    </header>
+
+    <div class="svc" id="svc-list">
+      <!-- injected -->
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     WORK / LIVE PLATFORMS
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section work" id="work">
+  <div class="wrap">
+    <header class="sect-head sect-head--split">
+      <div>
+        <p class="eyebrow reveal-up"><span class="dot"></span> Selected Work</p>
+        <h2 class="display reveal-up">Platforms that are<br><em>live right now.</em></h2>
+      </div>
+      <p class="sect-head__note reveal-up">
+        Every entry below is a running production platform. Nothing here is a concept.
+      </p>
+    </header>
+  </div>
+
+  <div class="rail-wrap reveal-up">
+    <div class="rail" id="work-rail" tabindex="0" aria-label="Featured platforms, scrollable"></div>
+    <div class="rail__nav">
+      <button type="button" class="rail__btn" data-rail="-1" aria-label="Previous">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button type="button" class="rail__btn" data-rail="1" aria-label="Next">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="index" id="index-block">
+      <div class="index__head">
+        <h3 class="reveal-up">Live platform index</h3>
+        <div class="filters reveal-up" role="tablist" aria-label="Filter platforms" id="filters"></div>
+      </div>
+      <ul class="index__list" id="index-list"></ul>
+      <button class="btn btn--ghost index__more" id="index-more" type="button"><span>Show all platforms</span></button>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     WHY US + STATS
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section why" id="why">
+  <div class="wrap">
+    <header class="sect-head">
+      <p class="eyebrow reveal-up"><span class="dot"></span> Why SmartIndia.ai</p>
+      <h2 class="display reveal-up">Five reasons this<br>holds up at scale.</h2>
+    </header>
+
+    <ol class="why__list" id="why-list"></ol>
+
+    <div class="stats" id="stats">
+      <div class="stat reveal-up"><b data-count="130" data-suffix="+" data-live="total">0</b><span>Platforms delivered</span></div>
+      <div class="stat reveal-up"><b data-count="300" data-suffix="+">0</b><span>Happy customers</span></div>
+      <div class="stat reveal-up"><b data-count="4.8" data-decimals="1" data-suffix="/5">0</b><span>Average client rating</span></div>
+      <div class="stat reveal-up"><b data-count="102" data-suffix="">0</b><span>Verified reviews</span></div>
+    </div>
+    <p class="stats__note reveal-up">
+      Rating and review counts as published on Google and Capterra for SmartIndia Digital.
+    </p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     TECHNOLOGY
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section tech" id="technology">
+  <div class="wrap">
+    <header class="sect-head sect-head--split">
+      <div>
+        <p class="eyebrow reveal-up"><span class="dot"></span> Capabilities</p>
+        <h2 class="display reveal-up">How the work<br>gets delivered.</h2>
+      </div>
+      <p class="sect-head__note reveal-up">A four-step delivery process, repeated across every platform we ship.</p>
+    </header>
+
+    <ol class="steps" id="steps"></ol>
+
+    <div class="cap reveal-up">
+      <div class="cap__col">
+        <h4>Build</h4>
+        <ul id="cap-build"></ul>
+      </div>
+      <div class="cap__col">
+        <h4>Commerce</h4>
+        <ul id="cap-commerce"></ul>
+      </div>
+      <div class="cap__col">
+        <h4>Intelligence</h4>
+        <ul id="cap-ai"></ul>
+      </div>
+      <div class="cap__col">
+        <h4>Operate</h4>
+        <ul id="cap-ops"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     CLIENTS
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section clients" id="clients">
+  <div class="wrap">
+    <header class="sect-head sect-head--split">
+      <div>
+        <p class="eyebrow reveal-up"><span class="dot"></span> Clients &amp; Partners</p>
+        <h2 class="display reveal-up">The brands<br>we build for.</h2>
+      </div>
+      <div class="rating reveal-up">
+        <div class="rating__score"><b>4.8</b><span>/5</span></div>
+        <div class="rating__stars" aria-label="4.8 out of 5">
+          <i></i><i></i><i></i><i></i><i class="half"></i>
+        </div>
+        <p>Across <b>102</b> verified reviews on Google &amp; Capterra</p>
+      </div>
+    </header>
+
+    <div class="wall" id="wall"></div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     CONTACT
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section contact" id="contact">
+  <div class="contact__bg" aria-hidden="true"><canvas id="contact-canvas"></canvas></div>
+  <div class="wrap">
+    <header class="sect-head sect-head--center">
+      <p class="eyebrow reveal-up"><span class="dot"></span> Let's Talk</p>
+      <h2 class="display display--xl reveal-up">Let's build something<br><em>exceptional.</em></h2>
+    </header>
+
+    <div class="contact__grid">
+      <form class="form reveal-up" id="contact-form" novalidate>
+        <div class="field">
+          <input id="f-name" name="name" type="text" required autocomplete="name" placeholder=" ">
+          <label for="f-name">Your name</label>
+          <p class="err" data-err="f-name"></p>
+        </div>
+        <div class="field">
+          <input id="f-email" name="email" type="email" required autocomplete="email" placeholder=" ">
+          <label for="f-email">Email address</label>
+          <p class="err" data-err="f-email"></p>
+        </div>
+        <div class="field">
+          <input id="f-phone" name="phone" type="tel" autocomplete="tel" placeholder=" ">
+          <label for="f-phone">Phone <span>(optional)</span></label>
+        </div>
+        <div class="field">
+          <select id="f-topic" name="topic">
+            <option>Dynamic website</option>
+            <option>E-commerce platform</option>
+            <option>Multi-vendor marketplace</option>
+            <option>Mobile application</option>
+            <option>AI search &amp; discovery</option>
+            <option>Support &amp; maintenance</option>
+            <option>Something else</option>
+          </select>
+          <label for="f-topic" class="label--static">What do you need?</label>
+        </div>
+        <div class="field field--full">
+          <textarea id="f-msg" name="message" rows="4" required placeholder=" "></textarea>
+          <label for="f-msg">Tell us about the project</label>
+          <p class="err" data-err="f-msg"></p>
+        </div>
+        <button class="btn btn--gold btn--wide magnetic" type="submit"><span>Send enquiry</span></button>
+        <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
+      </form>
+
+      <aside class="contact__aside reveal-up">
+        <div class="cblock">
+          <h4>Studio</h4>
+          <address>
+            Arun Towers, MR Nagar,<br>
+            K N P Colony, Karatangadu,<br>
+            Tiruppur, Tamil Nadu 641604<br>
+            India
+          </address>
+        </div>
+        <div class="cblock">
+          <h4>Direct</h4>
+          <a class="clink" href="mailto:info@smartindia.ai">info@smartindia.ai</a>
+          <a class="clink" href="tel:+919994900470">+91 99949 00470</a>
+        </div>
+        <div class="cblock">
+          <h4>Hours</h4>
+          <p>Monday – Saturday · 8:00 – 18:30 IST<br><span class="muted">Sunday closed</span></p>
+        </div>
+        <div class="cblock">
+          <h4>Platforms</h4>
+          <a class="clink" href="https://smartindia.digital" target="_blank" rel="noopener">smartindia.digital</a>
+          <a class="clink" href="https://cms.smartindia.ai" target="_blank" rel="noopener">cms.smartindia.ai</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+</main>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════════════════════════ -->
+<footer class="foot">
+  <div class="wrap foot__inner">
+    <div class="foot__brand">
+      <span class="foot__logo" id="foot-logo"></span>
+      <p>Bringing AI and People Together.</p>
+    </div>
+    <nav class="foot__nav" aria-label="Footer">
+      <div>
+        <h5>Company</h5>
+        <a href="#about">About</a>
+        <a href="#why">Why us</a>
+        <a href="#technology">Capabilities</a>
+      </div>
+      <div>
+        <h5>Work</h5>
+        <a href="#platform">Platform</a>
+        <a href="#services">Solutions</a>
+        <a href="#work">Live platforms</a>
+      </div>
+      <div>
+        <h5>Contact</h5>
+        <a href="mailto:info@smartindia.ai">info@smartindia.ai</a>
+        <a href="tel:+919994900470">+91 99949 00470</a>
+        <a href="#contact">Start a project</a>
+      </div>
+    </nav>
+  </div>
+  <div class="wrap foot__base">
+    <p>© <span id="year">2025</span> SmartIndia.ai · Tiruppur, Tamil Nadu, India</p>
+    <p>Founded 2025</p>
+  </div>
+</footer>
+
+<div class="cursor" id="cursor" aria-hidden="true"><i></i></div>
+
+<script src="js/data.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/reveal.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/site.js"></script>
+</body>
+</html>
