@@ -42,6 +42,22 @@
     };
   }
 
+  /* ── WhatsApp ────────────────────────────────────────────────────────
+     Both the floating button and the contact form hand off to the same
+     wa.me deep link, so it is built in one place. Note what this is: the
+     enquiry is composed here and *sent by the visitor* from their own
+     WhatsApp — nothing is delivered server-side, so an abandoned handoff
+     leaves no trace on our end, exactly like the mailto: it replaces.
+     ──────────────────────────────────────────────────────────────────── */
+  const WA_NUMBER = (D && D.CONTACT && D.CONTACT.whatsapp) || '';
+
+  function waLink(text) {
+    if (!WA_NUMBER) return '';
+    /* wa.me wants %0A for newlines; encodeURIComponent already gives that. */
+    return 'https://wa.me/' + WA_NUMBER +
+           (text ? '?text=' + encodeURIComponent(text) : '');
+  }
+
   /* ══════════════════════════════════════════════════════════════════════
      1.  Logo placements
      ══════════════════════════════════════════════════════════════════════ */
@@ -405,6 +421,13 @@
 
   let lastY = window.scrollY, navTick = 0, lastCur = -2;
 
+  /* The floating dock rides the nav's scroll pass instead of adding a
+     listener of its own — one handler, one layout read per frame. */
+  const dock = $('#dock');
+  const dockFabs = $$('.fab', dock || document);
+  const waContact = $('#contact');
+  let dockShown = false;
+
   /* Read the whole frame's worth of geometry first, then write. Toggling a
      class and *then* measuring forces the browser to re-run layout inside
      the handler — on every scroll frame, all the way down the page. */
@@ -424,6 +447,8 @@
       const r = s.getBoundingClientRect();
       if (r.top <= hi && r.bottom > lo) cur = i;
     }
+    /* measured in the read phase with everything else, never after a write */
+    const contactR = (dock && waContact) ? waContact.getBoundingClientRect() : null;
 
     /* ── write ── */
     if (bar) bar.style.width = (y / max * 100).toFixed(2) + '%';
@@ -437,6 +462,21 @@
     if (cur !== lastCur) {                 /* only touch the DOM when it moves */
       lastCur = cur;
       navLinks.forEach(function (a, i) { a.classList.toggle('is-active', i === cur); });
+    }
+
+    if (dock) {
+      /* Appear once the hero is behind us, and stand down while the contact
+         form is on screen — the form is the better way to enquire when it is
+         right there, and the dock would otherwise sit on top of it. */
+      const past = y > vh * .55;
+      const atForm = contactR && contactR.top < vh * .78 && contactR.bottom > vh * .2;
+      const show = past && !atForm;
+      if (show !== dockShown) {
+        dockShown = show;
+        dock.classList.toggle('is-in', show);
+        /* keep both buttons out of the tab order while they are invisible */
+        dockFabs.forEach(function (b) { b.setAttribute('tabindex', show ? '0' : '-1'); });
+      }
     }
   }
   window.addEventListener('scroll', function () {
@@ -609,23 +649,31 @@
         return;
       }
 
-      /* No server is wired up yet, so hand the enquiry to the visitor's own
-         mail client with everything already filled in. */
-      const body = [
-        'Name: ' + name,
-        'Email: ' + email,
-        phone ? 'Phone: ' + phone : '',
-        'Enquiry: ' + topic,
-        '',
-        msg
-      ].filter(Boolean).join('\n');
+      /* No server is wired up, so the enquiry is handed to the visitor's own
+         WhatsApp with everything already typed in — they press send. */
+      const lines = ['*New enquiry — ' + topic + '*', '', 'Name: ' + name, 'Email: ' + email];
+      if (phone) lines.push('Phone: ' + phone);
+      lines.push('', msg);
+      const body = lines.join('\n');
 
-      const href = 'mailto:' + D.CONTACT.email +
-        '?subject=' + encodeURIComponent('New enquiry — ' + topic + ' — ' + name) +
-        '&body=' + encodeURIComponent(body);
+      const wa = waLink(body);
 
-      if (status) status.textContent = 'Opening your mail app with the enquiry ready to send…';
-      window.location.href = href;
+      /* If the number is missing from the data layer, fall back to mail
+         rather than sending the visitor to a broken wa.me URL. */
+      if (!wa) {
+        window.location.href = 'mailto:' + D.CONTACT.email +
+          '?subject=' + encodeURIComponent('New enquiry — ' + topic + ' — ' + name) +
+          '&body=' + encodeURIComponent(body);
+        return;
+      }
+
+      if (status) {
+        status.classList.remove('is-err');
+        status.textContent = 'Opening WhatsApp with your enquiry ready to send…';
+      }
+      /* A new tab, not a navigation: the visitor keeps the site behind them,
+         and if they have no WhatsApp the landing page is still there. */
+      window.open(wa, '_blank', 'noopener');
     });
 
     /* clear a field's error as soon as the visitor starts fixing it */
@@ -642,7 +690,49 @@
   })();
 
   /* ══════════════════════════════════════════════════════════════════════
-     8.  Hand-off from the reveal
+     8.  Floating enquiry dock
+     ══════════════════════════════════════════════════════════════════════ */
+  (function dockButtons() {
+    if (!dock) return;
+
+    const waFab = $('#wa-fab', dock);
+    if (waFab) {
+      const href = waLink(
+        'Hello SmartIndia.ai — I found you through your website and I would like ' +
+        'to enquire about a project.'
+      );
+
+      /* The markup already carries a bare wa.me link so the button works with
+         JS off; only upgrade it if the data layer actually gave us a number. */
+      if (href) waFab.href = href;
+      else waFab.href = 'mailto:' + D.CONTACT.email;
+    }
+
+    /* The enquiry button is a plain #contact anchor, so the shared anchor
+       handler above already does the scrolling. All that is left is to land
+       the caret in the form once the scroll has settled — without stealing
+       focus on a coarse pointer, where it would throw up the keyboard and
+       cover the form the user was just sent to. */
+    const enqFab = $('#enq-fab', dock);
+    if (enqFab && !PROFILE.coarse) {
+      enqFab.addEventListener('click', function () {
+        const first = $('#f-name');
+        if (!first) return;
+        const settle = PROFILE.reduced ? 60 : 720;
+        setTimeout(function () {
+          /* preventScroll: the smooth scroll is still the authority on where
+             the page ends up; focus must not jump it somewhere else */
+          try { first.focus({ preventScroll: true }); }
+          catch (err) { first.focus(); }
+        }, settle);
+      });
+    }
+    /* tabindex starts at -1 in the markup and is owned by onScroll from here;
+       setting it again now would undo the state of a page loaded mid-scroll. */
+  })();
+
+  /* ══════════════════════════════════════════════════════════════════════
+     9.  Hand-off from the reveal
      ══════════════════════════════════════════════════════════════════════ */
   function enter() {
     const t = $('.hero__title');

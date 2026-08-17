@@ -111,6 +111,8 @@ window.SI = (function () {
     email: 'info@smartindia.ai',
     phone: '+91 99949 00470',
     phoneHref: '+919994900470',
+    /* wa.me wants the number bare: country code, no +, no spaces */
+    whatsapp: '919994900470',
     address: ['Arun Towers, MR Nagar', 'K N P Colony, Karatangadu', 'Tiruppur, Tamil Nadu 641604', 'India']
   };
 
