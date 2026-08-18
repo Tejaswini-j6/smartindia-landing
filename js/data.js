@@ -6,18 +6,18 @@
 window.SI = (function () {
   'use strict';
 
-  /* ── brand tokens, read straight off the logo ─────────────────────────── */
+  /* ── brand tokens, read off the logo and weighted for paper ───────────── */
   const BRAND = {
-    goldHi: '#FFE7B0',
-    gold: '#E3B25B',
+    goldHi: '#8A5A12',
+    gold: '#A9761F',
     goldMid: '#C08A34',
-    goldDeep: '#6E4413',
-    saffron: '#FF9933',
-    green: '#1FA83A',
+    goldDeep: '#5A360D',
+    saffron: '#F08221',
+    green: '#138808',
     navy: '#1B3A8F',
-    navyLit: '#3A5FC8',
-    ink: '#05070C',
-    white: '#FFFFFF'
+    navyLit: '#2E4FB0',
+    ink: '#14181F',
+    paper: '#F7F4EC'
   };
 
   /* ── categories ───────────────────────────────────────────────────────── */
@@ -277,12 +277,14 @@ window.SI = (function () {
     return PLATFORMS.find(function (p) { return p.d === dom; });
   }).filter(Boolean);
 
-  /* colour pairs cycled through the rail cards — brand hues only */
+  /* Colour pairs cycled through the rail cards — brand hues only, mixed as
+     pale washes so the dark monogram sitting on top stays the loudest thing
+     on the card. */
   const CARD_TINTS = [
-    ['rgba(227,178,91,.34)', 'rgba(27,58,143,.30)'],
-    ['rgba(255,153,51,.30)', 'rgba(110,68,19,.34)'],
-    ['rgba(31,168,58,.26)', 'rgba(227,178,91,.28)'],
-    ['rgba(27,58,143,.34)', 'rgba(255,153,51,.24)']
+    ['rgba(220,168,71,.42)', 'rgba(46,79,176,.24)'],
+    ['rgba(240,130,33,.34)', 'rgba(176,124,32,.30)'],
+    ['rgba(19,136,8,.24)', 'rgba(220,168,71,.34)'],
+    ['rgba(46,79,176,.26)', 'rgba(240,130,33,.28)']
   ];
 
   /* initials for the generated monogram tiles */

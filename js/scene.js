@@ -13,13 +13,25 @@
 
   const PROFILE = window.SI_PROFILE || { low: false, reduced: false, coarse: false };
 
-  const GOLD_HI = [255, 231, 176];
-  const GOLD = [227, 178, 91];
-  const GOLD_MID = [192, 138, 52];
-  const SAFFRON = [255, 153, 51];
-  const GREEN = [31, 168, 58];
-  const NAVY = [58, 95, 200];
-  const NAVY_SOFT = [40, 66, 150];
+  /* Paper palette. On black these were emissive — light added to a dark
+     field. On white nothing can be drawn by adding light, so every colour
+     here is an ink: the wheel is bronze, the graph is navy, and the accents
+     are the tricolour at the weight it holds against paper. Composite is
+     'source-over' throughout for the same reason (see COMP below). */
+  const GOLD_HI = [176, 124, 32];   /* the wheel's lit edge */
+  const GOLD = [150, 104, 28];
+  const GOLD_MID = [198, 156, 92];  /* the far orbits, where ink thins out */
+  const SAFFRON = [230, 122, 24];
+  const GREEN = [19, 136, 8];
+  const NAVY = [43, 74, 160];
+  const NAVY_SOFT = [96, 122, 186];
+
+  /* Every scene drew under 'lighter', which is additive and therefore
+     order-independent — that is what let draw.js regroup primitives into
+     colour buckets. On paper additive blending only washes toward white, so
+     the scenes composite normally instead. Regrouping stays safe: these are
+     scattered translucent motes and hairlines, not stacked opaque shapes. */
+  const COMP = 'source-over';
 
   const DRAW = window.SI_DRAW;
   const TAU = DRAW.TAU;
@@ -143,8 +155,8 @@
   function heroScene() {
     const canvas = document.getElementById('hero-canvas');
     if (!canvas || !canvas.getContext) return;
-    /* full-viewport additive field: 2× device pixels is four times the
-       fill rate for detail no one can resolve through the bloom */
+    /* full-viewport particle field: 2× device pixels is four times the
+       fill rate for detail no one can resolve at these alphas */
     const s = setup(canvas, 1.5);
     const ctx = s.ctx;
 
@@ -361,7 +373,7 @@
       }
 
       ctx.clearRect(0, 0, s.w, s.h);
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = COMP;
       ctx.lineCap = 'round';
 
       const near = dist - R * 2.4, far = dist + R * 4.6;
@@ -396,9 +408,9 @@
         if (p.dust) al *= 0.55 + 0.45 * Math.sin(t * 1.4 + p.ph);
         if (al <= 0.015) continue;
         const rad = Math.max(0.3, p.r * k * invRel);
-        /* Bloom as a second, wider translucent pass rather than shadowBlur.
-           Under 'lighter' it reads the same and costs a fraction. */
-        if (canGlow && p.glow) addFill(p.ci, al * 0.15 * p.glow, px[i], py[i], rad * 3.6);
+        /* Halo as a second, wider translucent pass rather than shadowBlur.
+           On paper it is a soft cast rather than a bloom, so it is thinner. */
+        if (canGlow && p.glow) addFill(p.ci, al * 0.08 * p.glow, px[i], py[i], rad * 3.6);
         addFill(p.ci, al, px[i], py[i], rad);
       }
 
@@ -450,12 +462,12 @@
       ctx.clearRect(0, 0, s.w, s.h);
       const cx = s.w / 2, cy = s.h / 2;
       const R = Math.min(s.w, s.h) * .38;
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = COMP;
 
       /* concentric rings, echoing the chakra */
       for (let i = 1; i <= 4; i++) {
         ctx.beginPath();
-        ctx.strokeStyle = rgba(GOLD, .07 + (4 - i) * .02);
+        ctx.strokeStyle = rgba(GOLD, .10 + (4 - i) * .03);
         ctx.lineWidth = 1;
         ctx.arc(cx, cy, R * (i / 4), 0, TAU);
         ctx.stroke();
@@ -507,7 +519,7 @@
     let head = 0, hop = 0;
     return function (t, dt) {
       ctx.clearRect(0, 0, s.w, s.h);
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = COMP;
       ctx.lineCap = 'butt';
       for (let i = 0; i < n; i++) {
         const p = pts[i];
@@ -632,7 +644,7 @@
 
     const frame = function (t, dt) {
       ctx.clearRect(0, 0, s.w, s.h);
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = COMP;
 
       /* a large, very faint chakra outline behind the closing statement.
          Rim, inner rim and all 24 spokes share one colour and weight, so
@@ -642,7 +654,7 @@
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(t * .028);
-      ctx.strokeStyle = rgba(GOLD, .05);
+      ctx.strokeStyle = rgba(GOLD, .10);
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(R, 0); ctx.arc(0, 0, R, 0, TAU);

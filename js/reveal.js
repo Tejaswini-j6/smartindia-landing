@@ -193,17 +193,21 @@
     const w = svg.querySelector('.si-wordmark'); if (w) w.remove();
     const t = svg.querySelector('.si-tagline'); if (t) t.remove();
 
-    /* bake the depth shading straight into the gradient stops */
-    const k = 0.76 - depth * 0.66;
+    /* Bake the depth shading straight into the gradient stops. On paper the
+       shells cannot recede by going black — that would read as a hole cut in
+       the page — so each one is mixed toward a deep bronze instead, and the
+       stack reads as an extruded block of metal seen edge-on. */
+    const SHADE = [58, 36, 10];
+    const k = 0.26 + depth * 0.62;               /* 0 = face colour, 1 = shade */
     const stops = svg.querySelectorAll('stop');
     for (let i = 0; i < stops.length; i++) {
       const c = stops[i].getAttribute('stop-color') || '#000000';
       const m = /^#([0-9a-f]{6})$/i.exec(c.trim());
       if (!m) continue;
       const v = parseInt(m[1], 16);
-      const r = Math.round(((v >> 16) & 255) * k);
-      const g = Math.round(((v >> 8) & 255) * k * 0.97);
-      const b = Math.round((v & 255) * k * 0.92);
+      const r = Math.round(((v >> 16) & 255) + (SHADE[0] - ((v >> 16) & 255)) * k);
+      const g = Math.round(((v >> 8) & 255) + (SHADE[1] - ((v >> 8) & 255)) * k);
+      const b = Math.round((v & 255) + (SHADE[2] - (v & 255)) * k);
       stops[i].setAttribute('stop-color',
         '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1));
     }
@@ -236,12 +240,15 @@
   let fadeAt = 1e6;
   const clamp01 = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
 
+  /* Inks, not sparks: the field is drawn onto paper, so the motes are
+     pigment settling on the mark rather than light gathering out of black.
+     They composite normally for the same reason (see draw()). */
   const DRAW = window.SI_DRAW;
-  const GOLD = DRAW.cid([255, 231, 176]);
-  const GOLD2 = DRAW.cid([227, 178, 91]);
-  const SAFF = DRAW.cid([255, 153, 51]);
-  const GRN = DRAW.cid([31, 168, 58]);
-  const NAVY = DRAW.cid([90, 130, 220]);
+  const GOLD = DRAW.cid([176, 124, 32]);
+  const GOLD2 = DRAW.cid([150, 104, 28]);
+  const SAFF = DRAW.cid([230, 122, 24]);
+  const GRN = DRAW.cid([19, 136, 8]);
+  const NAVY = DRAW.cid([43, 74, 160]);
 
   /** @returns {number} a batcher colour id, resolved once at build time */
   function pickColor(i) {
@@ -376,7 +383,7 @@
     if (!running || !ctx) return;
     const t = (now - t0) / 1000;
     ctx.clearRect(0, 0, W, H);
-    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalCompositeOperation = 'source-over';
 
     /* ambient dust — present for the whole reveal */
     for (let i = 0; i < ambient.length; i++) {

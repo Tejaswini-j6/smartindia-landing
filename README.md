@@ -39,8 +39,17 @@ onto `.si-slot`, so the wheel stays correct at any font size.
 ## Brand tokens
 
 Every colour in `css/style.css` `:root` is taken from the mark: the skyline's
-gold gradient, the saffron/white/green of the wordmark, the navy of the chakra,
-and the black field. Nothing else was introduced.
+gold gradient, the saffron/green of the wordmark and the navy of the chakra.
+Nothing else was introduced.
+
+The site runs on a **light** ground — warm paper (`--ink: #F7F4EC`) rather than
+the mark's black field — so those hues are re-weighted for ink-on-paper
+contrast: the golds are deepened (`--gold-hi` is the *darkest* of them, since
+it is what figures and accents are written in), with `--gold-fill*` kept bright
+for the surfaces that are filled with gold instead of written in it. The glass
+panes are white films with a dark-side rim, and the canvas scenes composite
+`source-over` with ink-weight colours — additive blending has nothing to add to
+on white.
 
 ## The reveal
 
