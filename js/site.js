@@ -261,6 +261,101 @@
     }
   })();
 
+  /* — live platforms: ten cards + category filter —
+     Filtering never re-renders. The cards are built once and only shown or
+     hidden, so the browser keeps the same nodes, the previews never reflow
+     and the transition can actually run. Each pass re-numbers the visible
+     cards so the cascade always reads left-to-right from the first one. */
+  (function live() {
+    const grid = $('#live-grid');
+    const bar = $('#live-filters');
+    const count = $('#live-count');
+    if (!grid || !D || !D.PORTFOLIO) return;
+
+    const items = D.PORTFOLIO;
+    const order = D.FILTER_ORDER || ['ecom', 'multi', 'dynamic', 'web'];
+    let active = 'all';
+
+    /* — cards — */
+    grid.innerHTML = items.map(function (p) {
+      return '<a class="live__card" data-cat="' + p.c + '"' +
+             ' href="https://' + p.d + '" target="_blank" rel="noopener">' +
+        '<span class="live__vis" aria-hidden="true">' +
+          '<span class="live__chrome"><i></i><i></i><i></i>' +
+            '<span class="live__url">' + p.d + '</span></span>' +
+          '<span class="live__mono">' + D.monogram(p.n) + '</span>' +
+          '<span class="live__glow"></span>' +
+        '</span>' +
+        '<span class="live__body">' +
+          '<span class="live__cat">' + (D.CATS[p.c] || p.c) + '</span>' +
+          '<h4>' + p.n + '</h4>' +
+          '<p>' + p.p + '</p>' +
+          '<span class="live__foot">' +
+            '<span class="live__dom">' + p.d + '</span>' +
+            '<span class="live__cta">Visit website' +
+              '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</span>' +
+          '</span>' +
+        '</span>' +
+      '</a>';
+    }).join('');
+
+    const cards = $$('.live__card', grid);
+
+    /* — tabs, in the order the data layer declares — */
+    if (bar) {
+      const tabs = [['all', 'All']].concat(order.map(function (k) {
+        return [k, D.CATS[k] || k];
+      }));
+      bar.innerHTML = tabs.map(function (t) {
+        const n = t[0] === 'all'
+          ? items.length
+          : items.filter(function (p) { return p.c === t[0]; }).length;
+        return '<button type="button" role="tab" data-f="' + t[0] + '"' +
+               ' aria-selected="' + (t[0] === 'all') + '">' +
+               t[1] + '<b>' + n + '</b></button>';
+      }).join('');
+
+      bar.addEventListener('click', function (e) {
+        const b = e.target.closest('button[data-f]');
+        if (!b || b.dataset.f === active) return;
+        active = b.dataset.f;
+        $$('button', bar).forEach(function (x) {
+          x.setAttribute('aria-selected', String(x === b));
+        });
+        /* keep the chosen tab in view when the bar is scrolling on a phone */
+        if (b.scrollIntoView) b.scrollIntoView({ block: 'nearest', inline: 'center', behavior: PROFILE.reduced ? 'auto' : 'smooth' });
+        paint();
+      });
+    }
+
+    function paint() {
+      let shown = 0;
+      cards.forEach(function (c) {
+        const on = active === 'all' || c.dataset.cat === active;
+        c.classList.toggle('is-off', !on);
+        if (on) {
+          c.style.setProperty('--i', shown % 3);   /* one step per column */
+          shown++;
+        }
+      });
+      /* replay the entry so a filter change lands as a wave, not a jump cut */
+      if (!PROFILE.reduced) {
+        grid.classList.remove('is-live');
+        void grid.offsetWidth;                     /* restart the animation */
+        grid.classList.add('is-live');
+      } else {
+        grid.classList.add('is-live');
+      }
+      if (count) {
+        count.textContent = shown === items.length
+          ? 'Showing all ' + items.length + ' live platforms'
+          : 'Showing ' + shown + ' of ' + items.length + ' live platforms';
+      }
+    }
+    paint();
+  })();
+
   /* — filterable live index — */
   (function index() {
     const list = $('#index-list');
@@ -272,13 +367,12 @@
     let active = 'all';
     let expanded = false;
 
-    const order = [
-      ['all', 'All', D.counts.total],
-      ['dynamic', 'Dynamic', D.counts.dynamic],
-      ['ecom', 'E-Commerce', D.counts.ecom],
-      ['multi', 'Multi-Vendor', D.counts.multi],
-      ['web', 'Web Platform', D.counts.web]
-    ];
+    /* same category order as the portfolio filter — both read FILTER_ORDER */
+    const order = [['all', 'All', D.counts.total]].concat(
+      (D.FILTER_ORDER || ['ecom', 'multi', 'dynamic', 'web']).map(function (k) {
+        return [k, D.CATS[k] || k, D.counts[k]];
+      })
+    );
 
     if (bar) {
       bar.innerHTML = order.map(function (o) {
@@ -669,7 +763,24 @@
       $$('.field', f).forEach(function (b) { b.classList.remove('has-err'); });
       $$('.err', f).forEach(function (e) { e.textContent = ''; });
       $$('input,textarea', f).forEach(function (i) { i.removeAttribute('aria-invalid'); });
-      if (status) { status.textContent = ''; status.classList.remove('is-err'); }
+      if (status) { status.textContent = ''; status.classList.remove('is-err', 'is-ok'); }
+    }
+
+    /* A contact number is now required, so it has to be checked properly
+       rather than just "not empty". Indian mobiles are ten digits starting
+       6-9; anything with a country code, spaces, dashes or brackets is
+       accepted and normalised down to its digits before it is judged. */
+    function phoneDigits(v) { return v.replace(/[^\d]/g, ''); }
+
+    function phoneValid(v) {
+      const d = phoneDigits(v);
+      if (!d) return false;
+      /* strip a leading 91 / 0 so +91 98765 43210, 09876543210 and
+         9876543210 are all the same number */
+      const local = d.replace(/^91(?=\d{10}$)/, '').replace(/^0(?=\d{10}$)/, '');
+      if (local.length === 10) return /^[6-9]\d{9}$/.test(local);
+      /* a non-Indian number: accept any sane international length */
+      return d.length >= 8 && d.length <= 15;
     }
 
     f.addEventListener('submit', function (e) {
@@ -680,11 +791,17 @@
       const email = $('#f-email').value.trim();
       const phone = $('#f-phone').value.trim();
       const topic = $('#f-topic').value;
+      const biz = $('#f-biz').value.trim();
       const msg = $('#f-msg').value.trim();
 
+      /* checked bottom-up so `first` ends on the topmost bad field — that is
+         the one that gets focus, which is where the eye already is */
       let first = null;
-      if (msg.length < 10) first = fail('f-msg', 'A sentence or two about the project, please.');
+      if (msg.length < 10) first = fail('f-msg', 'A sentence or two about what you need, please.');
+      if (biz.length < 3) first = fail('f-biz', 'Tell us briefly what your business does.');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) first = fail('f-email', 'That email address does not look right.');
+      if (!phone) first = fail('f-phone', 'A contact number is required.');
+      else if (!phoneValid(phone)) first = fail('f-phone', 'That does not look like a valid contact number.');
       if (name.length < 2) first = fail('f-name', 'Please tell us your name.');
 
       if (first) {
@@ -693,31 +810,87 @@
         return;
       }
 
-      /* No server is wired up, so the enquiry is handed to the visitor's own
-         WhatsApp with everything already typed in — they press send. */
-      const lines = ['*New enquiry — ' + topic + '*', '', 'Name: ' + name, 'Email: ' + email];
-      if (phone) lines.push('Phone: ' + phone);
-      lines.push('', msg);
-      const body = lines.join('\n');
+      const stamp = new Date().toLocaleString('en-IN', {
+        dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata'
+      });
 
-      const wa = waLink(body);
+      const enquiry = {
+        name: name, phone: phone, email: email,
+        topic: topic, business: biz, message: msg,
+        submittedAt: stamp
+      };
 
-      /* If the number is missing from the data layer, fall back to mail
-         rather than sending the visitor to a broken wa.me URL. */
-      if (!wa) {
-        window.location.href = 'mailto:' + D.CONTACT.email +
-          '?subject=' + encodeURIComponent('New enquiry — ' + topic + ' — ' + name) +
-          '&body=' + encodeURIComponent(body);
-        return;
+      /* The message body is composed once and used by whichever route
+         delivers it, so the office receives an identical enquiry either way. */
+      const body = [
+        '*New enquiry — ' + topic + '*', '',
+        'Name: ' + name,
+        'Contact: ' + phone,
+        'Email: ' + email,
+        'Business: ' + biz,
+        '', 'Requirement:', msg,
+        '', 'Submitted: ' + stamp + ' IST'
+      ].join('\n');
+
+      const btn = $('#form-send');
+      function busy(on) {
+        if (!btn) return;
+        btn.disabled = on;
+        btn.classList.toggle('is-busy', on);
       }
 
+      function done() {
+        if (status) {
+          status.classList.remove('is-err');
+          status.classList.add('is-ok');
+          status.textContent = 'Thank you — your enquiry has been sent. We will be in touch shortly.';
+        }
+        f.reset();
+        busy(false);
+      }
+
+      /* Fallback: hand the enquiry to the visitor's own WhatsApp, already
+         typed out, addressed to the office number. Nothing is sent from the
+         page itself, so no credentials are ever in the frontend. */
+      function handoff() {
+        const wa = waLink(body);
+        if (!wa) {
+          window.location.href = 'mailto:' + D.CONTACT.email +
+            '?subject=' + encodeURIComponent('New enquiry — ' + topic + ' — ' + name) +
+            '&body=' + encodeURIComponent(body);
+          busy(false);
+          return;
+        }
+        if (status) {
+          status.classList.remove('is-err');
+          status.classList.add('is-ok');
+          status.textContent = 'Opening WhatsApp with your enquiry ready to send…';
+        }
+        window.open(wa, '_blank', 'noopener');
+        busy(false);
+      }
+
+      busy(true);
       if (status) {
-        status.classList.remove('is-err');
-        status.textContent = 'Opening WhatsApp with your enquiry ready to send…';
+        status.classList.remove('is-err', 'is-ok');
+        status.textContent = 'Sending your enquiry…';
       }
-      /* A new tab, not a navigation: the visitor keeps the site behind them,
-         and if they have no WhatsApp the landing page is still there. */
-      window.open(wa, '_blank', 'noopener');
+
+      /* Try the server first: /api/enquiry delivers to the office number with
+         the credentials held server-side. It answers 501 when it has not been
+         given any, and then — and on any network trouble — the visitor-side
+         WhatsApp handoff takes over, so the form always reaches someone. */
+      if (typeof fetch === 'function') {
+        fetch('/api/enquiry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(enquiry)
+        }).then(function (r) {
+          if (r.ok) done(); else handoff();
+        }).catch(handoff);
+      } else {
+        handoff();
+      }
     });
 
     /* clear a field's error as soon as the visitor starts fixing it */

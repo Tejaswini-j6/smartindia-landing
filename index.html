@@ -245,11 +245,13 @@
   </a>
 
   <nav class="nav__links" aria-label="Primary">
-    <a href="#about" data-nav>About</a>
-    <a href="#platform" data-nav>Platform</a>
-    <a href="#services" data-nav>Solutions</a>
-    <a href="#work" data-nav>Work</a>
-    <a href="#contact" data-nav>Contact</a>
+    <a href="#about"     data-nav>About</a>
+    <a href="#portfolio" data-nav>Portfolio</a>
+    <a href="#services"  data-nav>Solutions</a>
+    <a href="#work"      data-nav>Work</a>
+    <a href="#vendors"   data-nav>Vendor</a>
+    <a href="#why"       data-nav>Why Us</a>
+    <a href="#contact"   data-nav>Contact</a>
   </nav>
 
   <a class="btn btn--gold nav__cta magnetic" href="#contact">
@@ -263,12 +265,13 @@
 
 <div class="menu" id="menu" hidden>
   <nav class="menu__inner" aria-label="Mobile">
-    <a href="#about"    data-nav><em>01</em>About</a>
-    <a href="#platform" data-nav><em>02</em>Platform</a>
-    <a href="#services" data-nav><em>03</em>Solutions</a>
-    <a href="#work"     data-nav><em>04</em>Work</a>
-    <a href="#why"      data-nav><em>05</em>Why Us</a>
-    <a href="#contact"  data-nav><em>06</em>Contact</a>
+    <a href="#about"     data-nav><em>01</em>About</a>
+    <a href="#portfolio" data-nav><em>02</em>Portfolio</a>
+    <a href="#services"  data-nav><em>03</em>Solutions</a>
+    <a href="#work"      data-nav><em>04</em>Work</a>
+    <a href="#vendors"   data-nav><em>05</em>Vendor</a>
+    <a href="#why"       data-nav><em>06</em>Why Us</a>
+    <a href="#contact"   data-nav><em>07</em>Contact</a>
   </nav>
   <div class="menu__foot">
     <a href="mailto:info@smartindia.ai">info@smartindia.ai</a>
@@ -305,7 +308,7 @@
     </p>
 
     <div class="hero__actions reveal-up">
-      <a class="btn btn--gold magnetic" href="#platform"><span>Explore SmartIndia.ai</span></a>
+      <a class="btn btn--gold magnetic" href="#portfolio"><span>Explore SmartIndia.ai</span></a>
       <a class="btn btn--ghost magnetic" href="#contact"><span>Get Started</span></a>
     </div>
 
@@ -379,13 +382,16 @@
 
 
 <!-- ══════════════════════════════════════════════════════════════
-     PLATFORM / PRODUCTS
+     PORTFOLIO
+     Two halves: the three product experiences that make up SmartIndia.ai,
+     then the Live Platforms grid — ten running production sites, filtered
+     by category. Both are rendered from js/data.js.
      ══════════════════════════════════════════════════════════════ -->
-<section class="section platform" id="platform">
+<section class="section portfolio" id="portfolio">
   <div class="wrap">
     <header class="sect-head sect-head--split">
       <div>
-        <p class="eyebrow reveal-up"><span class="dot"></span> The Platform</p>
+        <p class="eyebrow reveal-up"><span class="dot"></span> Portfolio</p>
         <h2 class="display reveal-up">One intelligent surface<br>for everything you look for.</h2>
       </div>
       <p class="sect-head__note reveal-up">Three connected experiences that make up SmartIndia.ai.</p>
@@ -407,6 +413,27 @@
         <h3>Intelligent Digital Experience</h3>
         <p>A user-friendly interface connecting people with AI-powered information.</p>
       </article>
+    </div>
+
+    <!-- ── live platforms ────────────────────────────────────────── -->
+    <div class="live" id="live">
+      <header class="live__head">
+        <div>
+          <p class="eyebrow reveal-up"><span class="dot"></span> Live Platforms</p>
+          <h3 class="live__title reveal-up">Ten platforms,<br>running right now.</h3>
+        </div>
+        <p class="sect-head__note reveal-up">
+          Every card below is a production site you can open today. Filter by the
+          kind of platform it is.
+        </p>
+      </header>
+
+      <!-- the scroller is only ever needed on a narrow screen; on desktop the
+           tabs sit on one line and it never scrolls -->
+      <div class="live__filters" role="tablist" aria-label="Filter live platforms" id="live-filters"></div>
+
+      <div class="live__grid" id="live-grid"></div>
+      <p class="live__count" id="live-count" role="status" aria-live="polite"></p>
     </div>
   </div>
 </section>
@@ -437,10 +464,11 @@
     <header class="sect-head sect-head--split">
       <div>
         <p class="eyebrow reveal-up"><span class="dot"></span> Selected Work</p>
-        <h2 class="display reveal-up">Platforms that are<br><em>live right now.</em></h2>
+        <h2 class="display reveal-up">Everything else<br><em>we run.</em></h2>
       </div>
       <p class="sect-head__note reveal-up">
-        Every entry below is a running production platform. Nothing here is a concept.
+        The Portfolio above leads with ten. This is the rest of the estate —
+        every one a running production platform, none of them a concept.
       </p>
     </header>
   </div>
@@ -590,20 +618,26 @@
     </header>
 
     <div class="contact__grid">
+      <!-- Every required field is marked twice over: a red asterisk for sight
+           and aria-required for a screen reader. Validation is ours, not the
+           browser's (novalidate), so the messages match the page. -->
       <form class="form reveal-up" id="contact-form" novalidate>
         <div class="field">
-          <input id="f-name" name="name" type="text" required autocomplete="name" placeholder=" ">
-          <label for="f-name">Your name</label>
+          <input id="f-name" name="name" type="text" required aria-required="true" autocomplete="name" placeholder=" ">
+          <label for="f-name">Your name <b class="req" aria-hidden="true">*</b></label>
           <p class="err" data-err="f-name"></p>
         </div>
         <div class="field">
-          <input id="f-email" name="email" type="email" required autocomplete="email" placeholder=" ">
-          <label for="f-email">Email address</label>
-          <p class="err" data-err="f-email"></p>
+          <input id="f-phone" name="phone" type="tel" required aria-required="true"
+                 inputmode="tel" autocomplete="tel" placeholder=" ">
+          <label for="f-phone">Contact number <b class="req" aria-hidden="true">*</b></label>
+          <p class="err" data-err="f-phone"></p>
         </div>
         <div class="field">
-          <input id="f-phone" name="phone" type="tel" autocomplete="tel" placeholder=" ">
-          <label for="f-phone">Phone <span>(optional)</span></label>
+          <input id="f-email" name="email" type="email" required aria-required="true"
+                 inputmode="email" autocomplete="email" placeholder=" ">
+          <label for="f-email">Email address <b class="req" aria-hidden="true">*</b></label>
+          <p class="err" data-err="f-email"></p>
         </div>
         <div class="field">
           <select id="f-topic" name="topic">
@@ -618,11 +652,17 @@
           <label for="f-topic" class="label--static">What do you need?</label>
         </div>
         <div class="field field--full">
-          <textarea id="f-msg" name="message" rows="4" required placeholder=" "></textarea>
-          <label for="f-msg">Tell us about the project</label>
+          <textarea id="f-biz" name="business" rows="2" required aria-required="true" placeholder=" "></textarea>
+          <label for="f-biz">About your business / type of business <b class="req" aria-hidden="true">*</b></label>
+          <p class="err" data-err="f-biz"></p>
+        </div>
+        <div class="field field--full">
+          <textarea id="f-msg" name="message" rows="4" required aria-required="true" placeholder=" "></textarea>
+          <label for="f-msg">Your requirement <b class="req" aria-hidden="true">*</b></label>
           <p class="err" data-err="f-msg"></p>
         </div>
-        <button class="btn btn--gold btn--wide magnetic" type="submit"><span>Send enquiry</span></button>
+        <button class="btn btn--gold btn--wide magnetic" type="submit" id="form-send"><span>Send enquiry</span></button>
+        <p class="form__note">Fields marked <b class="req" aria-hidden="true">*</b> are required.</p>
         <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
       </form>
 
@@ -676,7 +716,7 @@
       </div>
       <div>
         <h5>Work</h5>
-        <a href="#platform">Platform</a>
+        <a href="#portfolio">Portfolio</a>
         <a href="#services">Solutions</a>
         <a href="#work">Live platforms</a>
         <a href="#vendors">Vendors</a>

@@ -22,11 +22,15 @@ window.SI = (function () {
 
   /* ── categories ───────────────────────────────────────────────────────── */
   const CATS = {
-    dynamic: 'Dynamic Website',
-    ecom: 'E-Commerce',
-    multi: 'Multi-Vendor',
+    dynamic: 'Dynamic',
+    ecom: 'Ecommerce',
+    multi: 'Multivendor',
     web: 'Web Platform'
   };
+
+  /* The one place the category order is decided. Both the portfolio filter and
+     the full platform index read this, so the tabs can never drift apart. */
+  const FILTER_ORDER = ['ecom', 'multi', 'dynamic', 'web'];
 
   /* ── services (IT solutions only — marketing lines intentionally omitted) ─ */
   const SERVICES = [
@@ -126,6 +130,7 @@ window.SI = (function () {
     P('Big Experts', 'bigexperts.in', 'dynamic'),
     P('GNSWA', 'gnswa.in', 'dynamic'),
     P('Gupta Anish Associates', 'guptaanishassociates.in', 'dynamic'),
+    P('Bhoomithra', 'bhoomithra.in', 'dynamic'),
     P('Deal Confirm', 'dealconfirm.com', 'dynamic'),
     P('Home Art Interiors', 'homeartinteriors.in', 'dynamic'),
     P('Gyan Computer Institute', 'gyancomputerinstitute.com', 'dynamic'),
@@ -268,14 +273,47 @@ window.SI = (function () {
   const PLATFORMS = DYNAMIC.concat(ECOM, MULTI, WEB);
 
   /* featured on the horizontal rail — a spread across all four categories */
+  /* ── portfolio ─────────────────────────────────────────────────────────
+     The ten platforms the Portfolio section leads with. Every entry is a
+     running production site — the one-liners are drawn from what each site
+     says about itself, not written for it. Order matters: this is the order
+     the cards appear in, and the filter preserves it.
+     `c` must be one of the FILTER_ORDER keys or the card lands in no tab. */
+  const PORTFOLIO = [
+    { n: 'Paakhi Jewels', d: 'paakhijewels.com', c: 'ecom',
+      p: 'Handcrafted jewellery storefront running a full catalogue, cart and checkout.' },
+    { n: 'Bhoomithra', d: 'bhoomithra.in', c: 'dynamic',
+      p: 'Site for a Guntur real-estate developer — services, projects and enquiry capture.' },
+    { n: 'Aadees', d: 'aadees.com', c: 'multi',
+      p: 'Marketplace where every seller runs an independent storefront under one roof.' },
+    { n: 'Sakar Sankalp Foundation', d: 'sakarsankalpfoundation.org', c: 'multi',
+      p: 'Foundation platform carrying many contributors and campaigns on one system.' },
+    { n: 'Tara Naturals', d: 'taranaturals.in', c: 'ecom',
+      p: 'Premium cosmetics store with catalogue, cart and order management.' },
+    { n: 'Englady', d: 'englady.com', c: 'ecom',
+      p: 'Fashion storefront built around a seasonal, frequently refreshed catalogue.' },
+    { n: 'Theera Books', d: 'theerabooks.com', c: 'ecom',
+      p: 'Online bookstore with a deep catalogue, search and checkout.' },
+    { n: 'Deal Confirm', d: 'dealconfirm.com', c: 'dynamic',
+      p: 'Real-estate services platform with dynamic listings and enquiry routing.' },
+    { n: 'Astrojewell', d: 'astrojewell.com', c: 'web',
+      p: 'Gemstones and astrological consultation platform with booking built in.' },
+    { n: 'Abundance SAP', d: 'abundancesap.com', c: 'web',
+      p: 'Consulting practice platform for SAP S/4HANA, ABAP, RAP and BTP work.' }
+  ];
+
+  /* The rail deliberately draws from everything *except* the portfolio ten,
+     so the two sections never show the same platform twice. */
+  const PORTFOLIO_DOMS = PORTFOLIO.map(function (p) { return p.d; });
   const FEATURED = [
-    'aadees.com', 'paakhijewels.com', 'dealconfirm.com', 'stayzia.in',
-    'sakarsankalpfoundation.org', 'transcova.com', 'taranaturals.in',
-    'magichimalayancottagepahalgam.com', 'cms.smartindia.ai', 'nkexports.in',
-    'englady.com', 'digitraxtechnologies.com'
-  ].map(function (dom) {
-    return PLATFORMS.find(function (p) { return p.d === dom; });
-  }).filter(Boolean);
+    'stayzia.in', 'transcova.com', 'magichimalayancottagepahalgam.com',
+    'cms.smartindia.ai', 'nkexports.in', 'digitraxtechnologies.com',
+    'theerabooks.com', 'ambikadivineessence.com', 'valleyheal.com',
+    'aggreenshakti.com', 'arowinlubricants.com', 'minisakhi.com'
+  ].filter(function (dom) { return PORTFOLIO_DOMS.indexOf(dom) === -1; })
+   .map(function (dom) {
+     return PLATFORMS.find(function (p) { return p.d === dom; });
+   }).filter(Boolean);
 
   /* ── vendors ───────────────────────────────────────────────────────────
      PLACEHOLDER DATA — unlike everything else in this file, none of this is
@@ -330,6 +368,8 @@ window.SI = (function () {
   return {
     BRAND: BRAND,
     CATS: CATS,
+    FILTER_ORDER: FILTER_ORDER,
+    PORTFOLIO: PORTFOLIO,
     SERVICES: SERVICES,
     WHY: WHY,
     STEPS: STEPS,

@@ -90,11 +90,22 @@ All copy comes from the supplied company information and from
 smartindia.digital. The marketing, SEO and ads services on that site were
 **deliberately left out** — only IT solutions are presented.
 
-Nothing is invented. The platform counts in the stats and filters are computed
-from `js/data.js` at runtime (`SI.counts`), so they can never drift from the
-list: **132 platforms** — 51 dynamic, 34 e-commerce, 2 multi-vendor, 45 other
-live web platforms. The 300+ customers, 4.8/5 rating and 102 reviews are as
-published on smartindia.digital.
+The platform counts in the stats and filters are computed from `js/data.js` at
+runtime (`SI.counts`), so they can never drift from the list: **133 platforms**
+— 52 dynamic, 34 e-commerce, 2 multi-vendor, 45 other live web platforms. The
+300+ customers, 4.8/5 rating and 102 reviews are as published on
+smartindia.digital.
+
+`SI.PORTFOLIO` is the curated ten the Portfolio section leads with. Every entry
+is also in `PLATFORMS`, and the featured rail in Work deliberately draws from
+everything *except* those ten, so no platform is shown twice.
+
+Category order lives in one place — `SI.FILTER_ORDER` — and both the portfolio
+filter and the full index read it, so the tabs can never drift apart.
+
+**The one block of invented content is `SI.VENDORS`**, which is placeholder data
+waiting to be replaced. Everything else comes from the supplied company
+information or from the live sites themselves.
 
 **Not included, because no information was supplied:** team members, named
 client testimonials, awards or certifications. Send the details and these drop
@@ -102,7 +113,24 @@ straight in.
 
 ## The contact form
 
-There is no backend. The form validates, then hands a fully composed enquiry to
-the visitor's mail client at `info@smartindia.ai`. To post it to a server
-instead, replace the `mailto:` block at the end of `js/site.js` with a `fetch()`
-to your endpoint.
+Name, contact number, email, business and requirement — all required except the
+topic dropdown. Validation is the page's own (`novalidate`), so the messages
+match the design; the contact number is normalised before it is judged, so
+`+91 98765 43210`, `09876543210` and `9876543210` are all the same number.
+
+On submit the page POSTs to **`/api/enquiry`**, a serverless function that
+forwards the enquiry to the office number. The delivery credentials live in
+Vercel environment variables and never reach the browser:
+
+| Variable | Purpose |
+| --- | --- |
+| `ENQUIRY_TO` | Destination, digits only. Defaults to `919994900470`. |
+| `ENQUIRY_WEBHOOK_URL` | Optional. Receives the enquiry as JSON — the simplest route to an existing CRM or automation. |
+| `ENQUIRY_WEBHOOK_AUTH` | Optional. Sent as the `Authorization` header. |
+| `WHATSAPP_TOKEN` / `WHATSAPP_PHONE_ID` | Optional. WhatsApp Cloud API credentials. |
+
+**With none of them set the function answers 501 and the page falls back** to
+the visitor's own WhatsApp, opened with the enquiry already composed and
+addressed to the same number. So the form works today with nothing configured,
+and switching on server-side delivery is a matter of adding environment
+variables — no code change.

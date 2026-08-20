@@ -298,7 +298,7 @@
       clearTimeout(mt);
       mt = setTimeout(function () { scan(); relayoutRows(); remeasure(); }, 60);
     });
-    $$('#index-list, #wall, #svc-list, #why-list, #steps, #work-rail, #vend-list').forEach(function (el) {
+    $$('#index-list, #wall, #svc-list, #why-list, #steps, #work-rail, #vend-list, #live-grid').forEach(function (el) {
       mo.observe(el, { childList: true });
     });
   }
