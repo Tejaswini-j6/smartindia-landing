@@ -1051,6 +1051,8 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
   font-size:9.5px; letter-spacing:.04em; color:var(--faint);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
+/* the monogram is the ground beneath the shot — seen only if the image is
+   missing, so a card without a screenshot still looks deliberate */
 .live__mono{
   position:absolute; inset:30px 0 0 0;
   display:grid; place-items:center;
@@ -1058,14 +1060,27 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
   letter-spacing:.04em; color:var(--gold-hi);
   transition:transform .6s var(--ease);
 }
+/* the site's own hero, sitting inside the drawn browser window. Pinned to the
+   top edge so the crop keeps the masthead and headline — the part that
+   identifies the site — rather than centring on whatever is halfway down. */
+.live__shot{
+  position:absolute; left:0; right:0; top:30px; bottom:0;
+  width:100%; height:calc(100% - 30px);
+  object-fit:cover; object-position:50% 0;
+  transition:transform .7s var(--ease);
+}
 .live__glow{
-  position:absolute; inset:0;
-  background:radial-gradient(52% 52% at 50% 62%, var(--tint,rgba(220,168,71,.3)), transparent 70%);
+  position:absolute; inset:30px 0 0 0;
+  background:radial-gradient(58% 58% at 50% 58%, var(--tint,rgba(220,168,71,.3)), transparent 72%);
   opacity:0; transition:opacity .55s ease;
+  mix-blend-mode:soft-light;
 }
 @media (hover:hover){
   .live__card:hover .live__mono{ transform:translateY(-3px) scale(1.04); }
-  .live__card:hover .live__glow{ opacity:.85; }
+  /* a slow push into the shot, cropped by the window, so the preview feels
+     live rather than pasted on */
+  .live__card:hover .live__shot{ transform:scale(1.045); }
+  .live__card:hover .live__glow{ opacity:.7; }
 }
 /* one tint per category, so a filtered view reads as a set */
 .live__card[data-cat="ecom"]    { --tint:rgba(240,130,33,.30); }

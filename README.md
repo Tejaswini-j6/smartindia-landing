@@ -100,6 +100,17 @@ smartindia.digital.
 is also in `PLATFORMS`, and the featured rail in Work deliberately draws from
 everything *except* those ten, so no platform is shown twice.
 
+Each card's preview is the site's own hero, captured at 1280x800 and written
+out at 640x400 into `assets/portfolio/<domain-first-label>.jpg` — so
+`paakhijewels.com` looks for `paakhijewels.jpg`. Set `img` on an entry to point
+somewhere else. A missing or failed image is removed at runtime and the
+monogram plate underneath becomes the preview again, so a card is never a
+broken frame. To refresh a shot after a client redesigns, re-capture at the
+same size and overwrite the file; nothing else changes.
+
+An entry may also carry `u` to link deeper than its front page (Stayzia opens
+on a property). The card still reads as the bare domain.
+
 Category order lives in one place — `SI.FILTER_ORDER` — and both the portfolio
 filter and the full index read it, so the tabs can never drift apart.
 

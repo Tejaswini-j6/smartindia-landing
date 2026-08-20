@@ -279,7 +279,12 @@
         '<span class="live__vis" aria-hidden="true">' +
           '<span class="live__chrome"><i></i><i></i><i></i>' +
             '<span class="live__url">' + p.d + '</span></span>' +
+          /* the monogram sits underneath as the ground: if a shot is missing
+             or fails to load the card still looks deliberate rather than
+             broken. See the onerror wiring below. */
           '<span class="live__mono">' + D.monogram(p.n) + '</span>' +
+          '<img class="live__shot" src="assets/portfolio/' + (p.img || p.d.split('.')[0]) + '.jpg"' +
+            ' alt="" loading="lazy" decoding="async" width="640" height="400">' +
           '<span class="live__glow"></span>' +
         '</span>' +
         '<span class="live__body">' +
@@ -295,6 +300,14 @@
         '</span>' +
       '</a>';
     }).join('');
+
+    /* A shot that fails to load takes itself out of the way rather than
+       leaving a broken frame — the monogram plate underneath becomes the
+       preview again. Listened for in the capture phase because `error` does
+       not bubble. */
+    grid.addEventListener('error', function (e) {
+      if (e.target && e.target.classList.contains('live__shot')) e.target.remove();
+    }, true);
 
     /* Held back until the grid is actually on screen, so the wave is seen
        rather than spent while the visitor is still up at the hero. */
