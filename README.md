@@ -8,9 +8,11 @@ index.html          markup + the master logo (inline <template>)
 css/style.css       design system + all layout
 js/data.js          content: services, capabilities, 132 live platforms
 js/reveal.js        logo mounting + the 3D brand reveal
-js/scene.js         the 3D renderer (hero wheel, card miniatures, contact field)
+js/scene.js         the 3D renderer (hero wheel, contact field)
 js/site.js          rendering, scroll choreography, interactions, form
 assets/favicon.svg
+assets/product/     the three product-card plates
+assets/portfolio/   one hero capture per portfolio site
 ```
 
 ## The logo
@@ -95,6 +97,17 @@ runtime (`SI.counts`), so they can never drift from the list: **133 platforms**
 — 52 dynamic, 34 e-commerce, 2 multi-vendor, 45 other live web platforms. The
 300+ customers, 4.8/5 rating and 102 reviews are as published on
 smartindia.digital.
+
+The three product cards are illustrated with photographs
+(`assets/product/{search,discover,experience}.jpg`, 640x360). They are stock
+images under the Unsplash licence, so commercial use is fine and no attribution
+is required — but they are **not** used as shot. Each one is put through a levels
+stretch and then mapped onto a two-colour brand ramp, deep gold `#6E4A14` to warm
+paper `#FDF4E2`, so all three read as one set and as part of this palette rather
+than as stock. The treatment is baked into the file rather than applied with a
+CSS `filter`, because the scroll engine repaints while these are on screen and a
+live filter on three always-visible elements is paid for every frame. To swap one
+out, run any replacement through the same ramp at the same size.
 
 `SI.PORTFOLIO` is the curated ten the Portfolio section leads with. Every entry
 is also in `PLATFORMS`, and the featured rail in Work deliberately draws from

@@ -930,8 +930,9 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
   gap:clamp(14px,2vw,24px);
 }
 .prod__card{
+  --prod-pad:clamp(22px,2.6vw,34px);
   position:relative; overflow:hidden;
-  padding:clamp(22px,2.6vw,34px);
+  padding:var(--prod-pad);
   border:1px solid var(--line);
   background:var(--glass-sheen), var(--glass-film-2);
   -webkit-backdrop-filter:var(--glass-lens-sm);
@@ -940,16 +941,22 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
   border-radius:var(--r-glass);
   transition:box-shadow .6s var(--ease), border-color .5s ease;
 }
+/* The numeral used to sit in the padding gutter over pale glass. The plate now
+   fills the well edge to edge, so it is written onto the plate instead — paper
+   white over the gold, with a shade under it so it holds on the lighter one. */
 .prod__card::after{
   content:attr(data-idx);
-  position:absolute; right:20px; top:16px;
-  font-family:var(--serif); font-size:34px; color:rgba(138,90,18,.22);
+  position:absolute; z-index:2;
+  right:calc(var(--prod-pad) + 14px); top:calc(var(--prod-pad) + 4px);
+  font-family:var(--serif); font-size:34px; line-height:1;
+  color:rgba(255,249,238,.74);
+  text-shadow:0 1px 10px rgba(58,40,10,.45);
 }
 /* The three cards sit level and stretch to one another: a staircase offset
    made each card a different height, which read as three unrelated panes
    rather than one set. */
 .prod__card{ margin-top:0; }
-/* the well: glass has an inside too, so the canvas sits in a recess with the
+/* the well: glass has an inside too, so the image sits in a recess with the
    light coming from the opposite edge */
 .prod__vis{
   height:clamp(140px,16vw,190px); margin-bottom:26px;
@@ -960,7 +967,24 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
     inset 0 -1px 0 rgba(255,255,255,.7);
   overflow:hidden; position:relative;
 }
-.prod__vis canvas{ width:100%; height:100%; }
+.prod__shot{
+  width:100%; height:100%; display:block; object-fit:cover;
+  transition:transform .8s var(--ease);
+}
+/* the image fills the well, so the recess has to be drawn back on top of it —
+   otherwise the plate reads as a picture pasted over glass rather than one
+   sitting inside it */
+.prod__vis::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  border-radius:inherit;
+  background:
+    linear-gradient(158deg,rgba(255,251,240,.30),transparent 44%),
+    radial-gradient(84% 74% at 50% 112%,rgba(43,33,12,.18),transparent 62%);
+  box-shadow:
+    inset 0 1px 8px rgba(43,33,12,.16),
+    inset 0 -1px 0 rgba(255,255,255,.5);
+}
+.prod__card:hover .prod__shot{ transform:scale(1.045); }
 .prod__card h3{
   margin:0 0 10px; font-family:var(--serif); font-weight:600;
   font-size:clamp(19px,2vw,25px); color:var(--text); line-height:1.2;
