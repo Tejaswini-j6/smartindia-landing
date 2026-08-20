@@ -347,6 +347,50 @@
     }).join('');
   })();
 
+  /* — vendors —
+     A card is a link when the entry carries a domain and a plain article when
+     it does not, so an entry without a website is not a dead anchor. */
+  (function vendors() {
+    const host = $('#vend-list');
+    if (!host || !D || !D.VENDORS) return;
+    host.innerHTML = D.VENDORS.map(function (v) {
+      const tag = v.d ? 'a' : 'article';
+      const attr = v.d
+        ? ' href="https://' + v.d + '" target="_blank" rel="noopener"'
+        : '';
+      return '<' + tag + ' class="vend__card"' + attr + '>' +
+        '<span class="vend__mono" aria-hidden="true">' + D.monogram(v.n) + '</span>' +
+        '<h3>' + v.n + '</h3>' +
+        '<span class="vend__cat">' + v.c + '</span>' +
+        '<p>' + v.p + '</p>' +
+        '<span class="vend__foot">' +
+          '<em>' + v.m + '</em>' +
+          (v.d
+            ? '<span class="vend__dom">' + v.d +
+              '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+              '</span>'
+            : '') +
+        '</span>' +
+      '</' + tag + '>';
+    }).join('');
+
+    /* same pointer-tracked light as the service panels */
+    if (!PROFILE.coarse && !PROFILE.low) {
+      $$('.vend__card', host).forEach(function (el) {
+        const box = { e: -1, r: null };
+        const paint = perFrame(function (x, y) {
+          const r = box.r;
+          el.style.setProperty('--mx', ((x - r.left) / r.width * 100).toFixed(1) + '%');
+          el.style.setProperty('--my', ((y - r.top) / r.height * 100).toFixed(1) + '%');
+        });
+        el.addEventListener('pointermove', function (e) {
+          rectOf(el, box);
+          paint(e.clientX, e.clientY);
+        }, { passive: true });
+      });
+    }
+  })();
+
   /* — footer year — */
   const yearEl = $('#year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();

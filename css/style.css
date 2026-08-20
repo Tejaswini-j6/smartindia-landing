@@ -151,13 +151,26 @@ button{ font:inherit; color:inherit; }
 /* ══════════════════════════════════════════════════════════════════════════
    1.  3D LOGO REVEAL
    ══════════════════════════════════════════════════════════════════════════ */
+/* The intro keeps the logo's own black field. The mark was drawn for that
+   ground — bright gold on near-black, white wordmark — so rather than
+   restating every colour inside here, the reveal re-declares the handful of
+   tokens that flip between the two worlds. Everything nested below it (the
+   outro line, the rules, the skip control) then reads light-on-dark exactly
+   as it did before the page went to paper. */
 .reveal{
   position:fixed; inset:0; z-index:9000;
+  --text:    #F4F1EA;
+  --text-2:  #C9C4B8;
+  --muted:   #8E93A0;
+  --gold-hi: #FFE7B0;
+  --gold:    #E3B25B;
+  --saffron: #FF9933;
+  --green:   #1FA83A;
   display:grid; place-items:center;
   background:
-    radial-gradient(120% 80% at 50% 118%, rgba(220,168,71,.20) 0%, transparent 60%),
-    radial-gradient(90% 60% at 50% -10%, rgba(27,58,143,.10) 0%, transparent 62%),
-    #FBF9F3;
+    radial-gradient(120% 80% at 50% 118%, rgba(227,178,91,.10) 0%, transparent 60%),
+    radial-gradient(90% 60% at 50% -10%, rgba(27,58,143,.14) 0%, transparent 62%),
+    #010204;
   overflow:hidden;
   will-change:opacity, clip-path;
 }
@@ -167,7 +180,7 @@ button{ font:inherit; color:inherit; }
 .reveal__horizon{
   position:absolute; left:0; right:0; top:58%;
   height:1px;
-  background:linear-gradient(90deg,transparent,rgba(138,90,18,.42),transparent);
+  background:linear-gradient(90deg,transparent,rgba(227,178,91,.42),transparent);
   opacity:0; transform:scaleX(.2);
   transition:opacity .9s var(--ease), transform 1.4s var(--ease);
 }
@@ -223,10 +236,10 @@ button{ font:inherit; color:inherit; }
 
 /* soft glow that breathes during the hero hold */
 .reveal.s-3 .reveal__face .si-wordmark{
-  filter:drop-shadow(0 2px 18px rgba(90,54,13,.20));
+  filter:drop-shadow(0 0 26px rgba(227,178,91,.22));
 }
 .reveal.s-3 .reveal__face .si-skyline{
-  filter:drop-shadow(0 8px 22px rgba(138,90,18,.30));
+  filter:drop-shadow(0 6px 24px rgba(227,178,91,.28));
 }
 .reveal__face .si-skyline{ opacity:0; transition:opacity .8s ease .1s; }
 .reveal__face .si-wordmark{ opacity:0; transition:opacity .5s ease; }
@@ -439,7 +452,26 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
 .nav.is-hidden{ transform:translateY(-104%); }
 
 .nav__brand{ display:block; flex:0 0 auto; }
-.nav__logo{ display:block; width:clamp(148px,17vw,196px); }
+/* The mark is drawn for a dark ground — white wordmark, bright gold skyline —
+   so where it lands on the paper page it is handed that ground back as a
+   plate rather than being recoloured. Recolouring would mean keeping a second
+   version of the logo in sync; the plate keeps one master. */
+.nav__logo{
+  display:block; width:clamp(172px,19vw,222px);
+  padding:9px 15px; border-radius:13px;
+  background:linear-gradient(158deg,#151A22 0%,#05070B 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 0 0 1px rgba(227,178,91,.12),
+    0 8px 20px -12px rgba(10,14,20,.6);
+  transition:box-shadow .5s var(--ease);
+}
+.nav__brand:hover .nav__logo{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 0 0 1px rgba(227,178,91,.28),
+    0 10px 24px -12px rgba(10,14,20,.66);
+}
 .nav__logo .si-logo{ overflow:visible; }
 
 .nav__links{
@@ -1196,6 +1228,84 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
 .index__more{ margin:28px auto 0; display:flex; }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   9b.  VENDORS
+   ──────────────────────────────────────────────────────────────────────────
+   A hairline grid rather than separated cards: the same structural material
+   as the services, stats and steps blocks, so the page keeps one rhythm. The
+   glass here is film-only — sheen and rim, no backdrop lens — because six
+   panes of blur in a row costs more than it shows at this size.
+   ══════════════════════════════════════════════════════════════════════════ */
+.vend{
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:1px; background:var(--line-soft);
+  border:1px solid var(--line-soft);
+}
+.vend__card{
+  position:relative; overflow:hidden;
+  display:flex; flex-direction:column;
+  padding:clamp(24px,3vw,38px);
+  background:var(--glass-sheen), rgba(255,255,255,.62);
+  box-shadow:var(--glass-edge);
+  color:inherit;
+  transition:background .5s ease, box-shadow .5s var(--ease);
+}
+/* the wash follows the pointer, the same light the service panels use */
+.vend__card::before{
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(48% 60% at var(--mx,50%) var(--my,0%),rgba(220,168,71,.16),transparent 70%);
+  opacity:0; transition:opacity .5s ease; pointer-events:none;
+}
+.vend__card:hover::before,
+.vend__card:focus-visible::before{ opacity:1; }
+.vend__card:hover{ background:var(--glass-sheen), rgba(255,255,255,.86); box-shadow:var(--glass-edge-hi); }
+
+.vend__mono{
+  position:relative;
+  width:44px; height:44px; margin-bottom:20px;
+  display:grid; place-items:center;
+  font-family:var(--serif); font-size:17px; font-weight:600; letter-spacing:.02em;
+  color:var(--gold-hi);
+  border:1px solid var(--line); border-radius:12px;
+  background:linear-gradient(150deg,rgba(220,168,71,.26),rgba(255,255,255,.6) 70%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+  transition:transform .5s var(--ease), border-color .4s;
+}
+.vend__card:hover .vend__mono{ transform:translateY(-2px); border-color:rgba(138,90,18,.38); }
+
+.vend__card h3{
+  position:relative; margin:0 0 6px;
+  font-family:var(--serif); font-weight:600;
+  font-size:clamp(18px,1.9vw,23px); line-height:1.2; color:var(--text);
+}
+.vend__cat{
+  position:relative; margin-bottom:14px;
+  font-size:11px; letter-spacing:.19em; text-transform:uppercase; color:var(--gold);
+}
+.vend__card p{
+  position:relative; margin:0 0 22px;
+  font-size:14.5px; line-height:1.7; color:var(--muted);
+}
+/* pinned to the foot so the meta line stays level across a row of cards
+   whose descriptions run to different lengths */
+.vend__foot{
+  position:relative; margin-top:auto;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding-top:14px; border-top:1px solid var(--line-soft);
+}
+.vend__foot em{
+  font-style:normal; font-size:11.5px; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--faint);
+}
+.vend__dom{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:12.5px; color:var(--text-2);
+  transition:color .3s;
+}
+.vend__dom svg{ width:12px; height:12px; transition:transform .4s var(--ease); }
+a.vend__card:hover .vend__dom{ color:var(--gold-hi); }
+a.vend__card:hover .vend__dom svg{ transform:translate(2px,-2px); }
+
+/* ══════════════════════════════════════════════════════════════════════════
    10.  WHY + STATS
    ══════════════════════════════════════════════════════════════════════════ */
 .why__list{
@@ -1510,7 +1620,17 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
   display:grid; grid-template-columns:1fr 1.2fr; gap:clamp(32px,6vw,80px);
   align-items:start;
 }
-.foot__logo{ display:block; width:clamp(200px,26vw,290px); margin-bottom:18px; }
+/* same plate as the nav, sized for the full lockup — skyline, wordmark and
+   tagline all read on the ground they were drawn for */
+.foot__logo{
+  display:block; width:clamp(232px,29vw,322px); margin-bottom:18px;
+  padding:16px 20px 12px; border-radius:16px;
+  background:linear-gradient(158deg,#151A22 0%,#05070B 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    inset 0 0 0 1px rgba(227,178,91,.10),
+    0 14px 34px -20px rgba(10,14,20,.55);
+}
 .foot__brand p{ margin:0; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); }
 .foot__nav{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
 .foot__nav h5{
@@ -1767,6 +1887,7 @@ body.is-booting .dock .fab{
   .svc__item:nth-child(2){ grid-column:span 3; }
   .steps{ grid-template-columns:repeat(2,minmax(0,1fr)); }
   .cap{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .vend{ grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 
 @media (max-width:980px){
@@ -1816,6 +1937,7 @@ body.is-booting .dock .fab{
   .svc__item,.svc__item:nth-child(n){ grid-column:span 6; min-height:0; }
   .svc__more{ max-height:200px; opacity:1; }
   .steps,.cap{ grid-template-columns:1fr; }
+  .vend{ grid-template-columns:1fr; }
   .stats{ grid-template-columns:1fr; }
   .form{ grid-template-columns:1fr; }
   .foot__nav{ grid-template-columns:1fr 1fr; }
@@ -1859,7 +1981,107 @@ body.is-low .fab__tint{ opacity:1; }
 body.is-low .fab::before{ opacity:.5; }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   18.  REDUCED MOTION
+   18.  ANIMATIC FLOW
+   ──────────────────────────────────────────────────────────────────────────
+   Every rule below is gated behind .flow-on / .flow-rich, which only ever
+   come from flow.js. No JS, or prefers-reduced-motion, and none of this
+   applies — the page falls back to the plain reveals above it.
+
+   The custom properties are all fed by the one scroll loop in flow.js:
+     --fl-in   a section arriving      --fl-y    depth-layer offset
+     --fl-out  a block leaving         --fl-vel  scroll velocity
+
+   Note the split between `transform` and `translate`. The entry animations
+   further up this file own `transform`; everything scroll-linked here rides
+   the independent `translate` property, so a card can be mid-reveal and
+   parallaxing at once without either one clobbering the other.
+   ══════════════════════════════════════════════════════════════════════════ */
+@property --fl-y   { syntax:'<length>'; inherits:false; initial-value:0px; }
+@property --fl-out { syntax:'<number>'; inherits:false; initial-value:0; }
+@property --fl-vel { syntax:'<number>'; inherits:true;  initial-value:0; }
+/* inherited on purpose: the divider that reads this is a ::before, and a
+   pseudo-element only picks a registered property up from its originator if
+   the property inherits — otherwise it would sit on the initial value forever */
+@property --fl-in  { syntax:'<number>'; inherits:true;  initial-value:0; }
+
+/* — section dividers draw themselves as the section arrives —
+   clipped rather than scaled: scaleX would squeeze the whole tricolour into
+   the drawn portion instead of wiping it on left to right */
+.flow-on .section + .section{ border-top-color:transparent; }
+.flow-on .section + .section::before{
+  content:""; position:absolute; z-index:1;
+  left:0; right:0; top:-1px; height:1px;
+  background:linear-gradient(90deg,var(--saffron),var(--gold-mid) 52%,var(--green));
+  opacity:.5;
+  clip-path:inset(0 calc((1 - var(--fl-in,0)) * 100%) 0 0);
+}
+
+/* — headings, a line at a time —
+   The mask is a clip-path rather than overflow:hidden for two reasons: it
+   takes no part in layout, so wrapping the lines cannot shift a heading by a
+   single pixel; and it can bleed sideways and a little below the line box, so
+   Cormorant's descenders and the italic overhang are not shaved off. The
+   bleed is a fraction of an em and the line starts a full 125% below, so
+   there is no chance of the incoming text peeking under the edge. */
+.flow-on .fl-line{
+  display:block;
+  clip-path:inset(-.12em -.4em -.14em -.14em);
+}
+.flow-on .fl-line > span{
+  display:block;
+  transform:translateY(125%) rotate(1.4deg); transform-origin:0 0;
+  transition:transform 1.1s var(--ease);
+  transition-delay:calc(var(--i,0) * .085s);
+}
+.flow-on .fl-lines.in .fl-line > span{ transform:none; }
+/* the mask does the moving now, so the wrapper only fades */
+.flow-on .reveal-up.fl-lines{ transform:none; }
+
+/* — grids arrive as a wave: one delay step per column, per row — */
+.flow-on .fl-stag{ transition-delay:calc(var(--i,0) * var(--fl-step,.07s)); }
+.flow-on .fl-item{
+  opacity:0; translate:0 24px;
+  transition:opacity .8s ease, translate 1s var(--ease);
+  transition-delay:calc(var(--i,0) * var(--fl-step,.07s));
+}
+.flow-on .fl-item.in{ opacity:1; translate:0 0; }
+
+/* — depth: layers drift against the scroll — */
+.flow-rich .fl-par{ translate:0 var(--fl-y,0px); }
+.flow-rich .hero__skyline{ will-change:translate; }
+
+/* — a block eases back once it has been read, instead of cutting away at the
+     top of the screen. Origin is the top edge so the recede reads as depth
+     rather than as the block sliding out from under itself. — */
+.flow-rich .fl-block{
+  transform:translate3d(0,calc(var(--fl-out,0) * -30px),0) scale(calc(1 - var(--fl-out,0) * .018));
+  transform-origin:50% 0;
+}
+/* the dimming is a separate class because a block that carries .reveal-up is
+   already animating its own opacity on the way in — one owner per property */
+.flow-rich .fl-fade{ opacity:calc(1 - var(--fl-out,0) * .48); }
+/* the hero is already mid-transform on `transform` while the intro clears,
+   so its exit rides `translate` instead */
+.flow-rich .fl-hero{
+  translate:0 calc(var(--fl-out,0) * -64px);
+  opacity:calc(1 - var(--fl-out,0) * .9);
+  will-change:translate, opacity;
+}
+
+/* — cards hang a little behind a fast flick and catch up when it stops — */
+.flow-rich .fl-drag{ translate:0 calc(var(--fl-vel,0) * var(--fl-amp,6px)); }
+/* a layer can be both, and `translate` is a single property — so the two
+   offsets are summed here rather than one silently winning */
+.flow-rich .fl-par.fl-drag{
+  translate:0 calc(var(--fl-y,0px) + var(--fl-vel,0) * var(--fl-amp,6px));
+}
+
+/* the contact scene is the section's own background, so it is given bleed
+   before it is allowed to drift — otherwise the drift opens a seam */
+.flow-rich .contact .contact__bg{ top:-70px; bottom:-70px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   19.  REDUCED MOTION
    ══════════════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{

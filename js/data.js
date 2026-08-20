@@ -277,6 +277,34 @@ window.SI = (function () {
     return PLATFORMS.find(function (p) { return p.d === dom; });
   }).filter(Boolean);
 
+  /* ── vendors ───────────────────────────────────────────────────────────
+     PLACEHOLDER DATA — unlike everything else in this file, none of this is
+     real. It is here so the section has the right shape to look at; replace
+     each entry with an actual vendor and the rest of the page needs no
+     change. Fields:
+       n  name            c  what they supply       p  one-line description
+       m  relationship    d  domain (optional — omit and the card won't link)
+     Add or remove entries freely; the grid and the reveal cascade follow the
+     length of this array. */
+  const VENDORS = [
+    { n: 'Vendor One',   c: 'Hosting & Cloud',     m: 'Partner since 2023',
+      p: 'Placeholder line describing what this vendor supplies and why they are on the list.',
+      d: 'example.com' },
+    { n: 'Vendor Two',   c: 'Payments',            m: 'Partner since 2023',
+      p: 'Placeholder line describing what this vendor supplies and why they are on the list.',
+      d: 'example.com' },
+    { n: 'Vendor Three', c: 'Logistics',           m: 'Partner since 2024',
+      p: 'Placeholder line describing what this vendor supplies and why they are on the list.' },
+    { n: 'Vendor Four',  c: 'Design & Print',      m: 'Preferred supplier',
+      p: 'Placeholder line describing what this vendor supplies and why they are on the list.',
+      d: 'example.com' },
+    { n: 'Vendor Five',  c: 'Hardware',            m: 'Preferred supplier',
+      p: 'Placeholder line describing what this vendor supplies and why they are on the list.' },
+    { n: 'Vendor Six',   c: 'Support & Staffing',  m: 'Partner since 2025',
+      p: 'Placeholder line describing what this vendor supplies and why they are on the list.',
+      d: 'example.com' }
+  ];
+
   /* Colour pairs cycled through the rail cards — brand hues only, mixed as
      pale washes so the dark monogram sitting on top stays the loudest thing
      on the card. */
@@ -309,6 +337,7 @@ window.SI = (function () {
     CONTACT: CONTACT,
     PLATFORMS: PLATFORMS,
     FEATURED: FEATURED,
+    VENDORS: VENDORS,
     CARD_TINTS: CARD_TINTS,
     counts: {
       total: PLATFORMS.length,

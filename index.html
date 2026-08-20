@@ -22,23 +22,23 @@
 <template id="si-logo-src">
 <svg class="si-logo" viewBox="0 0 1000 480" role="img" aria-label="SmartIndia.ai — Bringing AI and People Together" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- The skyline gradient is deepened for paper: on black it ran bright
-         gold → brown top-to-bottom; on white the bright end would disappear,
-         so it runs warm gold → deep bronze instead. -->
+    <!-- The mark is unchanged from the black-theme original: it is always
+         shown on its own dark ground (the intro's field, and the plates the
+         nav and footer put behind it), never directly on the paper page. -->
     <linearGradient id="siGold" x1="0" y1="88" x2="0" y2="262" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#DCA847"/>
-      <stop offset=".28" stop-color="#C08A34"/>
-      <stop offset=".62" stop-color="#8A5A12"/>
-      <stop offset="1" stop-color="#4A2C08"/>
+      <stop offset="0" stop-color="#FFE7B0"/>
+      <stop offset=".28" stop-color="#F0C97A"/>
+      <stop offset=".62" stop-color="#C08A34"/>
+      <stop offset="1" stop-color="#6E4413"/>
     </linearGradient>
     <linearGradient id="siGoldFade" x1="0" y1="0" x2="1000" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#4A2C08" stop-opacity="0"/>
-      <stop offset=".5" stop-color="#8A5A12" stop-opacity=".9"/>
-      <stop offset="1" stop-color="#4A2C08" stop-opacity="0"/>
+      <stop offset="0" stop-color="#6E4413" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#C08A34" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#6E4413" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="siSaffronRule" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#F08221" stop-opacity="0"/>
-      <stop offset="1" stop-color="#F08221"/>
+      <stop offset="0" stop-color="#FF9933" stop-opacity="0"/>
+      <stop offset="1" stop-color="#FF9933"/>
     </linearGradient>
     <linearGradient id="siGreenRule" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#138808"/>
@@ -174,7 +174,7 @@
   <!-- ─── wordmark ─── -->
   <g class="si-wordmark">
     <text class="si-wm" x="500" y="402" text-anchor="middle" font-size="128">
-      <tspan fill="#14181F">Smart</tspan><tspan fill="#F08221">In</tspan><tspan fill="#14181F">d</tspan><tspan class="si-slot" fill="none">n</tspan><tspan fill="#138808">a</tspan><tspan font-size="88" fill="#14181F">.ai</tspan>
+      <tspan fill="#FFFFFF">Smart</tspan><tspan fill="#FF9933">In</tspan><tspan fill="#FFFFFF">d</tspan><tspan class="si-slot" fill="none">n</tspan><tspan fill="#138808">a</tspan><tspan font-size="88" fill="#FFFFFF">.ai</tspan>
     </text>
     <!-- Ashoka Chakra: positioned onto the reserved slot at runtime -->
     <g class="si-chakra" fill="none" stroke="#1B3A8F" stroke-width="1.6">
@@ -203,7 +203,7 @@
   <g class="si-tagline">
     <rect class="si-rule si-rule-l" x="120" y="445.5" width="92" height="2" fill="url(#siSaffronRule)"/>
     <rect class="si-rule si-rule-r" x="788" y="445.5" width="92" height="2" fill="url(#siGreenRule)"/>
-    <text x="503" y="453" text-anchor="middle" font-size="18" letter-spacing="6.4" fill="#5A6070">BRINGING AI AND PEOPLE TOGETHER</text>
+    <text x="503" y="453" text-anchor="middle" font-size="18" letter-spacing="6.4" fill="#E9E4DA">BRINGING AI AND PEOPLE TOGETHER</text>
   </g>
 </svg>
 </template>
@@ -471,6 +471,28 @@
 
 
 <!-- ══════════════════════════════════════════════════════════════
+     VENDORS
+     The cards are rendered from SI.VENDORS in js/data.js — that array is
+     placeholder content and is the only thing that needs replacing.
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section vendors" id="vendors">
+  <div class="wrap">
+    <header class="sect-head sect-head--split">
+      <div>
+        <p class="eyebrow reveal-up"><span class="dot"></span> Vendors</p>
+        <h2 class="display reveal-up">The suppliers<br>behind the build.</h2>
+      </div>
+      <p class="sect-head__note reveal-up">
+        Placeholder entries — replace <code>SI.VENDORS</code> in js/data.js with the real list.
+      </p>
+    </header>
+
+    <div class="vend" id="vend-list"><!-- injected --></div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
      WHY US + STATS
      ══════════════════════════════════════════════════════════════ -->
 <section class="section why" id="why">
@@ -657,6 +679,7 @@
         <a href="#platform">Platform</a>
         <a href="#services">Solutions</a>
         <a href="#work">Live platforms</a>
+        <a href="#vendors">Vendors</a>
       </div>
       <div>
         <h5>Contact</h5>
@@ -714,5 +737,8 @@
 <script src="js/reveal.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/site.js"></script>
+<!-- flow.js runs last: it tags content the scripts above have already
+     injected, so nothing it choreographs is missing at first scan. -->
+<script src="js/flow.js"></script>
 </body>
 </html>
