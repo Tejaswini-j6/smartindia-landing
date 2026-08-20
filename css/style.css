@@ -945,9 +945,10 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
   position:absolute; right:20px; top:16px;
   font-family:var(--serif); font-size:34px; color:rgba(138,90,18,.22);
 }
-.prod__card:nth-child(1){ margin-top:0; }
-.prod__card:nth-child(2){ margin-top:clamp(0px,3vw,44px); }
-.prod__card:nth-child(3){ margin-top:clamp(0px,6vw,88px); }
+/* The three cards sit level and stretch to one another: a staircase offset
+   made each card a different height, which read as three unrelated panes
+   rather than one set. */
+.prod__card{ margin-top:0; }
 /* the well: glass has an inside too, so the canvas sits in a recess with the
    light coming from the opposite edge */
 .prod__vis{
@@ -2134,7 +2135,6 @@ body.is-booting .dock .fab{
   .sect-head--split{ grid-template-columns:1fr; align-items:start; }
   .sect-head__note{ padding-left:16px; }
   .prod{ grid-template-columns:1fr; }
-  .prod__card:nth-child(n){ margin-top:0; }
   .mv{ grid-template-columns:1fr; }
   .contact__grid{ grid-template-columns:1fr; }
   .foot__inner{ grid-template-columns:1fr; }

@@ -75,7 +75,10 @@
      four across on a desktop, two on a tablet, one on a phone. */
   const SEQ = [
     { box: '#svc-list',       item: '.svc__item' },
-    { box: '.prod',           item: '.prod__card' },
+    /* `lock` opts a row out of the velocity drag: these three are read as one
+       set, so they must never sit at three different heights, not even by a
+       few pixels mid-scroll. */
+    { box: '.prod',           item: '.prod__card', lock: true },
     { box: '.mv',             item: '.mv__card' },
     { box: '#why-list',       item: '.why__item' },
     { box: '.stats',          item: '.stat' },
@@ -100,7 +103,7 @@
         el.dataset.fl = '1';
         if (el.classList.contains('reveal-up')) {
           el.classList.add('fl-stag');
-          if (RICH) el.classList.add('fl-drag');
+          if (RICH && !group.lock) el.classList.add('fl-drag');
         } else {
           el.classList.add('fl-item');
         }
