@@ -343,8 +343,22 @@
       });
     }
 
+    /* A–Z, sorted once rather than on every repaint.
+       Names are compared with their HTML entities decoded and punctuation
+       ignored, so "A B Khan &amp; Associates" files under A and not under
+       ampersand, and case never decides the order. */
+    function sortKey(name) {
+      return name
+        .replace(/&amp;/g, '&').replace(/&rsquo;/g, "'").replace(/&ndash;/g, '-')
+        .replace(/^[^A-Za-z0-9]+/, '')
+        .toLowerCase();
+    }
+    const AZ = D.PLATFORMS.slice().sort(function (a, b) {
+      return sortKey(a.n).localeCompare(sortKey(b.n), 'en', { numeric: true, sensitivity: 'base' });
+    });
+
     function rows() {
-      return active === 'all' ? D.PLATFORMS : D.PLATFORMS.filter(function (p) { return p.c === active; });
+      return active === 'all' ? AZ : AZ.filter(function (p) { return p.c === active; });
     }
 
     function paint() {
