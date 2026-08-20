@@ -272,8 +272,10 @@
     const items = D.PORTFOLIO;
 
     grid.innerHTML = items.map(function (p, i) {
+      /* `u` lets an entry point at a page deeper than its front door while the
+         card still reads as the bare domain */
       return '<a class="live__card" data-cat="' + p.c + '" style="--i:' + (i % 3) + '"' +
-             ' href="https://' + p.d + '" target="_blank" rel="noopener">' +
+             ' href="' + (p.u || 'https://' + p.d) + '" target="_blank" rel="noopener">' +
         '<span class="live__vis" aria-hidden="true">' +
           '<span class="live__chrome"><i></i><i></i><i></i>' +
             '<span class="live__url">' + p.d + '</span></span>' +

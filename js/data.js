@@ -274,42 +274,47 @@ window.SI = (function () {
 
   /* featured on the horizontal rail — a spread across all four categories */
   /* ── portfolio ─────────────────────────────────────────────────────────
-     The ten platforms the Portfolio section leads with. Every entry is a
-     running production site — the one-liners are drawn from what each site
-     says about itself, not written for it. Order matters: this is the order
-     the cards appear in, and the filter preserves it.
-     `c` must be one of the FILTER_ORDER keys or the card lands in no tab. */
+     The ten platforms the Portfolio section leads with, in the order they
+     appear. Every entry is a running production site and the one-liners are
+     drawn from what each site says about itself, not written for it.
+       n  name            d  domain, shown on the card and in the preview
+       c  category chip   p  one-line description
+       u  optional — a deeper link than the domain's front page. The card
+          still *reads* as `d`, so a long path never breaks the layout.
+     `c` must be one of the FILTER_ORDER keys for the chip to read properly. */
   const PORTFOLIO = [
     { n: 'Paakhi Jewels', d: 'paakhijewels.com', c: 'ecom',
       p: 'Handcrafted jewellery storefront running a full catalogue, cart and checkout.' },
     { n: 'Bhoomitra Vaastu', d: 'bhoomitravaastu.com', c: 'dynamic',
       p: 'Interior design and Vastu consultancy — services, guidance and enquiry capture.' },
-    { n: 'Aadees', d: 'aadees.com', c: 'multi',
-      p: 'Marketplace where every seller runs an independent storefront under one roof.' },
-    { n: 'Sakar Sankalp Foundation', d: 'sakarsankalpfoundation.org', c: 'multi',
-      p: 'Foundation platform carrying many contributors and campaigns on one system.' },
-    { n: 'Tara Naturals', d: 'taranaturals.in', c: 'ecom',
-      p: 'Premium cosmetics store with catalogue, cart and order management.' },
-    { n: 'Englady', d: 'englady.com', c: 'ecom',
-      p: 'Fashion storefront built around a seasonal, frequently refreshed catalogue.' },
-    { n: 'Theera Books', d: 'theerabooks.com', c: 'ecom',
-      p: 'Online bookstore with a deep catalogue, search and checkout.' },
+    { n: 'Stayzia', d: 'stayzia.in', c: 'dynamic',
+      u: 'https://stayzia.in/property/blue-lagoon',
+      p: 'Booking platform for handpicked hotels, homestays and villas across India.' },
     { n: 'Deal Confirm', d: 'dealconfirm.com', c: 'dynamic',
       p: 'Real-estate services platform with dynamic listings and enquiry routing.' },
-    { n: 'Astrojewell', d: 'astrojewell.com', c: 'web',
-      p: 'Gemstones and astrological consultation platform with booking built in.' },
-    { n: 'Abundance SAP', d: 'abundancesap.com', c: 'web',
-      p: 'Consulting practice platform for SAP S/4HANA, ABAP, RAP and BTP work.' }
+    { n: 'Englady', d: 'englady.com', c: 'ecom',
+      p: 'Fashion storefront built around a seasonal, frequently refreshed catalogue.' },
+    { n: 'Transcova', d: 'transcova.com', c: 'dynamic',
+      p: 'Innovation platform connecting innovators, engineers and manufacturers worldwide.' },
+    { n: 'Ambika Divine Essence', d: 'ambikadivineessence.com', c: 'ecom',
+      p: 'Fragrance and incense storefront with catalogue, cart and checkout.' },
+    { n: 'Arowin Lubricants', d: 'arowinlubricants.com', c: 'web',
+      p: 'Product and distribution platform for an automotive lubricants brand.' },
+    { n: 'Bendito Group', d: 'benditogroup.co.in', c: 'ecom',
+      p: 'Premium makhana storefront, trading online as PopNest.' },
+    { n: 'S7 Millet Co', d: 's7milletco.com', c: 'ecom',
+      p: 'Millet breakfast mixes sold direct — instant idli, dosa and pesarattu.' }
   ];
 
   /* The rail deliberately draws from everything *except* the portfolio ten,
      so the two sections never show the same platform twice. */
   const PORTFOLIO_DOMS = PORTFOLIO.map(function (p) { return p.d; });
   const FEATURED = [
-    'stayzia.in', 'transcova.com', 'magichimalayancottagepahalgam.com',
-    'cms.smartindia.ai', 'nkexports.in', 'digitraxtechnologies.com',
-    'theerabooks.com', 'ambikadivineessence.com', 'valleyheal.com',
-    'aggreenshakti.com', 'arowinlubricants.com', 'minisakhi.com'
+    'aadees.com', 'sakarsankalpfoundation.org', 'taranaturals.in',
+    'theerabooks.com', 'astrojewell.com', 'abundancesap.com',
+    'magichimalayancottagepahalgam.com', 'cms.smartindia.ai', 'nkexports.in',
+    'digitraxtechnologies.com', 'valleyheal.com', 'aggreenshakti.com',
+    'minisakhi.com'
   ].filter(function (dom) { return PORTFOLIO_DOMS.indexOf(dom) === -1; })
    .map(function (dom) {
      return PLATFORMS.find(function (p) { return p.d === dom; });
