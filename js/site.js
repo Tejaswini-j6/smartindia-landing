@@ -261,24 +261,18 @@
     }
   })();
 
-  /* — live platforms: ten cards + category filter —
-     Filtering never re-renders. The cards are built once and only shown or
-     hidden, so the browser keeps the same nodes, the previews never reflow
-     and the transition can actually run. Each pass re-numbers the visible
-     cards so the cascade always reads left-to-right from the first one. */
+  /* — our portfolio —
+     The cards render straight from SI.PORTFOLIO in the order that array
+     declares, and the whole grid animates in once, as a wave across its
+     columns, when it first comes into view. */
   (function live() {
     const grid = $('#live-grid');
-    const bar = $('#live-filters');
-    const count = $('#live-count');
     if (!grid || !D || !D.PORTFOLIO) return;
 
     const items = D.PORTFOLIO;
-    const order = D.FILTER_ORDER || ['ecom', 'multi', 'dynamic', 'web'];
-    let active = 'all';
 
-    /* — cards — */
-    grid.innerHTML = items.map(function (p) {
-      return '<a class="live__card" data-cat="' + p.c + '"' +
+    grid.innerHTML = items.map(function (p, i) {
+      return '<a class="live__card" data-cat="' + p.c + '" style="--i:' + (i % 3) + '"' +
              ' href="https://' + p.d + '" target="_blank" rel="noopener">' +
         '<span class="live__vis" aria-hidden="true">' +
           '<span class="live__chrome"><i></i><i></i><i></i>' +
@@ -300,60 +294,20 @@
       '</a>';
     }).join('');
 
-    const cards = $$('.live__card', grid);
-
-    /* — tabs, in the order the data layer declares — */
-    if (bar) {
-      const tabs = [['all', 'All']].concat(order.map(function (k) {
-        return [k, D.CATS[k] || k];
-      }));
-      bar.innerHTML = tabs.map(function (t) {
-        const n = t[0] === 'all'
-          ? items.length
-          : items.filter(function (p) { return p.c === t[0]; }).length;
-        return '<button type="button" role="tab" data-f="' + t[0] + '"' +
-               ' aria-selected="' + (t[0] === 'all') + '">' +
-               t[1] + '<b>' + n + '</b></button>';
-      }).join('');
-
-      bar.addEventListener('click', function (e) {
-        const b = e.target.closest('button[data-f]');
-        if (!b || b.dataset.f === active) return;
-        active = b.dataset.f;
-        $$('button', bar).forEach(function (x) {
-          x.setAttribute('aria-selected', String(x === b));
+    /* Held back until the grid is actually on screen, so the wave is seen
+       rather than spent while the visitor is still up at the hero. */
+    if (PROFILE.reduced || !('IntersectionObserver' in window)) {
+      grid.classList.add('is-live');
+    } else {
+      const gio = new IntersectionObserver(function (es) {
+        es.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          grid.classList.add('is-live');
+          gio.disconnect();
         });
-        /* keep the chosen tab in view when the bar is scrolling on a phone */
-        if (b.scrollIntoView) b.scrollIntoView({ block: 'nearest', inline: 'center', behavior: PROFILE.reduced ? 'auto' : 'smooth' });
-        paint();
-      });
+      }, { rootMargin: '0px 0px -10% 0px', threshold: .08 });
+      gio.observe(grid);
     }
-
-    function paint() {
-      let shown = 0;
-      cards.forEach(function (c) {
-        const on = active === 'all' || c.dataset.cat === active;
-        c.classList.toggle('is-off', !on);
-        if (on) {
-          c.style.setProperty('--i', shown % 3);   /* one step per column */
-          shown++;
-        }
-      });
-      /* replay the entry so a filter change lands as a wave, not a jump cut */
-      if (!PROFILE.reduced) {
-        grid.classList.remove('is-live');
-        void grid.offsetWidth;                     /* restart the animation */
-        grid.classList.add('is-live');
-      } else {
-        grid.classList.add('is-live');
-      }
-      if (count) {
-        count.textContent = shown === items.length
-          ? 'Showing all ' + items.length + ' live platforms'
-          : 'Showing ' + shown + ' of ' + items.length + ' live platforms';
-      }
-    }
-    paint();
   })();
 
   /* — filterable live index — */

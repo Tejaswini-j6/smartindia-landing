@@ -992,40 +992,6 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
   color:var(--text);
 }
 
-/* — filter tabs —
-   On a phone the row scrolls sideways rather than wrapping into a block of
-   pills: one line of tabs reads as a control, three lines read as a menu. */
-.live__filters{
-  display:flex; gap:8px; flex-wrap:wrap;
-  margin-bottom:clamp(22px,2.6vw,32px);
-  padding-bottom:2px;
-}
-.live__filters button{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:9px 16px;
-  border:1px solid var(--line); border-radius:var(--r-pill);
-  background:var(--glass-sheen), rgba(255,255,255,.6);
-  box-shadow:var(--glass-edge);
-  font-size:13px; font-weight:500; letter-spacing:.02em;
-  color:var(--text-2); white-space:nowrap; cursor:pointer;
-  transition:color .3s, border-color .3s, background .3s, box-shadow .3s;
-}
-.live__filters button b{
-  font-size:11px; font-weight:600;
-  color:var(--faint);
-  font-variant-numeric:tabular-nums;
-  transition:color .3s;
-}
-.live__filters button:hover{ border-color:rgba(138,90,18,.4); color:var(--text); }
-.live__filters button[aria-selected="true"]{
-  color:#241703; border-color:transparent;
-  background:
-    linear-gradient(157deg,rgba(255,255,255,.42),rgba(255,255,255,0) 46%),
-    linear-gradient(100deg,var(--gold-fill-hi),var(--gold-fill) 44%,var(--gold-mid));
-  box-shadow:0 10px 24px -14px rgba(138,90,18,.55), inset 0 1px 0 rgba(255,255,255,.7);
-}
-.live__filters button[aria-selected="true"] b{ color:rgba(36,23,3,.62); }
-
 /* — the grid — */
 .live__grid{
   display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
@@ -1040,7 +1006,6 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
   color:inherit;
   transition:transform .55s var(--ease), box-shadow .55s var(--ease), border-color .4s ease;
 }
-.live__card.is-off{ display:none; }
 @media (hover:hover){
   .live__card:hover{
     transform:translateY(-6px);
@@ -1147,14 +1112,9 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
 @media (hover:hover){
   .live__card:hover .live__cta svg{ transform:translate(2px,-2px); }
 }
-.live__count{
-  margin:clamp(20px,2.4vw,28px) 0 0;
-  font-size:12.5px; letter-spacing:.04em; color:var(--faint);
-}
-
-/* a filter change replays the entry, one step per column, so the new set
-   arrives as a wave instead of a jump cut */
-.live__grid.is-live .live__card:not(.is-off){
+.l/* the grid arrives as a wave across its columns, once, when it first
+   scrolls into view */
+.live__grid.is-live .live__card{
   animation:liveIn .62s var(--ease) both;
   animation-delay:calc(var(--i,0) * .07s);
 }
@@ -2176,21 +2136,8 @@ body.is-booting .dock .fab{
   .vend{ grid-template-columns:1fr; }
   .stats{ grid-template-columns:1fr; }
 
-  /* phone: one card across, and the filter row becomes a single scrolling
-     line — three lines of wrapped pills read as a menu, one line reads as a
-     control. The negative margin lets it bleed to both screen edges so the
-     row looks scrollable instead of clipped. */
+  /* phone: one card across */
   .live__grid{ grid-template-columns:1fr; }
-  .live__filters{
-    flex-wrap:nowrap; overflow-x:auto; overscroll-behavior-x:contain;
-    scroll-snap-type:x proximity;
-    margin-inline:calc(var(--gut) * -1);
-    padding-inline:var(--gut);
-    padding-bottom:10px;
-    scrollbar-width:none;
-  }
-  .live__filters::-webkit-scrollbar{ display:none; }
-  .live__filters button{ scroll-snap-align:center; flex:0 0 auto; padding:10px 16px; }
   .live__vis{ aspect-ratio:16/9; }
   .form{ grid-template-columns:1fr; }
   .foot__nav{ grid-template-columns:1fr 1fr; }
