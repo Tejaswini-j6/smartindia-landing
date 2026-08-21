@@ -5,9 +5,12 @@
    js/data.js. Nothing private is in the document, and the admin routes that
    can *write* it are behind a session.
 
-   204 when nothing has been published and 501 when there is no store, so
-   js/boot.js can tell "nothing to apply" from "not set up" and stop waiting
-   in either case rather than holding the page for a timeout.
+   204 both when nothing has been published and when there is no store at all.
+   The two are the same answer to the only question this route is ever asked —
+   "is there anything to apply?" — and 204 says it without the browser logging
+   a failed request on every single visit. Whether a store is configured is a
+   thing an operator needs to know, not a visitor, so that is reported by
+   /api/admin/session instead.
    ══════════════════════════════════════════════════════════════════════════ */
 
 const store = require('./_lib/store.js');
@@ -20,7 +23,7 @@ module.exports = async function handler(req, res) {
 
   if (!store.configured()) {
     res.setHeader('Cache-Control', 'public, max-age=60');
-    return res.status(501).json({ ok: false, error: 'not_configured' });
+    return res.status(204).end();
   }
 
   try {
