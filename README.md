@@ -44,6 +44,47 @@ Every colour in `css/style.css` `:root` is taken from the mark: the skyline's
 gold gradient, the saffron/green of the wordmark and the navy of the chakra.
 Nothing else was introduced.
 
+## Themes
+
+Two of them, switched from the control in the nav and remembered in
+`localStorage` under `si-theme`. Until someone presses it nothing is stored and
+the page follows the operating system, including when that changes mid-visit; a
+deliberate choice outranks the system from then on. An inline script in `<head>`
+resolves and stamps `data-theme` **before first paint**, because anything later
+lets one frame of the wrong ground through — a full-screen white flash on a
+dark-mode visit.
+
+The two accents are **Apricot `#FFD8B5`** and **Pistachio `#D8E8B8`** in light,
+**Antique Gold `#74613A`** and **Muted Pistachio `#4F6040`** in dark. Everything
+warm on the page is mixed toward the first and everything green toward the
+second.
+
+Only the palette is written twice. The sheet states its whites, shadows and
+golds through seven **channel** tokens (`--c-lift`, `--c-shade`, `--c-shade-w`,
+`--c-gold-fill`, `--c-gold-ink`, `--c-green`, `--c-saffron`, `--c-navy`) rather
+than naming colours inline, so `:root[data-theme="dark"]` is a dozen lines
+instead of two hundred edits. `--lift-k` and `--shade-k` scale alpha alongside
+the hue: a white inset that reads as a highlight on paper has to fall to a tenth
+of itself before it reads as one on a dark ground, and a shadow has to deepen.
+**Adding a colour means reaching for a channel, not a literal** — a literal will
+simply not follow the theme.
+
+Three backgrounds have to *invert* rather than dim, so they are the only ones
+stated in both blocks: `--hero-veil`, `--hero-veil-m` and `--sheet`. On paper the
+hero copy sits on a pool of page colour and the menu is a white sheet; on a dark
+ground both become pools of shade, and scaling their alpha would only make them
+disappear.
+
+There is deliberately no `prefers-color-scheme` block — the head script resolves
+the system preference itself, and since the page's content is rendered from
+`data.js`, a visitor without JS has no page to theme in the first place.
+
+The canvas scenes are the one thing that does **not** re-theme: `draw.js` caches
+its `rgba()` strings per colour at build time, so the bronze ink is fixed once
+the scenes are mounted. It was checked in both themes and reads in both — gold
+on paper, gold on a near-black ground — so it was left alone rather than given a
+per-frame filter the scroll engine would pay for.
+
 The site runs on a **light** ground — warm paper (`--ink: #F7F4EC`) rather than
 the mark's black field — so those hues are re-weighted for ink-on-paper
 contrast: the golds are deepened (`--gold-hi` is the *darkest* of them, since

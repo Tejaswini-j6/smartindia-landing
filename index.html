@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F7F4EC">
+<!-- one tag, set from script: a media-query pair would follow the system even
+     after the visitor has chosen the other theme, leaving the browser chrome
+     disagreeing with the page -->
+<meta name="theme-color" id="theme-color" content="#EFE1D0">
 <title>SmartIndia.ai — Bringing AI and People Together</title>
 <meta name="description" content="SmartIndia.ai is an AI-powered platform and IT solutions company from Tiruppur, Tamil Nadu — building intelligent search, dynamic web platforms, e-commerce and multi-vendor systems.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -11,6 +14,24 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
+<script>
+/* Resolve the theme before the first paint. Anything later — even a script at
+   the top of <body> — lets one frame of the wrong ground through, which on a
+   dark-mode visit is a full-screen white flash. */
+(function () {
+  try {
+    var t = localStorage.getItem('si-theme');
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+    var m = document.getElementById('theme-color');
+    if (m) m.setAttribute('content', t === 'dark' ? '#12140E' : '#EFE1D0');
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+})();
+</script>
 </head>
 <body class="is-booting">
 
@@ -257,6 +278,20 @@
   <a class="btn btn--gold nav__cta magnetic" href="#contact">
     <span>Start a Project</span>
   </a>
+
+  <button class="themer" id="themer" type="button" aria-label="Switch to dark theme" aria-pressed="false">
+    <span class="themer__track" aria-hidden="true">
+      <span class="themer__knob">
+        <svg class="themer__sun" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.6"/>
+          <g><path d="M12 1.6v3M12 19.4v3M1.6 12h3M19.4 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M19.4 4.6l-2.1 2.1M6.7 17.3l-2.1 2.1"/></g>
+        </svg>
+        <svg class="themer__moon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20.5 14.6A8.8 8.8 0 019.4 3.5a8.8 8.8 0 1011.1 11.1z"/>
+        </svg>
+      </span>
+    </span>
+  </button>
 
   <button class="nav__burger" id="nav-burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
     <i></i><i></i>

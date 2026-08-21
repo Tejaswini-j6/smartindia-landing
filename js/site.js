@@ -416,6 +416,52 @@
     paint();
   })();
 
+  /* — theme switch —
+     The head script has already resolved and stamped the theme before first
+     paint; this only wires the control and remembers a deliberate choice.
+     Until someone presses it nothing is stored, so the page keeps following
+     the system setting — including when that setting changes mid-visit. */
+  (function themer() {
+    const btn = $('#themer');
+    const root = document.documentElement;
+
+    function label(t) {
+      btn.setAttribute('aria-label', t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+      btn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+    }
+    function apply(t, animate) {
+      if (animate && !PROFILE.reduced) {
+        root.classList.add('theme-xf');
+        window.setTimeout(function () { root.classList.remove('theme-xf'); }, 460);
+      }
+      root.setAttribute('data-theme', t);
+      const meta = $('#theme-color');
+      if (meta) meta.setAttribute('content', t === 'dark' ? '#12140E' : '#EFE1D0');
+      if (btn) label(t);
+    }
+
+    if (btn) {
+      label(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+      btn.addEventListener('click', function () {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        try { localStorage.setItem('si-theme', next); } catch (e) {}
+        apply(next, true);
+      });
+    }
+
+    if (window.matchMedia) {
+      const mq = matchMedia('(prefers-color-scheme: dark)');
+      const follow = function () {
+        let stored = null;
+        try { stored = localStorage.getItem('si-theme'); } catch (e) {}
+        if (stored === 'light' || stored === 'dark') return;   /* a choice outranks the system */
+        apply(mq.matches ? 'dark' : 'light', true);
+      };
+      if (mq.addEventListener) mq.addEventListener('change', follow);
+      else if (mq.addListener) mq.addListener(follow);
+    }
+  })();
+
   /* — google reviews —
      Quotes are other people's words, so they go through esc() and are never
      trimmed here: a long review is clamped in CSS, which the reader can undo,
