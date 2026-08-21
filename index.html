@@ -810,12 +810,13 @@
 <div class="cursor" id="cursor" aria-hidden="true"><i></i></div>
 
 <script src="js/data.js"></script>
-<script src="js/draw.js"></script>
-<script src="js/reveal.js"></script>
-<script src="js/scene.js"></script>
-<script src="js/site.js"></script>
-<!-- flow.js runs last: it tags content the scripts above have already
-     injected, so nothing it choreographs is missing at first scan. -->
-<script src="js/flow.js"></script>
+<!-- boot.js loads draw / reveal / scene / site / flow, in that order, once it
+     has had its brief chance to pull published content over the built-in copy
+     in data.js. They are not listed here as their own tags because site.js
+     renders as soon as it is parsed, so hydration has to happen before it
+     rather than alongside it. flow.js still runs last: it tags content the
+     others have already injected, so nothing it choreographs is missing at
+     first scan. -->
+<script src="js/boot.js"></script>
 </body>
 </html>

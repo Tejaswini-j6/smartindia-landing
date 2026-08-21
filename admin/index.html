@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>SmartIndia.ai — Admin</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="admin.css">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('si-theme');
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+
+<!-- Loaded for its content, not its behaviour: it defines window.SI, which is
+     the seed the editor starts from when nothing has been published yet. That
+     is what stops a first save from publishing a blank site over a full one. -->
+<script src="../js/data.js"></script>
+
+<div class="gate" id="gate">
+  <div class="gate__card">
+    <p class="gate__brand">SmartIndia<span>.ai</span></p>
+    <h1 class="gate__title" id="gate-title">Admin</h1>
+    <p class="gate__note" id="gate-note">Checking&hellip;</p>
+
+    <form class="gate__form" id="login-form" hidden>
+      <label for="pw">Password</label>
+      <input type="password" id="pw" autocomplete="current-password" required>
+      <button class="btn btn--gold" type="submit" id="login-btn">Sign in</button>
+      <p class="gate__err" id="login-err" role="alert" hidden></p>
+    </form>
+
+    <div class="gate__setup" id="gate-setup" hidden>
+      <p>The panel is not switched on yet. In the Vercel project, add:</p>
+      <table>
+        <tr><th>ADMIN_PASSWORD</th><td>the password for this panel. Without it every admin route stays locked.</td></tr>
+        <tr><th>KV_REST_API_URL<br>KV_REST_API_TOKEN</th><td>a Redis store — add Upstash from the Vercel Marketplace and these are injected for you.</td></tr>
+      </table>
+      <p class="gate__fine">Redeploy after adding them, then reload this page.</p>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
+  <aside class="side">
+    <p class="side__brand">SmartIndia<span>.ai</span></p>
+    <nav class="side__nav" id="side-nav"></nav>
+    <div class="side__foot">
+      <button class="btn btn--ghost" type="button" id="theme-btn">Theme</button>
+      <button class="btn btn--ghost" type="button" id="logout-btn">Sign out</button>
+      <a class="side__link" href="../index.html" target="_blank" rel="noopener">View site &rarr;</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="bar">
+      <div>
+        <h1 id="view-title">Enquiries</h1>
+        <p id="view-note"></p>
+      </div>
+      <div class="bar__actions">
+        <span class="stamp" id="stamp"></span>
+        <button class="btn btn--gold" type="button" id="save-btn" hidden>Publish changes</button>
+      </div>
+    </header>
+
+    <div class="flash" id="flash" hidden></div>
+    <section class="view" id="view"></section>
+  </main>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

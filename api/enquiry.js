@@ -32,7 +32,28 @@
      WHATSAPP_PHONE_ID    optional. WhatsApp Cloud API phone number ID.
    ══════════════════════════════════════════════════════════════════════════ */
 
+const store = require('./_lib/store.js');
+
 const TO = (process.env.ENQUIRY_TO || '919994900470').replace(/[^\d]/g, '');
+
+/* Keep a copy for the admin inbox. Deliberately best-effort and deliberately
+   first: archiving is additional to delivery, never instead of it, so a store
+   that is missing, full or briefly down must not cost the lead. Every failure
+   here is logged and swallowed. */
+async function archive(enquiry) {
+  if (!store.configured()) return false;
+  try {
+    await store.pushCapped(store.KEYS.enquiries, Object.assign({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+      receivedAt: new Date().toISOString(),
+      read: false
+    }, enquiry), 500);
+    return true;
+  } catch (err) {
+    console.error('enquiry archive failed:', err && err.message);
+    return false;
+  }
+}
 
 /* Same rule the form applies in the browser. Re-checked here because a
    serverless endpoint is public: client-side validation is for the visitor's
@@ -133,10 +154,11 @@ module.exports = async function handler(req, res) {
   if (enquiry.message.length < 10) return res.status(422).json({ ok: false, error: 'message_required' });
 
   const text = compose(enquiry);
+  const stored = await archive(enquiry);
 
   try {
-    if (await viaWebhook(enquiry, text)) return res.status(200).json({ ok: true, via: 'webhook' });
-    if (await viaWhatsApp(text)) return res.status(200).json({ ok: true, via: 'whatsapp' });
+    if (await viaWebhook(enquiry, text)) return res.status(200).json({ ok: true, via: 'webhook', stored: stored });
+    if (await viaWhatsApp(text)) return res.status(200).json({ ok: true, via: 'whatsapp', stored: stored });
   } catch (err) {
     /* A configured route that fails is worth knowing about in the function
        log, but the visitor should not be stranded — answer 502 and the page
@@ -145,6 +167,8 @@ module.exports = async function handler(req, res) {
     return res.status(502).json({ ok: false, error: 'delivery_failed' });
   }
 
-  /* Nothing configured. Not an error — the page has a working fallback. */
-  return res.status(501).json({ ok: false, error: 'not_configured' });
+  /* No delivery route configured. Not an error — the page has a working
+     fallback. If the archive took it, the enquiry is still not lost: it is
+     waiting in the admin inbox. */
+  return res.status(501).json({ ok: false, error: 'not_configured', stored: stored });
 };

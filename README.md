@@ -187,6 +187,59 @@ information or from the live sites themselves.
 client testimonials, awards or certifications. Send the details and these drop
 straight in.
 
+## The admin panel
+
+`/admin` — one password, an enquiry inbox, and an editor for every piece of
+content on the page. It is **off until two things are set**, and until then the
+public site behaves exactly as it always has.
+
+| Variable | Purpose |
+| --- | --- |
+| `ADMIN_PASSWORD` | The password. **Without it every admin route answers 501** — a missing password locks the door, it does not leave it open. |
+| `KV_REST_API_URL` / `KV_REST_API_TOKEN` | A Redis store. Add Upstash from the Vercel Marketplace and both are injected automatically. `UPSTASH_REDIS_REST_URL` / `_TOKEN` work too. |
+| `SESSION_SECRET` | Optional. The cookie signing key; derived from `ADMIN_PASSWORD` if unset, so changing the password logs everyone out. |
+
+Redis is reached over its **REST API with plain `fetch`** — this project has no
+`package.json` and no `node_modules`, and it stays that way.
+
+**How content reaches the site.** `js/data.js` is still what the site ships
+with and still what renders if anything else fails. `js/boot.js` asks
+`/api/content` whether something newer has been published and merges it over
+`window.SI` before the renderers run — which is why the remaining scripts are
+loaded from `boot.js` rather than sitting in the markup as their own tags:
+`site.js` renders the moment it is parsed, so hydration has to finish first,
+not alongside. The wait is capped at 1.2s; a slow, missing or unconfigured API
+costs the visitor nothing.
+
+**The editor seeds from `data.js`.** Open a section that has never been touched
+and it is already full of the real content, because `admin/index.html` loads
+`js/data.js` for exactly that. So a first publish cannot blank a page you have
+not visited yet.
+
+The whole site saves as **one JSON document**, so a publish is atomic — it all
+lands or none of it does, and nothing can half-update. Each save carries the
+`updatedAt` it was loaded with; if a second tab published in the meantime the
+save is refused with 409 rather than quietly discarding that work.
+
+`admin/admin.js` describes every collection in one `SCHEMA` and draws them all
+with the same renderer, so no section ends up with a worse editor than its
+neighbours and a new field is a line rather than a screen.
+
+**Security.** The session is an HMAC-signed, `HttpOnly`, `Secure`,
+`SameSite=Strict` cookie — that last one is also what stops a cross-site form
+from driving these routes, which is why there is no separate CSRF token. The
+password is compared as a digest through `timingSafeEqual`. Ten failed logins
+per IP in fifteen minutes locks the route; the counter lives in the store, and
+falls back to per-instance memory which a serverless platform may discard or
+spread across instances — weaker, and said here rather than quietly assumed.
+Content is validated on the way in even though only an authenticated operator
+can send it, because every visitor's browser reads it back out. `/admin` and
+`/api/admin/*` are sent `noindex` and `no-store`.
+
+**Enquiries are archived, not diverted.** `api/enquiry.js` still forwards to
+WhatsApp exactly as before; storing a copy is additional and best-effort, so a
+store that is missing or briefly down can never cost a lead.
+
 ## The contact form
 
 Name, contact number, email, business and requirement — all required except the
