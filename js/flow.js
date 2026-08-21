@@ -86,6 +86,10 @@
     { box: '#vend-list',      item: '.vend__card' },
     { box: '.cap',            item: '.cap__col' },
     { box: '#index-list',     item: 'li', step: .04 },
+    /* the review cards are laid out in CSS columns, where a transform on a
+       card would drag it out of its column box — so they cascade in but sit
+       out the velocity drag, as the product row does */
+    { box: '#revs',           item: '.rev', step: .05, lock: true },
     { box: '#wall',           item: 'a',  step: .03 },
     { box: '.contact__aside', item: '.cblock' },
     { box: '.foot__nav',      item: 'div' }
@@ -301,7 +305,7 @@
       clearTimeout(mt);
       mt = setTimeout(function () { scan(); relayoutRows(); remeasure(); }, 60);
     });
-    $$('#index-list, #wall, #svc-list, #why-list, #steps, #work-rail, #vend-list, #live-grid').forEach(function (el) {
+    $$('#index-list, #wall, #svc-list, #why-list, #steps, #work-rail, #vend-list, #live-grid, #revs').forEach(function (el) {
       mo.observe(el, { childList: true });
     });
   }

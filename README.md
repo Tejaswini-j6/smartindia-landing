@@ -127,6 +127,17 @@ on a property). The card still reads as the bare domain.
 Category order lives in one place — `SI.FILTER_ORDER` — and both the portfolio
 filter and the full index read it, so the tabs can never drift apart.
 
+`SI.REVIEWS` is the eleven reviews on the Google Business Profile for
+smartindia.ai (`maps.google.com/?cid=12641309898071886347`), transcribed on
+21 August 2026. **Names and wording are reproduced exactly as posted**,
+spelling and all — they are real people's public words, so nothing there gets
+tidied, shortened or re-titled, and the two purely typographic exceptions are
+listed in a comment beside the data. A long review is clamped by the layout,
+never cut in JS. Cards carry no date: Google shows these as *"2 months ago"*,
+which would rot on a static page, and converting that to a month would be our
+approximation rather than Google's statement. To refresh, re-transcribe from
+the profile.
+
 **The one block of invented content is `SI.VENDORS`**, which is placeholder data
 waiting to be replaced. Everything else comes from the supplied company
 information or from the live sites themselves.

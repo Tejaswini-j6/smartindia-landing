@@ -348,6 +348,51 @@ window.SI = (function () {
       d: 'example.com' }
   ];
 
+  /* ────────────────────────────────────────────────────────────────────────
+     GOOGLE REVIEWS
+     ────────────────────────────────────────────────────────────────────────
+     Transcribed from the Google Business Profile for smartindia.ai
+     (maps.google.com/?cid=12641309898071886347), captured 21 Aug 2026.
+
+     Names and wording are exactly as posted, spelling included. These are
+     real people's public words: do not tidy the grammar, shorten a quote or
+     re-title anyone. If a review is too long for the card it is clamped
+     visually, never edited. To refresh, re-transcribe from the profile.
+
+     Every review on the profile at capture time was five stars, so `s` is
+     carried per entry rather than assumed — a four-star review must still
+     render honestly if one is added.
+       n  name (verbatim)   s  stars   q  quote (verbatim)
+
+     Two quotes carry a formatting change and no wording change, recorded here
+     so nobody mistakes them for exact transcription later:
+       Accessorieszone  a line break after "Highly Recommended!" is a space
+       Kartik Lokapur   a stray unmatched " at the very end is dropped */
+  const REVIEWS = [
+    { n: 'Syed Adnan Ahmed', s: 5,
+      q: 'Excellent experience working with this team! They created a professional, modern, and user-friendly website that perfectly matched my requirements. Communication was smooth throughout the project, they delivered everything on time, and their pricing was fair and transparent. They were always responsive to feedback and made revisions quickly. I highly recommend them to anyone looking for quality website development at a reasonable price.' },
+    { n: 'DRAVIN DEVGAN', s: 5,
+      q: 'Outstanding service! Smart India AI built our NGO website exactly as we envisioned. The design is modern, mobile-friendly, fast, and easy to use. They understood our requirements, added all the necessary features for donations and trust-building, and delivered high-quality work with excellent support throughout the process. We are very satisfied with the final website and highly recommend Smart India AI to anyone looking for a professional website. Thank you for your excellent service!' },
+    { n: 'Kartik Lokapur', s: 5,
+      q: 'Working with Smartindia.ai to build our website for Basava Ayurvedaa was a fantastic experience. They were professional, responsive, and understood the exact vision we had for our brand. Setting up essential features like payment gateways and integrations was handled smoothly and efficiently. Highly recommend their services to anyone looking to build a reliable and professional website!' },
+    { n: 'Tanmoy Pradhan', s: 5,
+      q: 'A great service. I strongly recommend them. Very helpful and very supportive team they have. They will guide completely to build your business online. I will give them 10/10. I am fully satisfied of their service and support.' },
+    { n: 'ashok prajapati', s: 5,
+      q: 'Thank you for your support and hard work throughout the website development process. The communication was professional, and the website was deployed on my Hostinger account as promised. The developer was responsive to my requests and is helping complete the remaining setup and testing. I appreciate the effort and support. Wishing you continued success.' },
+    { n: 'Rohit Garg', s: 5,
+      q: 'Excellent website development service by SmartIndia.ai. Professional team, great design, timely delivery, and smooth communication. Highly recommended!' },
+    { n: 'Accessorieszone', s: 5,
+      q: 'Highly Recommended! Amazing website development service. They delivered exactly what we needed, on time, and with great professionalism.' },
+    { n: 'naseem banoo', s: 5,
+      q: 'I appreciate a wonderful Job done by Team.I am fully Satisfied.Very Coperative Telented and Hardworking Team I want to Thank You All' },
+    { n: 'Ashish singh', s: 5,
+      q: 'There are very good service and they fullfill our commitment and also trustable agency and I am fully satisfied our work' },
+    { n: 'Yash Sadariya 0000', s: 5,
+      q: 'Best work from team side thank you team' },
+    { n: 'The Solutionpath', s: 5,
+      q: 'Excellent work and helpful service' }
+  ];
+
   /* Colour pairs cycled through the rail cards — brand hues only, mixed as
      pale washes so the dark monogram sitting on top stays the loudest thing
      on the card. */
@@ -383,6 +428,7 @@ window.SI = (function () {
     PLATFORMS: PLATFORMS,
     FEATURED: FEATURED,
     VENDORS: VENDORS,
+    REVIEWS: REVIEWS,
     CARD_TINTS: CARD_TINTS,
     counts: {
       total: PLATFORMS.length,

@@ -10,6 +10,13 @@
   const $ = function (sel, ctx) { return (ctx || document).querySelector(sel); };
   const $$ = function (sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); };
   const clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
+  /* Everything else on the page is copy we wrote; the reviews are text other
+     people typed, so it is escaped before it is put into innerHTML. */
+  const esc = function (s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  };
 
   /* ── pointer plumbing ────────────────────────────────────────────────
      A gaming mouse delivers pointermove at 500–1000Hz. Calling
@@ -407,6 +414,28 @@
       });
     }
     paint();
+  })();
+
+  /* — google reviews —
+     Quotes are other people's words, so they go through esc() and are never
+     trimmed here: a long review is clamped in CSS, which the reader can undo,
+     rather than cut in JS, which they cannot. */
+  (function reviews() {
+    const host = $('#revs');
+    if (!host || !D || !D.REVIEWS) return;
+    host.innerHTML = D.REVIEWS.map(function (r) {
+      const full = Math.max(0, Math.min(5, Math.round(r.s || 0)));
+      let stars = '';
+      for (let i = 0; i < 5; i++) stars += '<i' + (i < full ? '' : ' class="off"') + '></i>';
+      return '<figure class="rev reveal-up">' +
+        '<div class="rev__stars" role="img" aria-label="' + full + ' out of 5">' + stars + '</div>' +
+        '<blockquote class="rev__q">' + esc(r.q) + '</blockquote>' +
+        '<figcaption class="rev__by">' +
+          '<span class="rev__ini" aria-hidden="true">' + esc(D.monogram(r.n)) + '</span>' +
+          '<span class="rev__name">' + esc(r.n) + '</span>' +
+        '</figcaption>' +
+      '</figure>';
+    }).join('');
   })();
 
   /* — client wall — */

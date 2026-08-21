@@ -1662,6 +1662,60 @@ a.vend__card:hover .vend__dom svg{ transform:translate(2px,-2px); }
 .rating p{ margin:0; font-size:13px; color:var(--muted); }
 .rating p b{ color:var(--text); }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   GOOGLE REVIEWS
+   ──────────────────────────────────────────────────────────────────────────
+   These run from six words to ninety, so a row grid would either crop the
+   long ones or leave craters under the short ones. Columns let each card take
+   exactly the height its own text needs; `break-inside` keeps a card whole.
+   ────────────────────────────────────────────────────────────────────────── */
+.revs{
+  column-count:3; column-gap:clamp(14px,1.6vw,22px);
+  margin-bottom:clamp(22px,2.6vw,32px);
+}
+.rev{
+  break-inside:avoid; -webkit-column-break-inside:avoid;
+  display:block; margin:0 0 clamp(14px,1.6vw,22px);
+  padding:clamp(20px,2.1vw,26px);
+  border:1px solid var(--line); border-radius:var(--r-glass);
+  background:var(--glass-sheen), var(--glass-film-2);
+  -webkit-backdrop-filter:var(--glass-lens-sm);
+  backdrop-filter:var(--glass-lens-sm);
+  box-shadow:var(--glass-edge), var(--glass-lift);
+  transition:box-shadow .6s var(--ease), border-color .5s ease;
+}
+.rev:hover{
+  border-color:rgba(138,90,18,.34);
+  box-shadow:var(--glass-edge-hi), var(--glass-lift);
+}
+.rev__stars{ display:flex; gap:4px; margin-bottom:14px; }
+.rev__stars i{
+  width:13px; height:13px; background:var(--gold);
+  clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+}
+.rev__stars i.off{ background:rgba(138,90,18,.22); }
+.rev__q{
+  margin:0 0 18px; font-size:14.5px; line-height:1.72; color:var(--text);
+}
+.rev__by{ display:flex; align-items:center; gap:11px; }
+.rev__ini{
+  flex:none; display:grid; place-items:center;
+  width:34px; height:34px; border-radius:50%;
+  font-family:var(--serif); font-size:13px; letter-spacing:.02em;
+  color:var(--gold-hi);
+  background:linear-gradient(150deg,rgba(220,168,71,.34),rgba(220,168,71,.10));
+  box-shadow:inset 0 0 0 1px rgba(138,90,18,.18);
+}
+.rev__name{ font-size:14px; font-weight:600; color:var(--text); }
+.revs__note{
+  margin:0 0 clamp(34px,4vw,52px);
+  font-size:13px; color:var(--muted);
+}
+.revs__note a{ color:var(--gold-hi); text-decoration:underline; text-underline-offset:2px; }
+
+@media (max-width:1080px){ .revs{ column-count:2; } }
+@media (max-width:640px){ .revs{ column-count:1; } }
+
 .wall{
   display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
   gap:1px; background:var(--line-soft);
