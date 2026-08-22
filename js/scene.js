@@ -13,18 +13,40 @@
 
   const PROFILE = window.SI_PROFILE || { low: false, reduced: false, coarse: false };
 
-  /* Paper palette. On black these were emissive — light added to a dark
-     field. On white nothing can be drawn by adding light, so every colour
-     here is an ink: the wheel is bronze, the graph is navy, and the accents
-     are the tricolour at the weight it holds against paper. Composite is
-     'source-over' throughout for the same reason (see COMP below). */
-  const GOLD_HI = [176, 124, 32];   /* the wheel's lit edge */
+  /* Two palettes for the same roles. On the dark ground these are emissive —
+     light added to a dark field. On paper nothing can be drawn by adding
+     light, so the same roles become inks at the weight they hold against the
+     warm page. Composite is 'source-over' throughout for the same reason
+     (see COMP below).
+
+     The wheel is the Ashoka Chakra, so it is indigo in both themes — the
+     mark's own navy, taken to ink weight on paper and lit on the dark
+     ground. The gold stays where the gold belongs: the orbits, the graph
+     and the dust around it. */
+  const WHEEL_HI = [38, 50, 127];   /* the wheel's lit edge */
+  const WHEEL = [63, 82, 181];      /* inner rim, spokes */
+  const GOLD_HI = [176, 124, 32];
   const GOLD = [150, 104, 28];
   const GOLD_MID = [198, 156, 92];  /* the far orbits, where ink thins out */
   const SAFFRON = [230, 122, 24];
   const GREEN = [19, 136, 8];
   const NAVY = [43, 74, 160];
   const NAVY_SOFT = [96, 122, 186];
+
+  /* [array, light, dark] — the arrays above are mutated in place and their
+     cached strings rewritten, so the colour ids the geometry already holds
+     stay valid and a theme flip never rebuilds a scene. */
+  const TINTS = [
+    [WHEEL_HI, [38, 50, 127], [150, 172, 246]],
+    [WHEEL, [63, 82, 181], [110, 138, 216]],
+    [GOLD_HI, [176, 124, 32], [220, 192, 138]],
+    [GOLD, [150, 104, 28], [194, 164, 104]],
+    [GOLD_MID, [198, 156, 92], [167, 140, 80]],
+    [SAFFRON, [230, 122, 24], [238, 148, 69]],
+    [GREEN, [19, 136, 8], [110, 140, 85]],
+    [NAVY, [43, 74, 160], [110, 138, 216]],
+    [NAVY_SOFT, [96, 122, 186], [140, 163, 226]]
+  ];
 
   /* Every scene drew under 'lighter', which is additive and therefore
      order-independent — that is what let draw.js regroup primitives into
@@ -40,7 +62,20 @@
   const addFill = DRAW.fill;
   const addLine = DRAW.line;
   const flush = DRAW.flush;
+  const recolor = DRAW.recolor;
   const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+
+  /* Load the palette for whichever theme the head script stamped, before any
+     scene registers a colour. */
+  function applyTheme() {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    for (let i = 0; i < TINTS.length; i++) {
+      const t = TINTS[i], v = dark ? t[2] : t[1];
+      t[0][0] = v[0]; t[0][1] = v[1]; t[0][2] = v[2];
+      recolor(t[0]);
+    }
+  }
+  applyTheme();
 
   /* ══════════════════════════════════════════════════════════════════════
      Quality governor
@@ -180,47 +215,50 @@
       GRP = 0;
       const qs = qScale();
 
-      /* — chakra rim (two concentric circles, as in the mark) — */
+      /* — chakra rim (two concentric circles, as in the mark) —
+         The wheel is indigo, the same navy the chakra carries in the
+         wordmark; the gold around it belongs to the skyline, not the
+         wheel. — */
       const RIM = PROFILE.low ? 60 : 108;
       let firstOuter = -1, prevOuter = -1;
       for (let i = 0; i < RIM; i++) {
         const a = (i / RIM) * Math.PI * 2;
-        const id = P(Math.cos(a) * R, Math.sin(a) * R, 0, 1.5, GOLD_HI, .95, 1);
-        if (prevOuter >= 0) L(prevOuter, id, GOLD_HI, 1.7, .9);
+        const id = P(Math.cos(a) * R, Math.sin(a) * R, 0, 1.5, WHEEL_HI, .95, 1);
+        if (prevOuter >= 0) L(prevOuter, id, WHEEL_HI, 1.7, .9);
         else firstOuter = id;
         prevOuter = id;
       }
-      L(prevOuter, firstOuter, GOLD_HI, 1.7, .9);
+      L(prevOuter, firstOuter, WHEEL_HI, 1.7, .9);
 
       const RIM2 = PROFILE.low ? 40 : 72;
       let firstIn = -1, prevIn = -1;
       for (let i = 0; i < RIM2; i++) {
         const a = (i / RIM2) * Math.PI * 2;
-        const id = P(Math.cos(a) * R * .93, Math.sin(a) * R * .93, 0, 0, GOLD, .0, 0);
-        if (prevIn >= 0) L(prevIn, id, GOLD, .9, .55);
+        const id = P(Math.cos(a) * R * .93, Math.sin(a) * R * .93, 0, 0, WHEEL, .0, 0);
+        if (prevIn >= 0) L(prevIn, id, WHEEL, .9, .55);
         else firstIn = id;
         prevIn = id;
       }
-      L(prevIn, firstIn, GOLD, .9, .55);
+      L(prevIn, firstIn, WHEEL, .9, .55);
 
       /* — 24 spokes, exactly as the wheel is drawn — */
       for (let i = 0; i < 24; i++) {
         const a = (i / 24) * Math.PI * 2;
         const ca = Math.cos(a), sa = Math.sin(a);
-        const i0 = P(ca * R * .17, sa * R * .17, 0, 0, GOLD, 0, 0);
-        const i1 = P(ca * R * .90, sa * R * .90, 0, 1.9, GOLD_HI, .85, 1);
-        L(i0, i1, GOLD, 1.15, .72);
+        const i0 = P(ca * R * .17, sa * R * .17, 0, 0, WHEEL, 0, 0);
+        const i1 = P(ca * R * .90, sa * R * .90, 0, 1.9, WHEEL_HI, .85, 1);
+        L(i0, i1, WHEEL, 1.15, .72);
       }
 
       /* — hub — */
       let fh = -1, ph = -1;
       for (let i = 0; i < 20; i++) {
         const a = (i / 20) * Math.PI * 2;
-        const id = P(Math.cos(a) * R * .155, Math.sin(a) * R * .155, 0, 0, GOLD_HI, 0, 0);
-        if (ph >= 0) L(ph, id, GOLD_HI, 2.2, .95); else fh = id;
+        const id = P(Math.cos(a) * R * .155, Math.sin(a) * R * .155, 0, 0, WHEEL_HI, 0, 0);
+        if (ph >= 0) L(ph, id, WHEEL_HI, 2.2, .95); else fh = id;
         ph = id;
       }
-      L(ph, fh, GOLD_HI, 2.2, .95);
+      L(ph, fh, WHEEL_HI, 2.2, .95);
 
       GRP = 1;
 
@@ -545,6 +583,21 @@
     document.addEventListener('DOMContentLoaded', boot);
   } else {
     boot();
+  }
+
+  /* The theme can flip mid-visit, and the scenes are ink on a canvas rather
+     than CSS, so nothing repaints them on its own. Re-tint in place, then
+     push one frame through every job that is currently parked — a scene that
+     is off screen, or held still by reduced-motion, would otherwise keep the
+     other theme's palette on the canvas until something else woke it. */
+  if (window.MutationObserver) {
+    new MutationObserver(function () {
+      applyTheme();
+      for (let i = 0; i < jobs.length; i++) {
+        if (!jobs[i].active) jobs[i].frame(performance.now() / 1000, 0);
+      }
+      wake();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   }
 
   /* a backgrounded tab should cost nothing, and should not come back

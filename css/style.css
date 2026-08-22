@@ -115,6 +115,23 @@
     linear-gradient(180deg,rgba(var(--c-lift),.88) 0%,rgba(var(--c-lift),.62) 46%,rgba(var(--c-lift),.22) 72%);
   --sheet: rgba(var(--c-lift),.88);
 
+  /* — the logo plate —
+     The mark is drawn for a dark ground (white wordmark, bright gold
+     skyline), so wherever it lands it is handed that ground back rather
+     than being recoloured — one master, no second copy to keep in sync.
+     The plate itself is now mixed from the palette's own olive-black
+     instead of the old blue-black it arrived with, so on paper it reads
+     as the page's own deepest shade and on the dark ground it is the
+     footer one step up rather than a card pasted onto it. */
+  --plate:      linear-gradient(158deg,#20241A 0%,#0C0F07 100%);
+  --plate-edge: rgba(var(--c-gold-fill),.16);
+  --plate-lift: 0 16px 38px -22px rgba(58,42,16,.42);
+  --plate-halo: 0 0 0 6px rgba(var(--c-gold-fill),.05);
+
+  /* — footer ground — inverts rather than dims, like the washes above */
+  --foot-bg:   linear-gradient(180deg,var(--ink-2) 0%,#EDE8DB 100%);
+  --foot-dim:  var(--faint);
+
   --glass-lens:    blur(22px) saturate(1.35);
   --glass-lens-sm: blur(12px) saturate(1.2);
 
@@ -201,6 +218,25 @@
     linear-gradient(180deg,rgba(0,0,0,.80) 0%,rgba(0,0,0,.60) 46%,rgba(0,0,0,.26) 72%);
   --sheet: rgba(14,16,11,.93);
   --glass-well: rgba(0,0,0,.30);
+
+  /* On the dark ground the plate has nothing to separate itself from, so it
+     stops trying: it sits a single step above the footer, carries a warmer
+     gold hairline to say it is still the brand plate, and drops the paper
+     theme's cast shadow for a soft one that only deepens the corner. The
+     mark keeps the dark ground it was drawn for either way. */
+  --plate:      linear-gradient(158deg,#242A1B 0%,#141810 100%);
+  --plate-edge: rgba(var(--c-gold-fill),.34);
+  --plate-lift: 0 18px 40px -26px rgba(0,0,0,.8);
+  --plate-halo: 0 0 0 6px rgba(var(--c-gold-fill),.05);
+
+  /* the footer lightens downward on paper; on the dark ground it has to do
+     the same in the other direction rather than run off to a paper white */
+  --foot-bg:   linear-gradient(180deg,var(--ink-2) 0%,#20261A 100%);
+  /* --faint is tuned for real content on the page ground. The footer's
+     tagline and colophon sit on the darkest band in the site at 12–13px
+     with wide tracking, and at that weight they were dropping out — they
+     are carried at --muted here so they stay legible. */
+  --foot-dim:  var(--muted);
 
   color-scheme: dark;
 }
@@ -560,22 +596,23 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
 /* The mark is drawn for a dark ground — white wordmark, bright gold skyline —
    so where it lands on the paper page it is handed that ground back as a
    plate rather than being recoloured. Recolouring would mean keeping a second
-   version of the logo in sync; the plate keeps one master. */
+   version of the logo in sync; the plate keeps one master. The plate itself
+   is a theme token (see --plate), so nav and footer never drift apart. */
 .nav__logo{
   display:block; width:clamp(172px,19vw,222px);
   padding:9px 15px; border-radius:13px;
-  background:linear-gradient(158deg,#151A22 0%,#05070B 100%);
+  background:var(--plate);
   box-shadow:
     inset 0 1px 0 rgba(var(--c-lift),calc(.10 * var(--lift-k))),
-    inset 0 0 0 1px rgba(var(--c-gold-fill),.12),
-    0 8px 20px -12px rgba(10,14,20,.6);
-  transition:box-shadow .5s var(--ease);
+    inset 0 0 0 1px var(--plate-edge),
+    0 8px 20px -12px rgba(20,24,14,.55);
+  transition:box-shadow .5s var(--ease), background .5s ease;
 }
 .nav__brand:hover .nav__logo{
   box-shadow:
     inset 0 1px 0 rgba(var(--c-lift),calc(.14 * var(--lift-k))),
-    inset 0 0 0 1px rgba(var(--c-gold-fill),.28),
-    0 10px 24px -12px rgba(10,14,20,.66);
+    inset 0 0 0 1px rgba(var(--c-gold-fill),.34),
+    0 10px 24px -12px rgba(20,24,14,.62);
 }
 .nav__logo .si-logo{ overflow:visible; }
 
@@ -2036,7 +2073,7 @@ a.vend__card:hover .vend__dom svg{ transform:translate(2px,-2px); }
    ══════════════════════════════════════════════════════════════════════════ */
 .foot{
   border-top:1px solid var(--line);
-  background:linear-gradient(180deg,var(--ink-2),#EDE8DB);
+  background:var(--foot-bg);
   padding:clamp(48px,7vw,84px) 0 26px;
 }
 .foot__inner{
@@ -2044,17 +2081,23 @@ a.vend__card:hover .vend__dom svg{ transform:translate(2px,-2px); }
   align-items:start;
 }
 /* same plate as the nav, sized for the full lockup — skyline, wordmark and
-   tagline all read on the ground they were drawn for */
+   tagline all read on the ground they were drawn for. --plate-halo is what
+   keeps it from reading as a card dropped onto the footer: a wide, very
+   faint gold bleed that steps the plate's edge out into the ground instead
+   of ending it, so in both themes the lockup settles into the footer
+   rather than sitting on top of it. */
 .foot__logo{
   display:block; width:clamp(232px,29vw,322px); margin-bottom:18px;
-  padding:16px 20px 12px; border-radius:16px;
-  background:linear-gradient(158deg,#151A22 0%,#05070B 100%);
+  padding:16px 20px 12px; border-radius:18px;
+  background:var(--plate);
   box-shadow:
     inset 0 1px 0 rgba(var(--c-lift),calc(.09 * var(--lift-k))),
-    inset 0 0 0 1px rgba(var(--c-gold-fill),.10),
-    0 14px 34px -20px rgba(10,14,20,.55);
+    inset 0 0 0 1px var(--plate-edge),
+    var(--plate-halo),
+    var(--plate-lift);
+  transition:background .5s ease, box-shadow .5s ease;
 }
-.foot__brand p{ margin:0; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); }
+.foot__brand p{ margin:0; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--foot-dim); }
 .foot__nav{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
 .foot__nav h5{
   margin:0 0 14px; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold);
@@ -2068,7 +2111,7 @@ a.vend__card:hover .vend__dom svg{ transform:translate(2px,-2px); }
   margin-top:clamp(40px,6vw,72px); padding-top:22px;
   border-top:1px solid var(--line-soft);
   display:flex; flex-wrap:wrap; gap:10px 24px; justify-content:space-between;
-  font-size:12.5px; color:var(--faint);
+  font-size:12.5px; color:var(--foot-dim);
 }
 .foot__base p{ margin:0; }
 

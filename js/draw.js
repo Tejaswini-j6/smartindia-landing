@@ -54,6 +54,22 @@
     return id;
   }
 
+  /**
+   * Rewrite the strings of a colour already registered with cid(), in place.
+   * The scenes hold colour *ids*, not colours, so re-tinting this way lets a
+   * theme flip cost sixty-five string builds instead of tearing down and
+   * rebuilding every point and line in the geometry. Pass the same array
+   * object that was handed to cid(), with its three channels mutated.
+   */
+  function recolor(c) {
+    const id = CID.get(c);
+    if (id === undefined) return;                /* not registered yet — the
+                                                    mutated array is enough */
+    const head = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',';
+    const row = CSTR[id];
+    for (let i = 0; i <= AQ; i++) row[i] = head + (i / AQ).toFixed(3) + ')';
+  }
+
   const FB = new Array(MAXC * (AQ + 1));             /* fill buckets  */
   const SB = new Array(MAXC * (AQ + 1) * WSLOTS);    /* stroke buckets */
   const FK = [], SK = [];                            /* keys touched this frame */
@@ -136,7 +152,7 @@
   }
 
   window.SI_DRAW = {
-    cid: cid, fill: fill, line: line, flush: flush, TAU: TAU,
+    cid: cid, recolor: recolor, fill: fill, line: line, flush: flush, TAU: TAU,
     rgba: function (c, a) {
       return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' +
         (a < 0 ? 0 : a > 1 ? 1 : a).toFixed(3) + ')';
