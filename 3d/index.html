@@ -619,37 +619,82 @@ hero.userData.speedZ = 0.02;
 tunnelGroup.add(hero);
 chakras.push(hero);
 
-/* ---------- tricolor ribbons ---------- */
+/* ---------- tricolor dusty smoke ---------- */
 const ribbonVert = `
   varying vec2 vUv;
+  varying vec3 vWorldPos;
   void main() {
     vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vec4 world = modelMatrix * vec4(position, 1.0);
+    vWorldPos = world.xyz;
+    gl_Position = projectionMatrix * viewMatrix * world;
   }
 `;
 const ribbonFrag = `
   uniform vec3 uColor;
   uniform float uTime;
+  uniform float uEnergy;
   varying vec2 vUv;
+  varying vec3 vWorldPos;
+
+  /* cheap value-noise for dusty soft clumps */
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+  }
+  float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+  }
+  float fbm(vec2 p) {
+    float v = 0.0;
+    float a = 0.5;
+    for (int i = 0; i < 4; i++) {
+      v += a * noise(p);
+      p *= 2.03;
+      a *= 0.5;
+    }
+    return v;
+  }
+
   void main() {
     float edge = abs(vUv.y - 0.5) * 2.0;
-    float alpha = smoothstep(1.0, 0.0, edge);
-    alpha *= 0.55 + 0.45 * sin(vUv.x * 40.0 + uTime * 1.5);
-    alpha *= 0.85;
-    gl_FragColor = vec4(uColor, alpha);
+    float soft = 1.0 - smoothstep(0.15, 1.0, edge);
+
+    vec2 np = vec2(vUv.x * 3.2 + uTime * 0.08, vUv.y * 1.6 + uTime * 0.045);
+    float n = fbm(np + vWorldPos.xy * 0.04);
+    float n2 = fbm(np * 1.7 - uTime * 0.06);
+    float dust = smoothstep(0.28, 0.78, n * 0.65 + n2 * 0.45);
+
+    float wisps = smoothstep(0.35, 0.85, noise(np * 2.4 + uTime * 0.12));
+    float alpha = soft * dust * (0.22 + 0.28 * wisps);
+    alpha *= 0.55 + 0.25 * uEnergy;
+    alpha *= 0.72;
+
+    vec3 col = mix(uColor * 0.55, uColor, 0.55 + 0.45 * n);
+    gl_FragColor = vec4(col, alpha);
   }
 `;
 
 function createRibbon(color, phase, yBias, count) {
   const points = [];
-  for (let i = 0; i < count; i++) points.push(new THREE.Vector3(0, 0, 20 - i * 6));
+  for (let i = 0; i < count; i++) points.push(new THREE.Vector3(0, 0, 20 - i * 5.2));
   const mat = new THREE.ShaderMaterial({
-    uniforms: { uColor: { value: new THREE.Color(color) }, uTime: { value: 0 } },
+    uniforms: {
+      uColor: { value: new THREE.Color(color) },
+      uTime: { value: 0 },
+      uEnergy: { value: 0 }
+    },
     vertexShader: ribbonVert,
     fragmentShader: ribbonFrag,
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    blending: THREE.NormalBlending,
     side: THREE.DoubleSide
   });
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);
@@ -657,32 +702,46 @@ function createRibbon(color, phase, yBias, count) {
   return { points, mesh, phase, yBias };
 }
 
-const RIBBON_POINTS = 28;
+const RIBBON_POINTS = 24;
 const ribbons = [
-  createRibbon(SAFFRON, 0.0, 3.2, RIBBON_POINTS),
-  createRibbon(WHITE_C, 2.1, 0.0, RIBBON_POINTS),
-  createRibbon(GREEN_C, 4.2, -3.2, RIBBON_POINTS)
+  createRibbon(SAFFRON, 0.0, 2.4, RIBBON_POINTS),
+  createRibbon(WHITE_C, 2.1, 0.15, RIBBON_POINTS),
+  createRibbon(GREEN_C, 4.2, -2.4, RIBBON_POINTS)
 ];
 
 function updateRibbon(r, time, energy) {
   for (let i = 0; i < r.points.length; i++) {
-    const z = 20 - i * 6;
-    const x = Math.sin(z * 0.12 + time * (0.6 + energy) + r.phase) * (6.5 + energy * 2.5);
-    const y = r.yBias + Math.cos(z * 0.08 + time * (0.5 + energy) + r.phase) * (2.4 + energy * 1.2);
+    const t = i / Math.max(r.points.length - 1, 1);
+    const z = 22 - i * 5.2;
+    /* loose billow — not a tight tunnel helix */
+    const swirl = time * (0.18 + energy * 0.12) + r.phase;
+    const drift = 2.8 + energy * 1.4 + Math.sin(time * 0.22 + r.phase + t * 3.0) * 1.6;
+    const x = Math.sin(z * 0.055 + swirl) * drift
+            + Math.sin(z * 0.13 + time * 0.35 + r.phase) * (1.4 + energy);
+    const y = r.yBias
+            + Math.cos(z * 0.04 + swirl * 0.8) * (1.8 + energy * 0.8)
+            + Math.sin(time * 0.28 + r.phase + t * 2.4) * 1.1;
     r.points[i].set(x, y, z);
   }
   const curve = new THREE.CatmullRomCurve3(r.points);
-  const geo = new THREE.TubeGeometry(curve, 120, 0.45 + energy * 0.12, 8, false);
+  const radius = 1.35 + energy * 0.55;
+  const geo = new THREE.TubeGeometry(curve, 96, radius, 12, false);
 
   const posAttr = geo.attributes.position;
   const normAttr = geo.attributes.normal;
   const uvAttr = geo.attributes.uv;
   for (let vi = 0; vi < posAttr.count; vi++) {
     const u = uvAttr.getX(vi), v = uvAttr.getY(vi);
-    const fold = Math.sin(v * Math.PI * 3 + u * 16 + time * 1.1 + r.phase) * 0.055;
-    const flutter = Math.sin(u * 7 - time * 1.5 + r.phase * 2) * 0.045 * (0.5 + energy * 0.5);
-    const d = fold + flutter;
-    posAttr.setXYZ(vi, posAttr.getX(vi) + normAttr.getX(vi) * d, posAttr.getY(vi) + normAttr.getY(vi) * d, posAttr.getZ(vi) + normAttr.getZ(vi) * d);
+    /* soft irregular surface — dusty clumps, not silk folds */
+    const puff = Math.sin(v * Math.PI * 2.0 + u * 9.0 + time * 0.55 + r.phase) * 0.22;
+    const grain = Math.sin(u * 21.0 - time * 0.7 + r.phase * 1.7) * 0.12 * (0.4 + energy * 0.5);
+    const d = puff + grain;
+    posAttr.setXYZ(
+      vi,
+      posAttr.getX(vi) + normAttr.getX(vi) * d,
+      posAttr.getY(vi) + normAttr.getY(vi) * d,
+      posAttr.getZ(vi) + normAttr.getZ(vi) * d
+    );
   }
   posAttr.needsUpdate = true;
   geo.computeVertexNormals();
@@ -690,6 +749,7 @@ function updateRibbon(r, time, energy) {
   r.mesh.geometry.dispose();
   r.mesh.geometry = geo;
   r.mesh.material.uniforms.uTime.value = time;
+  r.mesh.material.uniforms.uEnergy.value = energy;
 }
 
 /* ---------- particle atmosphere ---------- */
