@@ -1,11 +1,12 @@
 /* ══════════════════════════════════════════════════════════════════════════
    SmartIndia.ai — scroll video
    ──────────────────────────────────────────────────────────────────────────
-   A cinematic layer on the existing 3D page. The Ashoka Chakra stays the
-   mark. Scroll plays the shot: the wheel moves through depth and three
-   silk bands — saffron, white, green — float around it like a film.
+   The Google Flow film is the shot. Scroll is the playhead: down advances
+   the tape, up rewinds it. The Ashoka Chakra stays on top of that film,
+   and three silk bands — saffron, white, green — drift through the frame.
 
-   Bidirectional. Velocity writes intensity. Reduced motion holds a still.
+   Existing page markup is not redesigned. This only drives the videos
+   already on the page and draws on a pointer-events-none canvas.
    ══════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -13,26 +14,53 @@
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LOW = (navigator.hardwareConcurrency || 4) <= 4 ||
               (navigator.deviceMemory || 4) <= 3 || window.innerWidth < 560;
+  const VID = 'e744a868-ed98-4fa7-9510-7ccbe122bc0e';
 
   const SAFFRON = [255, 153, 51];
   const WHITE = [245, 245, 240];
   const GREEN = [19, 136, 8];
-  const NAVY = [27, 58, 143];
   const NAVY_LIT = [120, 150, 230];
+  const NAVY = [27, 58, 143];
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
   function lerp(a, b, t) { return a + (b - a) * t; }
   function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a.toFixed(3) + ')'; }
 
   function boot() {
+    /* Let the Flow film show through the existing dark wash. */
+    const wash = document.createElement('style');
+    wash.setAttribute('data-si-journey', '1');
+    wash.textContent =
+      'div[style*="rgba(3,3,3,0.82)"]{background:rgba(3,3,3,0.38)!important;}';
+    document.head.appendChild(wash);
+
+    const videos = [];
+    function collect() {
+      videos.length = 0;
+      const all = document.querySelectorAll('video');
+      for (let i = 0; i < all.length; i++) {
+        const v = all[i];
+        const src = v.currentSrc || v.src || '';
+        if (src.indexOf(VID) === -1) continue;
+        v.loop = false;
+        v.muted = true;
+        v.playsInline = true;
+        v.autoplay = false;
+        try { v.pause(); } catch (e) {}
+        videos.push(v);
+      }
+    }
+    collect();
+    setTimeout(collect, 400);
+    setTimeout(collect, 1200);
+
     const cvs = document.createElement('canvas');
     cvs.id = 'si-journey';
     cvs.setAttribute('aria-hidden', 'true');
     cvs.style.cssText =
-      'position:fixed;inset:0;width:100%;height:100%;z-index:24;' +
+      'position:fixed;inset:0;width:100%;height:100%;z-index:22;' +
       'pointer-events:none;mix-blend-mode:screen;';
     document.body.appendChild(cvs);
-
     const ctx = cvs.getContext('2d', { alpha: true });
     if (!ctx) return;
 
@@ -48,7 +76,7 @@
     fit();
     window.addEventListener('resize', fit, { passive: true });
 
-    let sy = 0, lastSy = 0, vel = 0, tvel = 0, prog = 0;
+    let sy = 0, vel = 0, tvel = 0, prog = 0;
     function read() {
       sy = window.scrollY || 0;
       const max = Math.max(document.documentElement.scrollHeight - H, 1);
@@ -60,7 +88,17 @@
       tvel = clamp((sy - prev) / 22, -2, 2);
     }, { passive: true });
     read();
-    lastSy = sy;
+
+    function scrub() {
+      for (let i = 0; i < videos.length; i++) {
+        const v = videos[i];
+        if (!v.duration || !isFinite(v.duration)) continue;
+        const goal = prog * v.duration * 0.999;
+        if (Math.abs(v.currentTime - goal) > 0.04) {
+          try { v.currentTime = goal; } catch (e) {}
+        }
+      }
+    }
 
     function rot(x, y, z, rx, ry) {
       const cy = Math.cos(ry), syr = Math.sin(ry);
@@ -75,7 +113,6 @@
       return { x: cam.cx + p.x * k, y: cam.cy + p.y * k, k: k };
     }
 
-    /* Ashoka Chakra — 24 spokes, navy. The same wheel. */
     function drawChakra(cam, spin, tilt, scale, alpha) {
       if (alpha < 0.04) return;
       const R = cam.R * scale;
@@ -95,21 +132,20 @@
         ctx.stroke();
       }
 
-      /* navy glow */
       const hub = proj(rot(0, 0, 0, tilt, spin), cam);
       if (hub && !LOW) {
-        const g = ctx.createRadialGradient(hub.x, hub.y, 4, hub.x, hub.y, R * 1.6);
-        g.addColorStop(0, rgba(NAVY_LIT, 0.22 * alpha));
+        const g = ctx.createRadialGradient(hub.x, hub.y, 4, hub.x, hub.y, R * 1.55);
+        g.addColorStop(0, rgba(NAVY_LIT, 0.2 * alpha));
         g.addColorStop(1, rgba(NAVY, 0));
         ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.arc(hub.x, hub.y, R * 1.6, 0, Math.PI * 2);
+        ctx.arc(hub.x, hub.y, R * 1.55, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      ring(R, NAVY_LIT, 2.6, 0.95);
-      ring(R * 0.92, NAVY, 1.2, 0.7);
-      ring(R * 0.16, NAVY_LIT, 2.8, 1);
+      ring(R, NAVY_LIT, 2.5, 0.95);
+      ring(R * 0.92, NAVY, 1.15, 0.68);
+      ring(R * 0.16, NAVY_LIT, 2.7, 1);
 
       ctx.beginPath();
       for (let i = 0; i < 24; i++) {
@@ -120,8 +156,8 @@
         if (!a || !b) continue;
         ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
       }
-      ctx.strokeStyle = rgba(NAVY_LIT, 0.82 * alpha);
-      ctx.lineWidth = 1.45;
+      ctx.strokeStyle = rgba(NAVY_LIT, 0.8 * alpha);
+      ctx.lineWidth = 1.4;
       ctx.stroke();
 
       if (hub) {
@@ -132,99 +168,47 @@
       }
     }
 
-    /* Three silk bands — saffron, white, green — floating through the shot. */
     const BANDS = [
-      { c: SAFFRON, y: -1.05, ph: 0.0 },
-      { c: WHITE,   y:  0.00, ph: 1.2 },
-      { c: GREEN,   y:  1.05, ph: 2.4 }
+      { c: SAFFRON, y: -1.02, ph: 0.0 },
+      { c: WHITE,   y:  0.00, ph: 1.15 },
+      { c: GREEN,   y:  1.02, ph: 2.3 }
     ];
-    const SEGS = LOW ? 22 : 36;
+    const SEGS = LOW ? 22 : 34;
 
-    function drawRibbon(cam, band, t, scroll, speed) {
+    function drawRibbon(cam, band, t, scroll) {
       const pts = [];
-      const width = cam.R * 0.22;
+      const width = cam.R * 0.2;
       for (let i = 0; i <= SEGS; i++) {
         const u = i / SEGS;
-        const x = (u - 0.5) * cam.R * 5.4;
-        const wave = Math.sin(u * 4.2 + t * 0.9 + band.ph + scroll * 8) * cam.R * 0.38;
-        const z = Math.cos(u * 3.1 + t * 0.55 + band.ph) * cam.R * 0.7 - scroll * cam.R * 3.2;
-        const y = band.y * cam.R * 0.85 + wave;
-        const p = rot(x, y, z, 0.18 + speed * 0.08, scroll * 1.4 + t * 0.08);
+        const x = (u - 0.5) * cam.R * 5.2;
+        const wave = Math.sin(u * 4 + t * 0.85 + band.ph + scroll * 7) * cam.R * 0.34;
+        const z = Math.cos(u * 3 + t * 0.5 + band.ph) * cam.R * 0.65 - scroll * cam.R * 3;
+        const p = rot(x, band.y * cam.R * 0.82 + wave, z, 0.16, scroll * 1.25 + t * 0.07);
         const q = proj(p, cam);
         if (q) pts.push(q);
       }
       if (pts.length < 3) return;
-
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y - width);
-      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y - width * (0.7 + pts[i].k * 0.15));
-      for (let i = pts.length - 1; i >= 0; i--) ctx.lineTo(pts[i].x, pts[i].y + width * (0.7 + pts[i].k * 0.15));
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y - width);
+      for (let i = pts.length - 1; i >= 0; i--) ctx.lineTo(pts[i].x, pts[i].y + width);
       ctx.closePath();
-      ctx.fillStyle = rgba(band.c, 0.42);
+      ctx.fillStyle = rgba(band.c, 0.28);
       ctx.fill();
-      ctx.strokeStyle = rgba(band.c, 0.7);
-      ctx.lineWidth = 1.1;
+      ctx.strokeStyle = rgba(band.c, 0.55);
+      ctx.lineWidth = 1;
       ctx.stroke();
     }
 
-    const motes = [];
-    (function seed() {
-      const n = LOW ? 40 : 90;
-      for (let i = 0; i < n; i++) {
-        motes.push({
-          x: (Math.random() - 0.5) * 8,
-          y: (Math.random() - 0.5) * 5,
-          z: (Math.random() - 0.5) * 8,
-          r: 0.8 + Math.random() * 2.2,
-          c: i % 3 === 0 ? SAFFRON : (i % 3 === 1 ? WHITE : GREEN),
-          ph: Math.random() * 6.28
-        });
-      }
-    })();
-
-    function drawMotes(cam, t, scroll, burst) {
-      ctx.beginPath();
-      for (let i = 0; i < motes.length; i++) {
-        const m = motes[i];
-        const z = ((m.z + 4 - scroll * 10) % 8) - 4;
-        const p = rot(
-          m.x * cam.R * 0.7,
-          m.y * cam.R * 0.55 + Math.sin(t * 0.6 + m.ph) * cam.R * 0.12,
-          z * cam.R,
-          0.1, scroll * 0.6
-        );
-        const q = proj(p, cam);
-        if (!q) continue;
-        ctx.moveTo(q.x, q.y);
-        ctx.arc(q.x, q.y, m.r * (1 + burst * 0.6), 0, Math.PI * 2);
-      }
-      ctx.fillStyle = rgba(WHITE, 0.22 + burst * 0.12);
-      ctx.fill();
-    }
-
-    function grain() {
-      if (LOW) return;
-      ctx.save();
-      ctx.globalAlpha = 0.045;
-      for (let i = 0; i < 28; i++) {
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(Math.random() * W, Math.random() * H, 1.2, 1.2);
-      }
-      ctx.restore();
-    }
-
-    let mx = 0, my = 0, tmx = 0, tmy = 0, spin = 0, raf = 0, last = 0;
-
+    let mx = 0, my = 0, tmx = 0, tmy = 0, spin = 0, last = 0, raf = 0;
     window.addEventListener('pointermove', function (e) {
       tmx = (e.clientX / W - 0.5) * 2;
       tmy = (e.clientY / H - 0.5) * 2;
     }, { passive: true });
 
     if (REDUCED) {
-      fit();
-      const R = Math.min(W, H) * 0.18;
-      const cam = { cx: W * 0.7, cy: H * 0.45, focal: R * 3.4, dist: R * 4.2, R: R };
-      drawChakra(cam, 0.2, 0.15, 1, 0.8);
+      const R = Math.min(W, H) * 0.16;
+      drawChakra({ cx: W * 0.68, cy: H * 0.46, focal: R * 3.4, dist: R * 4.2, R: R }, 0.2, 0.14, 1, 0.7);
       return;
     }
 
@@ -236,31 +220,25 @@
       mx = lerp(mx, tmx, 0.05);
       my = lerp(my, tmy, 0.05);
       read();
-      spin += vel * 0.7 + dt * 0.12;
+      scrub();
+      spin += vel * 0.65 + dt * 0.1;
 
       const t = now / 1000;
-      const speed = Math.abs(vel);
       const wide = W > 860;
-      const R = Math.max(70, wide ? Math.min(W * 0.2, H * 0.24) : Math.min(W * 0.34, H * 0.2));
+      const R = Math.max(64, wide ? Math.min(W * 0.17, H * 0.2) : Math.min(W * 0.3, H * 0.18));
 
       ctx.clearRect(0, 0, W, H);
-
       const cam = {
-        cx: W * (wide ? 0.62 : 0.5) + mx * 22,
-        cy: H * 0.46 + my * 14 - prog * H * 0.08,
+        cx: W * (wide ? 0.68 : 0.5) + mx * 18,
+        cy: H * 0.47 + my * 12,
         focal: R * 3.5,
-        dist: R * (4.0 - prog * 0.7 + vel * 0.15),
+        dist: R * (4.05 - prog * 0.55),
         R: R
       };
 
-      drawMotes(cam, t, prog, speed);
-      for (let i = 0; i < BANDS.length; i++) drawRibbon(cam, BANDS[i], t, prog, speed);
+      for (let i = 0; i < BANDS.length; i++) drawRibbon(cam, BANDS[i], t, prog);
+      drawChakra(cam, spin * 0.85 + mx * 0.22, 0.2 + my * -0.18 + vel * 0.24, 1 - prog * 0.22, 0.78);
 
-      const scale = 1.05 - prog * 0.28;
-      const tilt = 0.22 + my * -0.2 + vel * 0.28;
-      drawChakra(cam, spin * 0.9 + mx * 0.25, tilt, scale, 0.92);
-
-      grain();
       raf = requestAnimationFrame(loop);
     }
 
@@ -275,8 +253,8 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 80); });
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 120); });
   } else {
-    setTimeout(boot, 80);
+    setTimeout(boot, 120);
   }
 })();
