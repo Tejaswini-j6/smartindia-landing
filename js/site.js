@@ -71,7 +71,6 @@
   if (LOGO) {
     LOGO.mount($('#nav-logo'), { part: 'wordmark' });
     LOGO.mount($('#foot-logo'), {});
-    LOGO.mount($('#hero-skyline'), { part: 'skyline', decorative: true });
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -281,8 +280,12 @@
     grid.innerHTML = items.map(function (p, i) {
       /* `u` lets an entry point at a page deeper than its front door while the
          card still reads as the bare domain */
+      /* data-peek is read by the preview below. It is absent on a site whose
+         server refuses to be framed, and the card is then left as the plain
+         outbound link it has always been. */
       return '<a class="live__card" data-cat="' + p.c + '" style="--i:' + (i % 3) + '"' +
-             ' href="' + (p.u || 'https://' + p.d) + '" target="_blank" rel="noopener">' +
+             ' href="' + (p.u || 'https://' + p.d) + '" target="_blank" rel="noopener"' +
+             (p.frame === false ? '' : ' data-peek="' + p.d + '" data-peek-name="' + esc(p.n) + '"') + '>' +
         '<span class="live__vis" aria-hidden="true">' +
           '<span class="live__chrome"><i></i><i></i><i></i>' +
             '<span class="live__url">' + p.d + '</span></span>' +
@@ -300,7 +303,7 @@
           '<p>' + p.p + '</p>' +
           '<span class="live__foot">' +
             '<span class="live__dom">' + p.d + '</span>' +
-            '<span class="live__cta">Visit website' +
+            '<span class="live__cta">' + (p.frame === false ? 'Visit website' : 'Preview site') +
               '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
             '</span>' +
           '</span>' +
@@ -416,49 +419,40 @@
     paint();
   })();
 
-  /* — theme switch —
-     The head script has already resolved and stamped the theme before first
-     paint; this only wires the control and remembers a deliberate choice.
-     Until someone presses it nothing is stored, so the page keeps following
-     the system setting — including when that setting changes mid-visit. */
+  /* — template switch —
+     The head script has already stamped data-mode before first paint. This
+     only wires the control: left is the flat page, right is the 3D template.
+     Theme no longer lives here. */
   (function themer() {
     const btn = $('#themer');
     const root = document.documentElement;
 
-    function label(t) {
-      btn.setAttribute('aria-label', t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
-      btn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+    function current() {
+      return root.getAttribute('data-mode') === 'normal' ? 'normal' : '3d';
     }
-    function apply(t, animate) {
-      if (animate && !PROFILE.reduced) {
-        root.classList.add('theme-xf');
-        window.setTimeout(function () { root.classList.remove('theme-xf'); }, 460);
+    function label(mode) {
+      if (!btn) return;
+      const three = mode === '3d';
+      btn.setAttribute('aria-label', three ? 'Switch to normal template' : 'Switch to 3D template');
+      btn.setAttribute('aria-pressed', three ? 'true' : 'false');
+      btn.setAttribute('title', three ? '3D template' : 'Normal template');
+    }
+    function apply(mode) {
+      root.setAttribute('data-mode', mode);
+      label(mode);
+      if (mode === 'normal') {
+        $$('.tilt, .magnetic').forEach(function (el) { el.style.transform = ''; });
       }
-      root.setAttribute('data-theme', t);
-      const meta = $('#theme-color');
-      if (meta) meta.setAttribute('content', t === 'dark' ? '#12140E' : '#EFE1D0');
-      if (btn) label(t);
+      window.dispatchEvent(new CustomEvent('si:mode', { detail: mode }));
     }
 
+    label(current());
     if (btn) {
-      label(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
       btn.addEventListener('click', function () {
-        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        try { localStorage.setItem('si-theme', next); } catch (e) {}
-        apply(next, true);
+        const next = current() === '3d' ? 'normal' : '3d';
+        try { localStorage.setItem('si-mode', next); } catch (e) {}
+        apply(next);
       });
-    }
-
-    if (window.matchMedia) {
-      const mq = matchMedia('(prefers-color-scheme: dark)');
-      const follow = function () {
-        let stored = null;
-        try { stored = localStorage.getItem('si-theme'); } catch (e) {}
-        if (stored === 'light' || stored === 'dark') return;   /* a choice outranks the system */
-        apply(mq.matches ? 'dark' : 'light', true);
-      };
-      if (mq.addEventListener) mq.addEventListener('change', follow);
-      else if (mq.addListener) mq.addListener(follow);
     }
   })();
 
@@ -716,7 +710,162 @@
   })();
 
   /* ══════════════════════════════════════════════════════════════════════
-     6.  Micro-interactions
+     6.  Live preview
+
+     A portfolio card is a link and stays one: this hangs off it rather than
+     replacing it, so a middle-click, a ctrl-click, "open in new tab" and a
+     visitor whose JS never arrives all still land on the client's site.
+     Only a plain left click is taken.
+
+     One iframe serves all ten cards. Its src is set on open and put back to
+     about:blank on close, so a client's site is never left running behind
+     the page holding memory, timers and sockets open.
+
+     What cannot be done: a site that answers with `X-Frame-Options` gets a
+     browser error page drawn inside the frame, and same-origin policy means
+     we cannot read that — the `load` event fires exactly as it would for a
+     site that rendered. So the ones known to refuse are flagged in data.js
+     from their real response headers and never open a preview at all, and
+     the timeout below only covers a site that is simply slow.
+     ══════════════════════════════════════════════════════════════════════ */
+  (function peek() {
+    const root = $('#peek');
+    const grid = $('#live-grid');
+    if (!root || !grid) return;
+
+    const win = $('.peek__win', root);
+    const stage = $('.peek__stage', root);
+    const frame = $('#peek-frame');
+    const wait = $('#peek-wait');
+    const stall = $('#peek-stall');
+    const nameEl = $('#peek-name');
+    const urlEl = $('#peek-url');
+    const out = $('#peek-out');
+    const stallOut = $('#peek-stall-out');
+    if (!win || !frame) return;
+
+    /* Long, because these are real sites on shared hosting being cold-loaded,
+       not a local asset. Cutting it short would call a slow site broken. */
+    const PATIENCE = 12000;
+    const FADE = 360;
+
+    let timer = 0;
+    let shutter = 0;
+    let opener = null;
+    let live = false;
+
+    /* — open — */
+    function show(url, domain, name, from) {
+      opener = from || null;
+      live = true;
+
+      nameEl.textContent = name || '';
+      urlEl.textContent = domain || url;
+      out.href = url;
+      stallOut.href = url;
+      size('desk');
+
+      wait.hidden = false;
+      stall.hidden = true;
+      frame.classList.remove('is-in');
+      frame.src = url;
+
+      clearTimeout(shutter);
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        if (!live) return;
+        wait.hidden = true;
+        stall.hidden = false;
+      }, PATIENCE);
+
+      root.hidden = false;
+      document.body.classList.add('is-locked');
+      /* the class goes on a frame later so the transition has a state to move
+         from — and is checked again there, because a close within that one
+         frame would otherwise be undone by this callback landing after it */
+      requestAnimationFrame(function () { if (live) root.classList.add('is-open'); });
+      $('.peek__x', root).focus();
+    }
+
+    /* — close —
+       The src is not cleared until the window has finished animating out;
+       blanking it while it is still on screen flashes white over the fade. */
+    function hide() {
+      if (!live) return;
+      live = false;
+      clearTimeout(timer);
+      root.classList.remove('is-open');
+      document.body.classList.remove('is-locked');
+
+      shutter = setTimeout(function () {
+        if (live) return;
+        root.hidden = true;
+        frame.src = 'about:blank';
+        frame.classList.remove('is-in');
+      }, FADE);
+
+      if (opener && document.contains(opener)) opener.focus();
+      opener = null;
+    }
+
+    /* `load` also fires for the about:blank on the way out, and for the error
+       page a refusing server produces — hence the `live` guard, and hence the
+       flags in data.js doing the work this event cannot. */
+    frame.addEventListener('load', function () {
+      if (!live || frame.src === 'about:blank') return;
+      clearTimeout(timer);
+      wait.hidden = true;
+      stall.hidden = true;
+      frame.classList.add('is-in');
+    });
+
+    /* — width —
+       The frame is a real viewport, so this shows the site's own responsive
+       layout rather than a scaled picture of the desktop one. */
+    function size(which) {
+      stage.setAttribute('data-size', which);
+      $$('.peek__size', root).forEach(function (b) {
+        const on = b.getAttribute('data-peek-size') === which;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+    }
+    $$('.peek__size', root).forEach(function (b) {
+      b.addEventListener('click', function () { size(b.getAttribute('data-peek-size')); });
+    });
+
+    /* — the card hands over — */
+    grid.addEventListener('click', function (e) {
+      const card = e.target.closest && e.target.closest('a.live__card[data-peek]');
+      if (!card) return;
+      /* anything that means "somewhere else, not here" is left to the browser */
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      show(card.href, card.getAttribute('data-peek'), card.getAttribute('data-peek-name'), card);
+    });
+
+    $$('[data-peek-close]', root).forEach(function (el) {
+      el.addEventListener('click', hide);
+    });
+
+    window.addEventListener('keydown', function (e) {
+      if (!live) return;
+      if (e.key === 'Escape') { hide(); return; }
+      if (e.key !== 'Tab') return;
+
+      /* Tab is kept inside the window: behind it the whole page is still in
+         the tab order, and walking out of a modal into it is disorienting. */
+      const able = $$('a[href],button:not([disabled]),iframe,[tabindex]:not([tabindex="-1"])', win)
+        .filter(function (el) { return el.offsetParent !== null || el === document.activeElement; });
+      if (!able.length) return;
+      const first = able[0], last = able[able.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  })();
+
+  /* ══════════════════════════════════════════════════════════════════════
+     7.  Micro-interactions
      ══════════════════════════════════════════════════════════════════════ */
   if (!PROFILE.coarse && !PROFILE.reduced) {
 
@@ -731,6 +880,7 @@
         el.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
       });
       el.addEventListener('pointermove', function (e) {
+        if (document.documentElement.getAttribute('data-mode') === 'normal') return;
         rectOf(el, box);
         move(e.clientX, e.clientY);
       }, { passive: true });
@@ -749,6 +899,7 @@
           (x * 6).toFixed(2) + 'deg) translateZ(6px)';
       });
       el.addEventListener('pointermove', function (e) {
+        if (document.documentElement.getAttribute('data-mode') === 'normal') return;
         rectOf(el, box);
         move(e.clientX, e.clientY);
       }, { passive: true });
@@ -801,7 +952,7 @@
   });
 
   /* ══════════════════════════════════════════════════════════════════════
-     7.  Contact form
+     8.  Contact form
      ══════════════════════════════════════════════════════════════════════ */
   (function form() {
     const f = $('#contact-form');
@@ -965,7 +1116,7 @@
   })();
 
   /* ══════════════════════════════════════════════════════════════════════
-     8.  Floating enquiry dock
+     9.  Floating enquiry dock
      ══════════════════════════════════════════════════════════════════════ */
   (function dockButtons() {
     if (!dock) return;
@@ -1007,9 +1158,12 @@
   })();
 
   /* ══════════════════════════════════════════════════════════════════════
-     9.  Hand-off from the reveal
+     10.  Hand-off from the reveal
      ══════════════════════════════════════════════════════════════════════ */
+  let entered = false;
   function enter() {
+    if (entered) return;
+    entered = true;
     const t = $('.hero__title');
     if (t) t.classList.add('in');
     $$('.hero .reveal-up').forEach(function (el, i) {
@@ -1019,6 +1173,9 @@
     onScroll();
   }
   window.addEventListener('si:revealed', enter);
+  /* Normal template skips the intro before this file runs, so the event
+     has already fired. Don't wait for it. */
+  if (!document.body.classList.contains('is-booting')) enter();
   /* if the reveal never fires for any reason, don't leave the hero blank */
   setTimeout(function () {
     if (!document.body.classList.contains('is-booting')) enter();

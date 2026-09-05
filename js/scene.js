@@ -217,8 +217,8 @@
 
       /* — chakra rim (two concentric circles, as in the mark) —
          The wheel is indigo, the same navy the chakra carries in the
-         wordmark; the gold around it belongs to the skyline, not the
-         wheel. — */
+         wordmark. The gold belongs to what orbits it, not to the
+         wheel itself. — */
       const RIM = PROFILE.low ? 60 : 108;
       let firstOuter = -1, prevOuter = -1;
       for (let i = 0; i < RIM; i++) {
@@ -556,7 +556,13 @@
   /* ══════════════════════════════════════════════════════════════════════
      boot
      ══════════════════════════════════════════════════════════════════════ */
+  let started = false;
+  function mode3d() {
+    return document.documentElement.getAttribute('data-mode') !== 'normal';
+  }
   function start() {
+    if (started || !mode3d()) return;
+    started = true;
     if (PROFILE.reduced) {
       /* still paint one static frame so the composition is not empty */
       heroScene();
@@ -570,11 +576,17 @@
 
   /* Hold every scene until the reveal hands the page over. Running five
      canvases behind an intro nobody can see steals the frame budget from
-     the one animation that is actually on screen. */
+     the one animation that is actually on screen. Normal template never
+     starts the canvases; switching to 3D later picks them up here. */
   function boot() {
-    if (!document.body.classList.contains('is-booting')) { start(); return; }
+    const tryStart = function () { if (mode3d()) start(); };
+    window.addEventListener('si:mode', function (e) {
+      if (e.detail === '3d') tryStart();
+    });
+    if (!mode3d()) return;
+    if (!document.body.classList.contains('is-booting')) { tryStart(); return; }
     let done = false;
-    const go = function () { if (!done) { done = true; start(); } };
+    const go = function () { if (!done) { done = true; tryStart(); } };
     window.addEventListener('si:revealed', go, { once: true });
     setTimeout(go, 12000);              /* never depend on the reveal alone */
   }

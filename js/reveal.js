@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════════════════════════════════════════
    SmartIndia.ai — 3D brand reveal
    ──────────────────────────────────────────────────────────────────────────
-   Sequence:  particles assemble the skyline  →  3D depth develops  →
+   Sequence:  particles assemble the mark  →  3D depth develops  →
               wordmark resolves under a specular sweep  →  chakra locks  →
               tagline draws  →  hero hold  →  camera pushes through the mark
    The mark itself is the real vector logo. It is never redrawn, retyped or
@@ -75,6 +75,8 @@
       'translate(' + cx.toFixed(2) + ' ' + cy.toFixed(2) + ') scale(' + scale.toFixed(4) + ')');
     chakra.dataset.cx = cx;
     chakra.dataset.cy = cy;
+    chakra.dataset.scale = scale;      /* the mote field rebuilds the wheel
+                                          analytically and needs the scale */
   }
 
   /**
@@ -119,7 +121,7 @@
 
   /**
    * @param {Element} host
-   * @param {{viewBox?:string, part?:'full'|'lockup'|'skyline', decorative?:boolean}} opts
+   * @param {{viewBox?:string, part?:'full'|'wordmark', decorative?:boolean}} opts
    */
   function mountLogo(host, opts) {
     opts = opts || {};
@@ -127,25 +129,11 @@
     if (!tpl || !host) return null;
     const svg = tpl.content.firstElementChild.cloneNode(true);
 
-    if (opts.part === 'lockup') {
-      const t = svg.querySelector('.si-tagline'); if (t) t.remove();
-      svg.setAttribute('viewBox', '0 0 1000 418');
-    } else if (opts.part === 'wordmark') {
+    if (opts.part === 'wordmark') {
       /* compact nav lockup — the wordmark alone, cropped to its own box.
          The chakra travels with it, so the mark is still fully present. */
-      const sk = svg.querySelector('.si-skyline'); if (sk) sk.remove();
       const t = svg.querySelector('.si-tagline'); if (t) t.remove();
       svg.setAttribute('viewBox', '112 296 776 122');
-    } else if (opts.part === 'shell') {
-      /* extrusion shell — skyline only, but keeps the full viewBox so it
-         registers pixel-perfectly behind the face layer */
-      const w = svg.querySelector('.si-wordmark'); if (w) w.remove();
-      const t = svg.querySelector('.si-tagline'); if (t) t.remove();
-    } else if (opts.part === 'skyline') {
-      const w = svg.querySelector('.si-wordmark'); if (w) w.remove();
-      const t = svg.querySelector('.si-tagline'); if (t) t.remove();
-      svg.setAttribute('viewBox', '0 78 1000 186');
-      svg.setAttribute('preserveAspectRatio', 'xMidYMax meet');
     }
     if (opts.viewBox) svg.setAttribute('viewBox', opts.viewBox);
     if (opts.decorative) {
@@ -156,7 +144,7 @@
 
     uniquify(svg);
     host.appendChild(svg);
-    if (opts.part !== 'skyline' && opts.part !== 'shell') scheduleChakra(svg);
+    scheduleChakra(svg);
 
     /* the crop is only correct once the real wordmark metrics are known */
     if (opts.part === 'wordmark') { wordmarks.push(svg); fitWordmark(svg); }
@@ -176,59 +164,80 @@
 
   if (!root || !faceHost) { document.body.classList.remove('is-booting'); return; }
 
-  const faceSvg = mountLogo(faceHost, {});
-
-  /* ── real 3D extrusion: skyline shells receding in Z ──────────────────
-     Each shell is a flat bitmap, not a live SVG clone. Cloning the skyline
-     per shell costs ~200 DOM nodes and a filtered compositing layer each —
-     that alone pushed first paint into the tens of seconds on slower
-     hardware. Instead the skyline is serialised once per depth with its
-     gold gradient pre-darkened, so there is no runtime filter at all. ── */
-  const LAYERS = PROFILE.low ? 4 : 9;
-  const STEP = 3.6;
-
-  function shellImage(depth) {
-    const tpl = document.getElementById('si-logo-src');
-    const svg = tpl.content.firstElementChild.cloneNode(true);
-    const w = svg.querySelector('.si-wordmark'); if (w) w.remove();
-    const t = svg.querySelector('.si-tagline'); if (t) t.remove();
-
-    /* Bake the depth shading straight into the gradient stops. On paper the
-       shells cannot recede by going black — that would read as a hole cut in
-       the page — so each one is mixed toward a deep bronze instead, and the
-       stack reads as an extruded block of metal seen edge-on. */
-    const SHADE = [58, 36, 10];
-    const k = 0.26 + depth * 0.62;               /* 0 = face colour, 1 = shade */
-    const stops = svg.querySelectorAll('stop');
-    for (let i = 0; i < stops.length; i++) {
-      const c = stops[i].getAttribute('stop-color') || '#000000';
-      const m = /^#([0-9a-f]{6})$/i.exec(c.trim());
-      if (!m) continue;
-      const v = parseInt(m[1], 16);
-      const r = Math.round(((v >> 16) & 255) + (SHADE[0] - ((v >> 16) & 255)) * k);
-      const g = Math.round(((v >> 8) & 255) + (SHADE[1] - ((v >> 8) & 255)) * k);
-      const b = Math.round((v & 255) + (SHADE[2] - (v & 255)) * k);
-      stops[i].setAttribute('stop-color',
-        '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1));
-    }
-    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    return 'data:image/svg+xml;charset=utf-8,' +
-      encodeURIComponent(new XMLSerializer().serializeToString(svg));
+  /* Normal template: hand the page over immediately. Do not write the
+     "seen" key — a later visit in 3D should still get the intro. */
+  if (document.documentElement.getAttribute('data-mode') === 'normal') {
+    document.body.classList.remove('is-booting');
+    root.classList.add('is-done', 'is-gone');
+    root.setAttribute('aria-hidden', 'true');
+    window.dispatchEvent(new CustomEvent('si:revealed'));
+    return;
   }
 
-  for (let i = 1; i <= LAYERS; i++) {
-    const img = document.createElement('img');
-    img.className = 'reveal__shell';
-    img.alt = '';
-    img.setAttribute('aria-hidden', 'true');
-    img.decoding = 'async';
-    img.src = shellImage(i / LAYERS);
-    img.style.transform = 'translateZ(' + (-i * STEP).toFixed(2) + 'px)';
-    extrudeHost.appendChild(img);
+  const faceSvg = mountLogo(faceHost, {});
+
+  /* ── real 3D extrusion: the wheel, in shells receding in Z ────────────
+     The skyline used to be the extruded body. With it gone the Ashoka
+     Chakra is the only pure-vector element left in the mark, and it is the
+     right one to give the depth to: it is the same wheel the hero turns, so
+     the intro and the page under it are one object seen twice.
+
+     The old shells had to be bitmaps — cloning ~200 skyline nodes per depth
+     pushed first paint into the tens of seconds on slower hardware. A
+     chakra is 27 nodes, so the shells are live SVG again: no serialising,
+     no data URI, no font to wait on, and no runtime filter either, since
+     the depth shading is written straight onto the stroke. They also
+     inherit the spin-up from the same CSS the face uses, so the whole
+     extrusion turns as one body instead of drifting out of register. ── */
+  const LAYERS = PROFILE.low ? 4 : 9;
+  const STEP = 3.6;
+  const SVGNS = 'http://www.w3.org/2000/svg';
+
+  /* the wheel recedes toward a deeper indigo, never toward black — on paper
+     a black shell reads as a hole cut in the page rather than as depth */
+  const SHELL_NEAR = [46, 78, 178];
+  const SHELL_FAR = [14, 26, 72];
+
+  function shellNode(depth) {
+    const src = faceSvg && faceSvg.querySelector('.si-chakra');
+    if (!src) return null;
+
+    const k = 0.26 + depth * 0.62;               /* 0 = face colour, 1 = shade */
+    const ink = 'rgb(' +
+      Math.round(SHELL_NEAR[0] + (SHELL_FAR[0] - SHELL_NEAR[0]) * k) + ',' +
+      Math.round(SHELL_NEAR[1] + (SHELL_FAR[1] - SHELL_NEAR[1]) * k) + ',' +
+      Math.round(SHELL_NEAR[2] + (SHELL_FAR[2] - SHELL_NEAR[2]) * k) + ')';
+
+    const svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('viewBox', faceSvg.getAttribute('viewBox'));
+    svg.setAttribute('class', 'reveal__shell');
+    svg.setAttribute('aria-hidden', 'true');
+
+    const g = src.cloneNode(true);
+    g.setAttribute('stroke', ink);
+    g.querySelectorAll('[fill]').forEach(function (e) {
+      if (e.getAttribute('fill') !== 'none') e.setAttribute('fill', ink);
+    });
+    svg.appendChild(g);
+    return svg;
+  }
+
+  /* Built after the fonts settle, not at parse time: the chakra is placed by
+     measuring the slot in the real typeface, so a shell cloned before that
+     would freeze the fallback position and never re-register. */
+  function buildShells() {
+    if (!extrudeHost) return;
+    extrudeHost.textContent = '';
+    for (let i = 1; i <= LAYERS; i++) {
+      const n = shellNode(i / LAYERS);
+      if (!n) return;
+      n.style.transform = 'translateZ(' + (-i * STEP).toFixed(2) + 'px)';
+      extrudeHost.appendChild(n);
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════════════
-     Particle field — motes converge onto the real skyline geometry
+     Particle field — motes converge onto the real mark: letters and wheel
      ══════════════════════════════════════════════════════════════════════ */
   const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
   let W = 0, H = 0, dpr = 1;
@@ -271,58 +280,155 @@
     if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
+  /* The glyph run as the wordmark actually sets it, including the invisible
+     slot the chakra occupies — it advances the pen without being drawn, so
+     the dust lands on the letters as they are really set rather than on an
+     evenly spaced approximation of them. */
+  const WM_RUN = [
+    ['Smart', 128], ['In', 128], ['d', 128],
+    ['n', 128, true],                    /* the reserved slot */
+    ['a', 128], ['.ai', 88]
+  ];
+
   /**
-   * Sample points along the actual skyline outlines, in SVG user space.
+   * Sample points on the wordmark's silhouette, in SVG user space.
+   *
+   * The skyline used to supply these as vector outlines. Type cannot:
+   * getTotalLength() is meaningless on a <text>, and converting Cormorant
+   * to paths would mean shipping a second copy of the mark. So the wordmark
+   * is drawn once into an offscreen canvas at viewBox scale and the motes
+   * are seeded from the pixels that came back opaque — the letters fill in
+   * out of the dust rather than being outlined by it.
+   *
    * Deliberately *not* getScreenCTM(): the mark sits inside a CSS 3D
-   * transform, and a 2D CTM cannot describe that. Targets are kept in
-   * viewBox units and projected per frame against the live layout box, so
-   * the motes stay welded to the logo no matter how the camera moves.
+   * transform, and a 2D CTM cannot describe that. Targets stay in viewBox
+   * units and are projected per frame against the live layout box, so the
+   * motes stay welded to the logo no matter how the camera moves.
    */
-  function sampleSkyline(count) {
+  function sampleWordmark(count) {
     const out = [];
-    if (!faceSvg) return out;
-    const els = faceSvg.querySelectorAll('.si-skyline > *');
-    const usable = [];
+    const cv = document.createElement('canvas');
+    const c2 = cv.getContext && cv.getContext('2d');
+    if (!c2) return out;
+
+    const SS = 0.5;                            /* silhouette resolution */
+    cv.width = Math.max(1, Math.round(vbW * SS));
+    cv.height = Math.max(1, Math.round(vbH * SS));
+    /* the same face the sheet sets on .si-wm, tracking included — a couple of
+       percent of drift across the run is enough to walk the dust off the
+       letters at the ends. letterSpacing is re-applied after every font
+       assignment because some engines clear it with the shorthand. */
+    const face = function (px) {
+      c2.font = '600 ' + px + 'px "Cormorant Garamond", Garamond, "Times New Roman", serif';
+      if ('letterSpacing' in c2) c2.letterSpacing = '-1px';
+    };
+
     let total = 0;
-
-    for (let i = 0; i < els.length; i++) {
-      const el = els[i];
-      if (typeof el.getTotalLength !== 'function') continue;
-      let L = 0;
-      try { L = el.getTotalLength(); } catch (e) { continue; }
-      if (!isFinite(L) || L <= 2) continue;
-      usable.push({ el: el, L: L });
-      total += L;
+    for (let i = 0; i < WM_RUN.length; i++) {
+      face(WM_RUN[i][1]);
+      total += c2.measureText(WM_RUN[i][0]).width;
     }
-    if (!usable.length || !total) return out;
+    if (!(total > 10)) return out;
 
-    for (let i = 0; i < usable.length; i++) {
-      const u = usable[i];
-      const n = Math.max(2, Math.round(count * (u.L / total)));
-      for (let k = 0; k < n; k++) {
-        let p;
-        try { p = u.el.getPointAtLength((k + Math.random() * 0.6) / n * u.L); } catch (e) { break; }
-        out.push([p.x, p.y]);
+    /* text-anchor="middle" about x=500, on the baseline the <text> declares */
+    let x = 500 - total / 2;
+    c2.setTransform(SS, 0, 0, SS, -vbX * SS, -vbY * SS);
+    c2.fillStyle = '#fff';
+    c2.textAlign = 'left';
+    c2.textBaseline = 'alphabetic';
+    for (let i = 0; i < WM_RUN.length; i++) {
+      const seg = WM_RUN[i];
+      face(seg[1]);
+      if (!seg[2]) c2.fillText(seg[0], x, 402);
+      x += c2.measureText(seg[0]).width;
+    }
+
+    let img;
+    try { img = c2.getImageData(0, 0, cv.width, cv.height); } catch (e) { return out; }
+    const d = img.data, cw = cv.width, ch = cv.height;
+    const hits = [];
+    for (let py = 0; py < ch; py++) {
+      for (let pxi = 0; pxi < cw; pxi++) {
+        if (d[(py * cw + pxi) * 4 + 3] > 120) hits.push(pxi, py);
       }
+    }
+    const n = hits.length / 2;
+    if (!n) return out;
+
+    for (let i = 0; i < count; i++) {
+      const j = (Math.random() * n) | 0;
+      out.push([
+        vbX + (hits[j * 2] + Math.random()) / SS,
+        vbY + (hits[j * 2 + 1] + Math.random()) / SS
+      ]);
     }
     return out;
   }
 
-  /* live projection: viewBox units → viewport px */
-  const VB_W = 1000;
+  /**
+   * The wheel, rebuilt analytically rather than walked with
+   * getPointAtLength(): each spoke carries its own rotate(), and
+   * getPointAtLength reports a point *before* the element's own transform,
+   * so walking them would stack all twenty-four onto one. The geometry is
+   * fixed and known — rim r30, hub r4.6, spokes r6→r28 — so it is cheaper
+   * and exact to lay the points down directly and push them through the
+   * placement placeChakra() measured.
+   */
+  function sampleChakra(count) {
+    const out = [];
+    const g = faceSvg && faceSvg.querySelector('.si-chakra');
+    if (!g) return out;
+    const cx = parseFloat(g.dataset.cx);
+    const cy = parseFloat(g.dataset.cy);
+    const sc = parseFloat(g.dataset.scale);
+    if (!isFinite(cx) || !isFinite(cy) || !isFinite(sc)) return out;
+
+    const rim = Math.max(8, Math.round(count * 0.46));
+    for (let i = 0; i < rim; i++) {
+      const a = (i / rim) * Math.PI * 2;
+      out.push([cx + Math.cos(a) * 30 * sc, cy + Math.sin(a) * 30 * sc]);
+    }
+    const per = Math.max(2, Math.round(count * 0.44 / 24));
+    for (let s = 0; s < 24; s++) {
+      const a = (s / 24) * Math.PI * 2 - Math.PI / 2;
+      const ca = Math.cos(a), sa = Math.sin(a);
+      for (let k = 0; k < per; k++) {
+        const r = (6 + 22 * (k + Math.random() * 0.6) / per) * sc;
+        out.push([cx + ca * r, cy + sa * r]);
+      }
+    }
+    const hub = Math.max(6, Math.round(count * 0.10));
+    for (let i = 0; i < hub; i++) {
+      const a = (i / hub) * Math.PI * 2;
+      out.push([cx + Math.cos(a) * 4.6 * sc, cy + Math.sin(a) * 4.6 * sc]);
+    }
+    return out;
+  }
+
+  /* live projection: viewBox units → viewport px.
+     The viewBox no longer starts at the origin — it is cropped to the
+     lockup — so the offset has to come out of the map, not be assumed. */
+  let vbX = 0, vbY = 290, vbW = 1000, vbH = 182;
   let mapX = 0, mapY = 0, mapS = 0.5;
   function refreshMap() {
     if (!faceSvg) return;
+    const vb = (faceSvg.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
+    if (vb.length === 4 && vb[2] > 0 && vb[3] > 0) {
+      vbX = vb[0]; vbY = vb[1]; vbW = vb[2]; vbH = vb[3];
+    }
     const r = faceSvg.getBoundingClientRect();
     if (r.width < 20) return;
-    mapS = r.width / VB_W;
-    mapX = r.left;
-    mapY = r.top;
+    mapS = r.width / vbW;
+    mapX = r.left - vbX * mapS;
+    mapY = r.top - vbY * mapS;
   }
 
   function buildMotes() {
     const want = PROFILE.low ? 230 : 640;
-    const targets = sampleSkyline(want);
+    /* the letters take the bulk of the dust, the wheel the rest — split by
+       the area each actually covers, so neither reads as denser than it is */
+    const targets = sampleWordmark(Math.round(want * 0.72))
+      .concat(sampleChakra(Math.round(want * 0.28)));
     motes = [];
 
     const cx = W / 2, cy = H / 2;
@@ -333,8 +439,8 @@
         const t = targets[i];
         const a = Math.random() * Math.PI * 2;
         const rad = spread * (0.55 + Math.random() * 0.75);
-        /* stagger left→right so the skyline "writes" itself across */
-        const lead = (t[0] / VB_W) * 0.34 + Math.random() * 0.22;
+        /* stagger left→right so the mark "writes" itself across */
+        const lead = ((t[0] - vbX) / vbW) * 0.34 + Math.random() * 0.22;
         motes.push({
           x: cx + Math.cos(a) * rad,
           y: cy + Math.sin(a) * rad * 0.62,
@@ -356,7 +462,7 @@
         motes.push({
           x: cx + Math.cos(a) * rad, y: cy + Math.sin(a) * rad * 0.6,
           px: 0, py: 0,
-          vx: 40 + Math.random() * 920, vy: 210 + Math.random() * 50,
+          vx: 140 + Math.random() * 720, vy: 320 + Math.random() * 80,
           d: Math.random() * 0.4, sp: 0.05 + Math.random() * 0.05,
           r: 0.6 + Math.random() * 1.4, c: pickColor(i), seed: Math.random() * 6.283
         });
@@ -561,7 +667,7 @@
     startField();
     stage(0);
 
-    at(40, function () { stage(1); });                  /* skyline resolves out of the dust */
+    at(40, function () { stage(1); });                  /* the wheel's depth develops */
     at(1180, function () { stage(2); });                /* wordmark + specular sweep + chakra */
     at(1900, function () {                              /* tagline draws, hero moment begins */
       stage(3);
@@ -581,6 +687,9 @@
 
   const bail = function () { finish(true); };
   if (skipBtn) skipBtn.addEventListener('click', bail);
+  window.addEventListener('si:mode', function (e) {
+    if (e.detail === 'normal' && !finished) bail();
+  });
   window.addEventListener('keydown', function (e) {
     if (!finished && (e.key === 'Escape' || e.key === 'Enter')) bail();
   });
@@ -594,6 +703,7 @@
   /* start once the fonts are settled so the wordmark never reflows mid-reveal */
   function boot() {
     refit();
+    buildShells();               /* after refit — the shells clone the placed chakra */
     requestAnimationFrame(function () { requestAnimationFrame(run); });
   }
   if (document.fonts && document.fonts.ready) {

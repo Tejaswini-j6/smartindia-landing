@@ -1,8 +1,8 @@
 /* ══════════════════════════════════════════════════════════════════════════
    SmartIndia.ai — design system derived from the logo
    ──────────────────────────────────────────────────────────────────────────
-   Palette source : monument skyline gold gradient, tricolour wordmark
-                    (saffron / white / green), navy Ashoka Chakra, black field
+   Palette source : tricolour wordmark (saffron / white / green),
+                    navy Ashoka Chakra, antique gold, black field
    Geometry source: gopuram tiers, dome + iwan arches, 24-spoke radial
    Type source    : serif wordmark  +  wide-tracked sans tagline
    ══════════════════════════════════════════════════════════════════════════ */
@@ -116,13 +116,15 @@
   --sheet: rgba(var(--c-lift),.88);
 
   /* — the logo plate —
-     The mark is drawn for a dark ground (white wordmark, bright gold
-     skyline), so wherever it lands it is handed that ground back rather
-     than being recoloured — one master, no second copy to keep in sync.
-     The plate itself is now mixed from the palette's own olive-black
-     instead of the old blue-black it arrived with, so on paper it reads
-     as the page's own deepest shade and on the dark ground it is the
-     footer one step up rather than a card pasted onto it. */
+     The mark is drawn for a dark ground (white wordmark, pale tagline), so
+     where the full lockup lands it is handed that ground back rather than
+     being recoloured — one master, no second copy to keep in sync. The nav
+     is the exception: it carries the wordmark alone, which is small enough
+     to re-ink instead (see .nav__logo).
+     The plate is mixed from the palette's own olive-black instead of the
+     old blue-black it arrived with, so on paper it reads as the page's own
+     deepest shade and on the dark ground it is the footer one step up
+     rather than a card pasted onto it. */
   --plate:      linear-gradient(158deg,#20241A 0%,#0C0F07 100%);
   --plate-edge: rgba(var(--c-gold-fill),.16);
   --plate-lift: 0 16px 38px -22px rgba(58,42,16,.42);
@@ -317,7 +319,7 @@ button{ font:inherit; color:inherit; }
 }
 .reveal__canvas{ position:absolute; inset:0; width:100%; height:100%; }
 
-/* faint horizon band — echoes the skyline ground rule in the logo */
+/* faint horizon band — the ground the mark rises off during the intro */
 .reveal__horizon{
   position:absolute; left:0; right:0; top:58%;
   height:1px;
@@ -344,7 +346,7 @@ button{ font:inherit; color:inherit; }
 }
 .reveal__extrude,.reveal__face{ transform-style:preserve-3d; }
 
-/* stacked shells receding in Z — a genuine extrusion of the skyline */
+/* stacked shells receding in Z — a genuine extrusion of the chakra */
 .reveal__extrude{
   position:absolute; left:0; top:0; width:100%; height:100%;
   transform:scaleZ(.04);
@@ -354,7 +356,7 @@ button{ font:inherit; color:inherit; }
 .reveal.s-2 .reveal__extrude,
 .reveal.s-3 .reveal__extrude,
 .reveal.s-4 .reveal__extrude{ transform:scaleZ(1); }
-/* flat bitmaps — no filter, no preserve-3d, no per-shell compositing hint */
+/* flat layers — no filter, no preserve-3d, no per-shell compositing hint */
 .reveal__shell{
   position:absolute; left:0; top:0; width:100%; height:auto;
   pointer-events:none;
@@ -379,10 +381,6 @@ button{ font:inherit; color:inherit; }
 .reveal.s-3 .reveal__face .si-wordmark{
   filter:drop-shadow(0 0 26px rgba(var(--c-gold-fill),.22));
 }
-.reveal.s-3 .reveal__face .si-skyline{
-  filter:drop-shadow(0 6px 24px rgba(var(--c-gold-fill),.28));
-}
-.reveal__face .si-skyline{ opacity:0; transition:opacity .8s ease .1s; }
 .reveal__face .si-wordmark{ opacity:0; transition:opacity .5s ease; }
 .reveal__face .si-tagline{ opacity:0; transition:opacity .7s ease; }
 .reveal__face .si-tagline .si-rule{ transform:scaleX(0); transform-origin:center;
@@ -417,13 +415,11 @@ button{ font:inherit; color:inherit; }
   opacity:1;
   transform:translateZ(-210px) rotateX(9deg) scale(.9);
 }
-.reveal.s-1 .reveal__face .si-skyline{ opacity:1; }
 
 .reveal.s-2 .reveal__depth{
   opacity:1;
   transform:translateZ(0) rotateX(4deg) scale(.98);
 }
-.reveal.s-2 .reveal__face .si-skyline{ opacity:1; }
 .reveal.s-2 .reveal__face .si-wordmark{ opacity:1; }
 
 .reveal.s-3 .reveal__depth{
@@ -431,7 +427,6 @@ button{ font:inherit; color:inherit; }
   transform:translateZ(60px) rotateX(0deg) scale(1);
   transition:transform 1.6s var(--ease);
 }
-.reveal.s-3 .reveal__face .si-skyline,
 .reveal.s-3 .reveal__face .si-wordmark{ opacity:1; }
 .reveal.s-3 .reveal__face .si-tagline{ opacity:1; }
 .reveal.s-3 .reveal__face .si-tagline .si-rule{ transform:scaleX(1); }
@@ -442,7 +437,6 @@ button{ font:inherit; color:inherit; }
   opacity:0;
   transition:transform 1.05s cubic-bezier(.5,0,.75,0), opacity .8s ease .25s;
 }
-.reveal.s-4 .reveal__face .si-skyline,
 .reveal.s-4 .reveal__face .si-wordmark,
 .reveal.s-4 .reveal__face .si-tagline{ opacity:1; }
 
@@ -593,27 +587,39 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
 .nav.is-hidden{ transform:translateY(-104%); }
 
 .nav__brand{ display:block; flex:0 0 auto; }
-/* The mark is drawn for a dark ground — white wordmark, bright gold skyline —
-   so where it lands on the paper page it is handed that ground back as a
-   plate rather than being recoloured. Recolouring would mean keeping a second
-   version of the logo in sync; the plate keeps one master. The plate itself
-   is a theme token (see --plate), so nav and footer never drift apart. */
+/* Where the mark lands on the page itself — the nav and the footer — the
+   paper theme re-inks it rather than plating it: the letters are written in
+   the page's own ink and the lockup sits directly on the ground, with no
+   card under it at all. On the dark theme the plate comes back, because
+   there the mark already has the ground it was drawn for.
+   The tricolour never moves in either direction: the saffron "In", the green
+   "a" and the navy chakra are the flag, and they hold on both grounds. */
 .nav__logo{
   display:block; width:clamp(172px,19vw,222px);
   padding:9px 15px; border-radius:13px;
+  background:none;
+  box-shadow:none;
+  transition:box-shadow .5s var(--ease), background .5s ease;
+}
+:root[data-theme="dark"] .nav__logo{
   background:var(--plate);
   box-shadow:
     inset 0 1px 0 rgba(var(--c-lift),calc(.10 * var(--lift-k))),
     inset 0 0 0 1px var(--plate-edge),
     0 8px 20px -12px rgba(20,24,14,.55);
-  transition:box-shadow .5s var(--ease), background .5s ease;
 }
-.nav__brand:hover .nav__logo{
+:root[data-theme="dark"] .nav__brand:hover .nav__logo{
   box-shadow:
     inset 0 1px 0 rgba(var(--c-lift),calc(.14 * var(--lift-k))),
     inset 0 0 0 1px rgba(var(--c-gold-fill),.34),
     0 10px 24px -12px rgba(20,24,14,.62);
 }
+/* the re-inking itself. Scoped to the two page placements — the intro keeps
+   its own black field, so the mark there stays exactly as it was drawn. */
+:root:not([data-theme="dark"]) .nav__logo .si-ink,
+:root:not([data-theme="dark"]) .foot__logo .si-ink{ fill:var(--text); }
+:root:not([data-theme="dark"]) .nav__logo .si-ink-2,
+:root:not([data-theme="dark"]) .foot__logo .si-ink-2{ fill:var(--muted); }
 .nav__logo .si-logo{ overflow:visible; }
 
 /* seven items now, so the gap tightens and the row is allowed to give ground
@@ -639,11 +645,10 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
 .nav__links a:hover,.nav__links a.is-active{ color:var(--text); }
 .nav__links a:hover::after,.nav__links a.is-active::after{ transform:scaleX(1); }
 
-/* — theme switch —
-   A track with a knob that slides, rather than an icon that swaps: the
-   control should say which of two states you are in, not just what pressing
-   it does. Both glyphs live in the knob and cross-fade, so the knob is never
-   empty mid-travel. */
+/* — template switch —
+   Same sliding knob as before: left is the flat page, right is the 3D
+   template. Both glyphs live in the knob and cross-fade, so the knob is
+   never empty mid-travel. */
 .themer{
   flex:none; margin-left:14px;
   width:62px; height:32px; padding:0;
@@ -672,10 +677,28 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
   stroke-linecap:round; stroke-linejoin:round;
   transition:opacity .35s ease, transform .5s var(--ease);
 }
-.themer__moon{ fill:var(--gold-deep); stroke:none; opacity:0; transform:rotate(-60deg); }
-:root[data-theme="dark"] .themer__knob{ transform:translateX(30px); }
-:root[data-theme="dark"] .themer__sun{ opacity:0; transform:rotate(60deg); }
-:root[data-theme="dark"] .themer__moon{ opacity:1; transform:rotate(0deg); }
+.themer__cube{ opacity:0; transform:rotate(-60deg); }
+:root[data-mode="3d"] .themer__knob{ transform:translateX(30px); }
+:root[data-mode="3d"] .themer__flat{ opacity:0; transform:rotate(60deg); }
+:root[data-mode="3d"] .themer__cube{ opacity:1; transform:rotate(0deg); }
+
+/* Normal template: the 3D intro, canvases and floating bodies stay out of
+   the way so the page is just the copy. Content must still be visible if
+   JS has not yet cleared is-booting. */
+:root[data-mode="normal"] .reveal{ display:none !important; }
+:root[data-mode="normal"] .hero__canvas,
+:root[data-mode="normal"] .contact__bg,
+:root[data-mode="normal"] .fl-orb,
+:root[data-mode="normal"] .cursor{ display:none; }
+:root[data-mode="normal"] body.is-booting{ overflow:auto; }
+:root[data-mode="normal"] body.is-booting main,
+:root[data-mode="normal"] body.is-booting .foot,
+:root[data-mode="normal"] body.is-booting .nav,
+:root[data-mode="normal"] body.is-booting .hero__inner,
+:root[data-mode="normal"] body.is-booting .dock{
+  opacity:1; visibility:visible; transform:none;
+}
+:root[data-mode="normal"] .tilt{ transform-style:flat; }
 
 /* The ground, the text and every pane ease between themes together. Scoped to
    a class the switch adds for the length of the change, so the transition is
@@ -880,18 +903,6 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
     linear-gradient(180deg,var(--surface-2) 0%,var(--surface-2) 58%,var(--ink-2) 100%);
 }
 .hero__canvas{ position:absolute; inset:0; width:100%; height:100%; opacity:.95; }
-.hero__skyline{
-  position:absolute; left:0; right:0; bottom:0; height:min(26vh,220px);
-  pointer-events:none; overflow:hidden;
-  opacity:.16;
-  -webkit-mask-image:linear-gradient(180deg,transparent,#000 55%);
-  mask-image:linear-gradient(180deg,transparent,#000 55%);
-}
-.hero__skyline .si-logo{
-  position:absolute; left:50%; bottom:-6%;
-  width:170%; transform:translateX(-50%);
-}
-.hero__skyline .si-wordmark,.hero__skyline .si-tagline{ display:none; }
 .hero__veil{
   position:absolute; inset:0;
   /* the copy still needs its own ground under the scene — on paper that is a
@@ -1337,7 +1348,7 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
 @media (hover:hover){
   .live__card:hover .live__cta svg{ transform:translate(2px,-2px); }
 }
-.l/* the grid arrives as a wave across its columns, once, when it first
+/* the grid arrives as a wave across its columns, once, when it first
    scrolls into view */
 .live__grid.is-live .live__card{
   animation:liveIn .62s var(--ease) both;
@@ -1347,6 +1358,147 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
   from{ opacity:0; transform:translateY(14px); }
   to{ opacity:1; transform:none; }
 }
+
+/* — live preview —
+   The card opens the client's site inside a browser window drawn from the
+   same parts as the card's own preview plate, so the modal reads as that
+   card enlarged rather than as a separate piece of UI. Sits above the nav,
+   the dock and the menu, and below the cursor. */
+.peek{
+  position:fixed; inset:0; z-index:9200;
+  display:grid; place-items:center;
+  padding:clamp(10px,2.4vw,34px);
+}
+.peek[hidden]{ display:none; }
+.peek__scrim{
+  position:absolute; inset:0;
+  background:rgba(var(--c-shade),calc(.52 * var(--shade-k)));
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  opacity:0; transition:opacity .32s ease;
+}
+.peek.is-open .peek__scrim{ opacity:1; }
+
+.peek__win{
+  position:relative;
+  display:flex; flex-direction:column;
+  width:min(1240px,100%); height:min(880px,100%);
+  border:1px solid var(--line); border-radius:var(--r-glass);
+  background:var(--surface);
+  box-shadow:var(--glass-edge), 0 40px 90px -40px rgba(var(--c-shade-w),calc(.6 * var(--shade-k)));
+  overflow:hidden;
+  opacity:0; transform:translateY(14px) scale(.985);
+  transition:opacity .34s var(--ease), transform .34s var(--ease);
+}
+.peek.is-open .peek__win{ opacity:1; transform:none; }
+
+/* — the window's title bar — the card's chrome strip, grown up — */
+.peek__bar{
+  display:flex; align-items:center; gap:clamp(8px,1.2vw,16px);
+  flex:none; padding:0 clamp(10px,1.2vw,16px); height:52px;
+  border-bottom:1px solid var(--line-soft);
+  background:linear-gradient(180deg,rgba(var(--c-lift),calc(.9 * var(--lift-k))),rgba(var(--c-lift),calc(.62 * var(--lift-k))));
+}
+.peek__dots{ display:flex; gap:5px; flex:none; padding-left:4px; }
+.peek__dots i{ width:8px; height:8px; border-radius:50%; background:rgba(var(--c-gold-ink),.26); }
+.peek__dots i:nth-child(2){ background:rgba(var(--c-saffron),.34); }
+.peek__dots i:nth-child(3){ background:rgba(var(--c-green),.30); }
+
+/* name and domain share one column: the domain is the address, the name is
+   what the visitor just clicked, and neither is worth a second row */
+.peek__id{
+  flex:1; min-width:0;
+  display:flex; align-items:baseline; gap:9px;
+  padding:5px 12px; border-radius:var(--r-pill);
+  background:rgba(var(--c-shade),calc(.045 * var(--shade-k)));
+  overflow:hidden;
+}
+.peek__name{ font-weight:600; font-size:12.5px; color:var(--text-2); white-space:nowrap; }
+.peek__url{
+  min-width:0; flex:1;
+  font-size:11px; letter-spacing:.03em; color:var(--faint);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.peek__sizes{
+  flex:none; display:flex; gap:2px; padding:2px;
+  border:1px solid var(--line-soft); border-radius:var(--r-pill);
+}
+.peek__size{
+  padding:4px 11px; border:0; border-radius:var(--r-pill);
+  background:none; cursor:pointer; color:var(--muted);
+  font:inherit; font-size:11px; letter-spacing:.02em;
+  transition:background .25s ease, color .25s ease;
+}
+.peek__size.is-on{ background:rgba(var(--c-gold-fill),.22); color:var(--gold-hi); }
+@media (hover:hover){ .peek__size:not(.is-on):hover{ color:var(--text-2); } }
+
+.peek__out{
+  flex:none; display:inline-flex; align-items:center; gap:6px;
+  padding:6px 13px; border-radius:var(--r-pill);
+  border:1px solid rgba(var(--c-gold-ink),.3);
+  font-size:11.5px; letter-spacing:.02em; color:var(--gold-hi);
+  text-decoration:none; transition:background .25s ease, border-color .25s ease;
+}
+.peek__out svg{ width:11px; height:11px; }
+@media (hover:hover){
+  .peek__out:hover{ background:rgba(var(--c-gold-fill),.16); border-color:rgba(var(--c-gold-ink),.5); }
+}
+.peek__x{
+  flex:none; display:grid; place-items:center;
+  width:32px; height:32px; padding:0;
+  border:1px solid var(--line-soft); border-radius:50%;
+  background:none; color:var(--muted); cursor:pointer;
+  transition:background .25s ease, color .25s ease;
+}
+.peek__x svg{ width:15px; height:15px; }
+@media (hover:hover){ .peek__x:hover{ background:rgba(var(--c-shade),calc(.06 * var(--shade-k))); color:var(--text); } }
+
+/* — the stage — the ground behind the frame stays visible in phone mode,
+     where the frame is narrower than the window — */
+.peek__stage{
+  position:relative; flex:1; min-height:0;
+  display:grid; place-items:center;
+  background:
+    radial-gradient(70% 70% at 50% 0%, rgba(var(--c-gold-fill),.10), transparent 70%),
+    var(--surface-2);
+}
+.peek__frame{
+  width:100%; height:100%; border:0; display:block;
+  background:var(--surface);
+  opacity:0; transition:opacity .4s ease;
+}
+.peek__frame.is-in{ opacity:1; }
+
+/* phone width: the frame *is* the viewport, so this shows the site's own
+   responsive layout rather than a scaled-down picture of the desktop one */
+/* the inset is what lets the device edge and its shadow be seen at all —
+   without it the frame fills the stage and the rounding never shows */
+.peek__stage[data-size="phone"]{ padding:clamp(10px,1.6vw,22px); }
+.peek__stage[data-size="phone"] .peek__frame{
+  width:min(390px,100%); height:min(844px,100%);
+  border:1px solid var(--line);
+  border-radius:clamp(12px,1.4vw,22px);
+  box-shadow:0 30px 60px -34px rgba(var(--c-shade-w),calc(.5 * var(--shade-k)));
+}
+
+.peek__wait, .peek__stall{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; padding:32px; text-align:center;
+}
+.peek__wait p{ margin:0; font-size:12.5px; letter-spacing:.04em; color:var(--muted); }
+.peek__wait[hidden], .peek__stall[hidden]{ display:none; }
+.peek__spin{
+  width:26px; height:26px; border-radius:50%;
+  border:2px solid rgba(var(--c-gold-ink),.18);
+  border-top-color:var(--gold);
+  animation:peekSpin .8s linear infinite;
+}
+@keyframes peekSpin{ to{ transform:rotate(360deg); } }
+
+.peek__stall{ background:var(--surface-2); }
+.peek__stall-t{ margin:0; font-family:var(--serif); font-size:clamp(18px,2vw,23px); color:var(--text); }
+.peek__stall-p{ margin:0; max-width:44ch; font-size:13px; line-height:1.65; color:var(--muted); }
 
 /* ══════════════════════════════════════════════════════════════════════════
    8.  SERVICES
@@ -2080,8 +2232,8 @@ a.vend__card:hover .vend__dom svg{ transform:translate(2px,-2px); }
   display:grid; grid-template-columns:1fr 1.2fr; gap:clamp(32px,6vw,80px);
   align-items:start;
 }
-/* same plate as the nav, sized for the full lockup — skyline, wordmark and
-   tagline all read on the ground they were drawn for. --plate-halo is what
+/* the full lockup — wordmark, chakra and tagline all read on the ground they
+   were drawn for, so this one keeps its plate in both themes. --plate-halo is
    keeps it from reading as a card dropped onto the footer: a wide, very
    faint gold bleed that steps the plate's edge out into the ground instead
    of ending it, so in both themes the lockup settles into the footer
@@ -2089,13 +2241,17 @@ a.vend__card:hover .vend__dom svg{ transform:translate(2px,-2px); }
 .foot__logo{
   display:block; width:clamp(232px,29vw,322px); margin-bottom:18px;
   padding:16px 20px 12px; border-radius:18px;
+  background:none;
+  box-shadow:none;
+  transition:background .5s ease, box-shadow .5s ease;
+}
+:root[data-theme="dark"] .foot__logo{
   background:var(--plate);
   box-shadow:
     inset 0 1px 0 rgba(var(--c-lift),calc(.09 * var(--lift-k))),
     inset 0 0 0 1px var(--plate-edge),
     var(--plate-halo),
     var(--plate-lift);
-  transition:background .5s ease, box-shadow .5s ease;
 }
 .foot__brand p{ margin:0; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--foot-dim); }
 .foot__nav{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
@@ -2361,6 +2517,11 @@ body.is-booting .dock .fab{
 
 /* Wider cards need a shallower plate: held at 16/10 the preview becomes the
    whole card and the words are pushed under the fold of the grid. */
+/* the bar runs out of room for the client's name before it runs out of room
+   for the address the visitor is actually looking at */
+@media (max-width:860px){
+  .peek__name{ display:none; }
+}
 @media (max-width:980px){
   .live__vis{ aspect-ratio:16/9; }
 }
@@ -2426,6 +2587,19 @@ body.is-booting .dock .fab{
   /* phone: one card across */
   .live__grid{ grid-template-columns:1fr; }
   .live__vis{ aspect-ratio:16/9; }
+
+  /* the preview takes the whole screen and the bar keeps only the address,
+     the way out and the way back */
+  .peek{ padding:0; }
+  .peek__win{ width:100%; height:100%; border:0; border-radius:0; }
+  .peek__bar{ height:48px; gap:8px; }
+  .peek__sizes{ display:none; }
+  .peek__name{ display:none; }
+  .peek__out span{ display:none; }
+  .peek__out{ padding:7px 9px; }
+  .peek__stage[data-size="phone"] .peek__frame{
+    width:100%; height:100%; border:0; border-radius:0; box-shadow:none;
+  }
   .form{ grid-template-columns:1fr; }
   .foot__nav{ grid-template-columns:1fr 1fr; }
   .index__list{ grid-template-columns:1fr; }
@@ -2535,7 +2709,6 @@ body.is-low .fab::before{ opacity:.5; }
 
 /* — depth: layers drift against the scroll — */
 .flow-rich .fl-par{ translate:0 var(--fl-y,0px); }
-.flow-rich .hero__skyline{ will-change:translate; }
 
 /* — a block eases back once it has been read, instead of cutting away at the
      top of the screen. Origin is the top edge so the recede reads as depth
@@ -2568,6 +2741,194 @@ body.is-low .fab::before{ opacity:.5; }
 .flow-rich .contact .contact__bg{ top:-70px; bottom:-70px; }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   18b.  AMBIENT FLOAT
+   ──────────────────────────────────────────────────────────────────────────
+   §18 above moves the page when the scroll moves. This moves it when nothing
+   moves at all. Gated behind .float-on / .float-rich, which only ever come
+   from float.js.
+
+     --fl-mx / --fl-my   pointer, smoothed, written on <html> once a frame
+     --fl-d              per-layer depth, in px of travel at full deflection
+
+   Every layer derives its own offset from those two numbers, so the cost of
+   the parallax does not grow with the number of layers - one style write a
+   frame feeds all of them, and the compositor does the moving.
+   ══════════════════════════════════════════════════════════════════════════ */
+@property --fl-mx { syntax:'<number>'; inherits:true; initial-value:0; }
+@property --fl-my { syntax:'<number>'; inherits:true; initial-value:0; }
+
+/* - the words -
+   Amplitude is deliberately tiny: about two pixels and half a degree. Big
+   enough that a still screenshot and the live page are different things,
+   small enough that the eye reads it as the page breathing rather than as
+   text that will not sit still. Never a bounce, never a shake - the curve
+   never returns the same way it left. */
+@keyframes flWordDrift{
+  0%   { transform:translate3d(0,0,0)          rotate(0deg); }
+  27%  { transform:translate3d(.5px,-2.1px,0)  rotate(.42deg); }
+  53%  { transform:translate3d(-.7px,1.2px,0)  rotate(-.3deg); }
+  78%  { transform:translate3d(-.4px,-1.1px,0) rotate(.16deg); }
+  100% { transform:translate3d(0,0,0)          rotate(0deg); }
+}
+@keyframes flWordDriftFine{
+  0%   { transform:translate3d(0,0,0); }
+  30%  { transform:translate3d(.3px,-.75px,0); }
+  62%  { transform:translate3d(-.35px,.5px,0); }
+  100% { transform:translate3d(0,0,0); }
+}
+
+.float-on .fl-word{
+  display:inline-block;
+  /* the word's own box only - the drift must not re-wrap the line */
+  white-space:pre-wrap;
+}
+/* Only while the heading is actually on screen. `.fl-live` is added and
+   removed by float.js's own observer, so an off-screen heading has no
+   animation at all rather than a paused one - which is what keeps the count
+   of compositor layers at the two or three headings in view, instead of every
+   heading the visitor has scrolled past. (The site's own `.in` cannot do this
+   job: it is a latch that is never taken off again.) */
+.float-on .fl-live .fl-word{
+  /* `--w` is the word's index: a per-word duration so no two words share a
+     period, and a *negative* delay so the heading arrives already scattered
+     through the cycle instead of starting as one block and drifting apart */
+  animation:flWordDrift calc(8.5s + var(--w,0) * .77s) ease-in-out
+            calc(var(--w,0) * -1.37s) infinite;
+}
+/* the eyebrow is a line of 11px caps - at the heading's amplitude it would
+   read as a wobble, so it floats at a third of it */
+.float-on .eyebrow.fl-live .fl-word{
+  animation-name:flWordDriftFine;
+  animation-duration:calc(11s + var(--w,0) * .9s);
+}
+
+/* The hero's line mask is `overflow:hidden`, which would shave the drift off
+   the top and bottom of every word. Swapped for the same clipped-with-bleed
+   mask §18 uses on the display headings: it still hides the 105% entry slide,
+   but it lets a two-pixel drift through. */
+.float-on .hero__title .line{
+  overflow:visible;
+  clip-path:inset(-.02em -.32em -.06em -.12em);
+}
+
+/* - pointer parallax -
+   `translate` is shared with §18's scroll channels, so where a layer is on
+   both the two are summed in one declaration rather than one silently
+   winning. Vertical travel is deliberately under half the horizontal: a
+   window is wider than it is tall, so equal amplitudes do not read as equal. */
+.float-rich .fl-ptr{
+  translate:calc(var(--fl-mx,0) * var(--fl-d,0) * 1px)
+            calc(var(--fl-my,0) * var(--fl-d,0) * .42px);
+}
+.float-rich .fl-ptr.fl-par{
+  translate:calc(var(--fl-mx,0) * var(--fl-d,0) * 1px)
+            calc(var(--fl-y,0px) + var(--fl-my,0) * var(--fl-d,0) * .42px);
+}
+/* the hero lines carry the deepest parallax on the page, so they are the one
+   place worth naming a compositor layer for outright */
+.float-rich .hero__title .line.fl-ptr{ will-change:translate; }
+
+/* - bodies in the space -
+   A blurred disc and a hairline ring, in the section's own tint. They sit
+   behind the content and take no pointer, so nothing here can come between
+   the visitor and a link. `--k` is the size as a percentage of the section's
+   width, which is what keeps them proportionate at every breakpoint instead
+   of needing a size per media query. */
+.fl-orb{
+  position:absolute; z-index:0;
+  left:var(--x,50%); top:var(--y,50%);
+  width:calc(var(--k,20) * 1%);
+  aspect-ratio:1;
+  margin:calc(var(--k,20) * -.5%) 0 0 calc(var(--k,20) * -.5%);
+  border-radius:50%;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 1.6s ease;
+  background:radial-gradient(circle at 34% 30%,
+    rgba(var(--orb),.30), rgba(var(--orb),.10) 46%, rgba(var(--orb),0) 72%);
+  filter:blur(var(--orb-blur,26px));
+}
+/* both the reveal and the drift are gated, not just the reveal - otherwise a
+   device that never gets .float-rich would sit there animating nine blurred
+   bodies it is deliberately not showing */
+.float-rich .fl-orb{
+  opacity:1;
+  animation:flBodyDrift var(--d-t,40s) ease-in-out infinite;
+}
+/* the ring is the same body seen as an edge: no fill, one hairline, and a
+   flattening rotation so it reads as a disc turned away from the viewer */
+.fl-orb--ring{
+  background:none;
+  /* faint enough that it never competes with a heading it passes behind -
+     it is the edge of a body at distance, not a drawn ring */
+  border:1px solid rgba(var(--orb),.15);
+  filter:blur(var(--orb-blur,2.6px));
+  rotate:x 62deg;
+}
+.fl-orb[data-tint="gold"]   { --orb:var(--c-gold-fill); }
+.fl-orb[data-tint="saffron"]{ --orb:var(--c-saffron); }
+.fl-orb[data-tint="green"]  { --orb:var(--c-green); }
+.fl-orb[data-tint="navy"]   { --orb:var(--c-navy); }
+
+/* the turn is slow enough that it is never seen happening, only noticed as
+   having happened - which is the difference between ambient and animated */
+@keyframes flBodyDrift{
+  0%   { transform:translate3d(0,0,0) scale(1); }
+  33%  { transform:translate3d(2.5%,-4%,0) scale(1.06); }
+  66%  { transform:translate3d(-3%,2.5%,0) scale(.95); }
+  100% { transform:translate3d(0,0,0) scale(1); }
+}
+
+/* the content column has to win against a body placed behind it - most
+   sections never set a z-index of their own, so it is given here once */
+.float-rich .section > .wrap,
+.float-rich .section > .rail-wrap{ position:relative; z-index:1; }
+
+/* A body sitting in a section's right-hand margin reaches past the section's
+   own edge, and an absolutely positioned child that does that is still counted
+   in the document's scroll width - so the page reports as horizontally
+   scrollable even with `overflow-x:hidden` holding it shut on the body.
+   `clip` rather than `hidden` on purpose: hidden would make every section a
+   scroll container, and clip can be given to one axis while the other stays
+   visible - which is what lets a body carry on down past the section boundary
+   into the next one, instead of being cut off at the seam. The hero already
+   clips itself, and the rail carries its own horizontal scroller inside this
+   one, so neither is affected. */
+.float-rich .section{ overflow-x:clip; }
+
+/* - cards lean toward the cursor as a set -
+   site.js already tilts a hovered card under the pointer. This is the other
+   half: every card in the grid leans a little, all the time, so the hovered
+   one is a member of a moving set rather than the only live thing on a still
+   page. The amplitude is a third of the hover tilt. */
+.float-rich .live__card,
+.float-rich .svc__item{
+  translate:calc(var(--fl-mx,0) * 2.2px) calc(var(--fl-my,0) * 1px);
+}
+/* ...except while it is being hovered, where site.js's own tilt takes the
+   element over completely and the two must not argue */
+@media (hover:hover){
+  .float-rich .live__card:hover,
+  .float-rich .svc__item:hover{ translate:none; }
+}
+
+/* - coarse pointers -
+   A phone drives the same channels from device tilt at half amplitude, but
+   the blurred bodies are the one thing worth dropping outright: a 26px blur
+   over a quarter of the viewport is the most expensive paint on the page and
+   the least visible on the smallest screen. */
+@media (max-width:640px){
+  .fl-orb{ display:none; }
+  .float-rich .live__card,
+  .float-rich .svc__item{ translate:none; }
+}
+
+/* low-power devices already lose .float-rich in JS, so the parallax and the
+   bodies never start; the words keep floating, because a compositor animation
+   on the handful of spans that are on screen is not what makes a page slow */
+body.is-low .fl-orb{ display:none; }
+
+/* ══════════════════════════════════════════════════════════════════════════
    19.  REDUCED MOTION
    ══════════════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion:reduce){
@@ -2580,6 +2941,14 @@ body.is-low .fab::before{ opacity:.5; }
   .hero__title .line > span{ transform:none !important; }
   .ticker__row{ animation:none; }
   .cursor{ display:none; }
+  /* float.js never starts under reduced motion, so these only matter if the
+     preference is switched on mid-visit: the layers go back to level rather
+     than keeping the lean they happened to be holding */
+  .fl-word{ animation:none !important; transform:none !important; }
+  .fl-ptr{ translate:none !important; }
+  .fl-orb{ display:none; }
+  /* a frozen ring reads as a broken control, so the wait says so in words */
+  .peek__spin{ display:none; }
   body.is-booting main,body.is-booting .foot,body.is-booting .nav,
   body.is-booting .hero__inner{
     transform:none; opacity:1; visibility:visible;

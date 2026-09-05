@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-mode="3d">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -15,9 +15,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
 <script>
-/* Resolve the theme before the first paint. Anything later — even a script at
-   the top of <body> — lets one frame of the wrong ground through, which on a
-   dark-mode visit is a full-screen white flash. */
+/* Stamp theme and template mode before the first paint so neither a dark
+   ground nor the 3D intro can flash the wrong first frame. */
 (function () {
   try {
     var t = localStorage.getItem('si-theme');
@@ -30,6 +29,12 @@
   } catch (e) {
     document.documentElement.setAttribute('data-theme', 'light');
   }
+  try {
+    var mode = localStorage.getItem('si-mode');
+    document.documentElement.setAttribute('data-mode', mode === 'normal' ? 'normal' : '3d');
+  } catch (e) {
+    document.documentElement.setAttribute('data-mode', '3d');
+  }
 })();
 </script>
 </head>
@@ -41,22 +46,8 @@
      never re-drawn, re-proportioned or distorted anywhere.
      ══════════════════════════════════════════════════════════════ -->
 <template id="si-logo-src">
-<svg class="si-logo" viewBox="0 0 1000 480" role="img" aria-label="SmartIndia.ai — Bringing AI and People Together" xmlns="http://www.w3.org/2000/svg">
+<svg class="si-logo" viewBox="0 290 1000 182" role="img" aria-label="SmartIndia.ai — Bringing AI and People Together" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- The mark is unchanged from the black-theme original: it is always
-         shown on its own dark ground (the intro's field, and the plates the
-         nav and footer put behind it), never directly on the paper page. -->
-    <linearGradient id="siGold" x1="0" y1="88" x2="0" y2="262" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFE7B0"/>
-      <stop offset=".28" stop-color="#F0C97A"/>
-      <stop offset=".62" stop-color="#C08A34"/>
-      <stop offset="1" stop-color="#6E4413"/>
-    </linearGradient>
-    <linearGradient id="siGoldFade" x1="0" y1="0" x2="1000" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#6E4413" stop-opacity="0"/>
-      <stop offset=".5" stop-color="#C08A34" stop-opacity=".9"/>
-      <stop offset="1" stop-color="#6E4413" stop-opacity="0"/>
-    </linearGradient>
     <linearGradient id="siSaffronRule" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#FF9933" stop-opacity="0"/>
       <stop offset="1" stop-color="#FF9933"/>
@@ -67,135 +58,13 @@
     </linearGradient>
   </defs>
 
-  <!-- ─── skyline of Indian monuments ─── -->
-  <g class="si-skyline" fill="url(#siGold)">
-    <rect x="10" y="257" width="980" height="3" fill="url(#siGoldFade)"/>
-
-    <!-- gopuram (left) -->
-    <rect x="17" y="236" width="110" height="24"/>
-    <rect x="24" y="216" width="96" height="20"/>
-    <rect x="31" y="198" width="82" height="18"/>
-    <rect x="38" y="182" width="68" height="16"/>
-    <rect x="45" y="168" width="54" height="14"/>
-    <rect x="52" y="156" width="40" height="12"/>
-    <rect x="58" y="146" width="28" height="10"/>
-    <path d="M56 146 L50 130 H94 L88 146 Z"/>
-    <rect x="59" y="118" width="2" height="9"/><circle cx="60" cy="126" r="3.4"/>
-    <rect x="71" y="111" width="2" height="13"/><circle cx="72" cy="124" r="4.4"/>
-    <rect x="83" y="118" width="2" height="9"/><circle cx="84" cy="126" r="3.4"/>
-    <rect x="127" y="250" width="6" height="10"/>
-
-    <!-- small shikhara -->
-    <rect x="132" y="240" width="56" height="20"/>
-    <path d="M140 240 C144 214 150 194 160 184 C170 194 176 214 180 240 Z"/>
-    <ellipse cx="160" cy="183" rx="10" ry="4.5"/>
-    <rect x="159" y="166" width="2" height="14"/><circle cx="160" cy="164" r="3.8"/>
-    <rect x="188" y="252" width="10" height="8"/>
-
-    <!-- golden temple -->
-    <rect x="196" y="246" width="122" height="14"/>
-    <rect x="212" y="198" width="90" height="48"/>
-    <path d="M230 198 C230 172 242 152 257 149 C272 152 284 172 284 198 Z"/>
-    <rect x="255.5" y="132" width="3" height="18"/><circle cx="257" cy="130" r="4.8"/>
-    <path d="M212 198 C212 185 216 177 222 176 C228 177 232 185 232 198 Z"/>
-    <path d="M282 198 C282 185 286 177 292 176 C298 177 302 185 302 198 Z"/>
-    <rect x="221" y="167" width="2" height="10"/><circle cx="222" cy="165" r="2.8"/>
-    <rect x="291" y="167" width="2" height="10"/><circle cx="292" cy="165" r="2.8"/>
-    <path d="M196 246 C196 238 199 233 203 232 C207 233 210 238 210 246 Z"/>
-    <path d="M304 246 C304 238 307 233 311 232 C315 233 318 238 318 246 Z"/>
-    <rect x="318" y="250" width="16" height="10"/>
-
-    <!-- qutub minar -->
-    <path d="M334 260 L342 116 H358 L366 260 Z"/>
-    <rect x="331" y="196" width="38" height="7"/>
-    <rect x="333" y="160" width="34" height="6"/>
-    <rect x="335" y="130" width="30" height="5"/>
-    <path d="M341 116 C341 106 345 100 350 99 C355 100 359 106 359 116 Z"/>
-    <rect x="349" y="90" width="2" height="10"/><circle cx="350" cy="88" r="2.9"/>
-    <rect x="366" y="248" width="14" height="12"/>
-
-    <!-- taj mahal -->
-    <rect x="378" y="244" width="244" height="16"/>
-    <path d="M391 244 L393 156 H403 L405 244 Z"/>
-    <rect x="389" y="212" width="18" height="5"/><rect x="389.5" y="184" width="17" height="4.5"/>
-    <path d="M392 156 C392 146 395 140 398 139 C401 140 404 146 404 156 Z"/>
-    <rect x="397" y="130" width="2" height="10"/><circle cx="398" cy="128" r="2.9"/>
-    <path d="M595 244 L597 156 H607 L609 244 Z"/>
-    <rect x="593" y="212" width="18" height="5"/><rect x="593.5" y="184" width="17" height="4.5"/>
-    <path d="M596 156 C596 146 599 140 602 139 C605 140 608 146 608 156 Z"/>
-    <rect x="601" y="130" width="2" height="10"/><circle cx="602" cy="128" r="2.9"/>
-    <path d="M428 244 L430 176 H438 L440 244 Z"/>
-    <rect x="426" y="214" width="16" height="4.5"/>
-    <path d="M429 176 C429 167 432 162 434 161 C436 162 439 167 439 176 Z"/>
-    <rect x="433" y="152" width="2" height="9"/><circle cx="434" cy="150" r="2.5"/>
-    <path d="M560 244 L562 176 H570 L572 244 Z"/>
-    <rect x="558" y="214" width="16" height="4.5"/>
-    <path d="M561 176 C561 167 564 162 566 161 C568 162 571 167 571 176 Z"/>
-    <rect x="565" y="152" width="2" height="9"/><circle cx="566" cy="150" r="2.5"/>
-    <path fill-rule="evenodd" d="M446 244 V212 L462 198 H538 L554 212 V244 Z M486 244 V224 A14 16 0 0 1 514 224 V244 Z"/>
-    <path d="M450 198 C450 184 454 176 460 174 C466 176 470 184 470 198 Z"/>
-    <path d="M530 198 C530 184 534 176 540 174 C546 176 550 184 550 198 Z"/>
-    <rect x="459" y="163" width="2" height="12"/><circle cx="460" cy="161" r="2.8"/>
-    <rect x="539" y="163" width="2" height="12"/><circle cx="540" cy="161" r="2.8"/>
-    <rect x="474" y="190" width="52" height="10"/>
-    <path d="M470 192 C463 168 473 142 500 136 C527 142 537 168 530 192 Z"/>
-    <rect x="498.5" y="108" width="3" height="28"/><circle cx="500" cy="106" r="5"/>
-    <rect x="620" y="250" width="10" height="10"/>
-
-    <!-- nagara shikhara -->
-    <rect x="628" y="238" width="74" height="22"/>
-    <path d="M630 238 C632 220 636 208 642 202 C648 208 652 220 654 238 Z"/>
-    <path d="M676 238 C678 220 682 208 688 202 C694 208 698 220 700 238 Z"/>
-    <path d="M640 238 C644 198 652 166 665 152 C678 166 686 198 690 238 Z"/>
-    <ellipse cx="665" cy="150" rx="11" ry="5"/>
-    <rect x="664" y="130" width="2" height="16"/><circle cx="665" cy="128" r="3.8"/>
-    <rect x="702" y="250" width="8" height="10"/>
-
-    <!-- charminar / mosque -->
-    <rect x="708" y="240" width="94" height="20"/>
-    <path d="M710 240 L713 172 H721 L724 240 Z"/>
-    <path d="M786 240 L789 172 H797 L800 240 Z"/>
-    <rect x="708" y="206" width="18" height="4"/><rect x="784" y="206" width="18" height="4"/>
-    <path d="M712 172 C712 163 715 158 717 157 C719 158 722 163 722 172 Z"/>
-    <path d="M788 172 C788 163 791 158 793 157 C795 158 798 163 798 172 Z"/>
-    <rect x="716" y="146" width="2" height="12"/><circle cx="717" cy="144" r="2.5"/>
-    <rect x="792" y="146" width="2" height="12"/><circle cx="793" cy="144" r="2.5"/>
-    <rect x="722" y="204" width="66" height="36"/>
-    <path d="M722 204 C722 192 726 185 731 184 C736 185 740 192 740 204 Z"/>
-    <path d="M770 204 C770 192 774 185 779 184 C784 185 788 192 788 204 Z"/>
-    <path d="M736 204 C733 184 742 168 755 164 C768 168 777 184 774 204 Z"/>
-    <rect x="753.5" y="140" width="3" height="26"/><circle cx="755" cy="138" r="4.4"/>
-    <rect x="802" y="250" width="8" height="10"/>
-
-    <!-- stepped deul -->
-    <rect x="808" y="236" width="84" height="24"/>
-    <rect x="814" y="218" width="72" height="18"/>
-    <rect x="820" y="202" width="60" height="16"/>
-    <rect x="826" y="188" width="48" height="14"/>
-    <rect x="832" y="176" width="36" height="12"/>
-    <rect x="838" y="166" width="24" height="10"/>
-    <ellipse cx="850" cy="163" rx="15" ry="5"/>
-    <rect x="849" y="144" width="2" height="16"/><circle cx="850" cy="142" r="3.8"/>
-    <rect x="892" y="250" width="8" height="10"/>
-
-    <!-- gopuram (right) -->
-    <rect x="898" y="238" width="100" height="22"/>
-    <rect x="904" y="220" width="88" height="18"/>
-    <rect x="910" y="204" width="76" height="16"/>
-    <rect x="916" y="190" width="64" height="14"/>
-    <rect x="922" y="178" width="52" height="12"/>
-    <rect x="928" y="168" width="40" height="10"/>
-    <rect x="934" y="160" width="28" height="8"/>
-    <path d="M932 160 L927 146 H969 L964 160 Z"/>
-    <rect x="936" y="134" width="2" height="9"/><circle cx="937" cy="142" r="3"/>
-    <rect x="947" y="129" width="2" height="12"/><circle cx="948" cy="140" r="4"/>
-    <rect x="958" y="134" width="2" height="9"/><circle cx="959" cy="142" r="3"/>
-  </g>
-
-  <!-- ─── wordmark ─── -->
+  <!-- ─── wordmark ───
+       The letters that are not tricolour carry .si-ink so they can be
+       re-inked for a light ground. The saffron "In" and green "a" never
+       move: they are the flag, and they hold on either ground. -->
   <g class="si-wordmark">
     <text class="si-wm" x="500" y="402" text-anchor="middle" font-size="128">
-      <tspan fill="#FFFFFF">Smart</tspan><tspan fill="#FF9933">In</tspan><tspan fill="#FFFFFF">d</tspan><tspan class="si-slot" fill="none">n</tspan><tspan fill="#138808">a</tspan><tspan font-size="88" fill="#FFFFFF">.ai</tspan>
+      <tspan class="si-ink" fill="#FFFFFF">Smart</tspan><tspan fill="#FF9933">In</tspan><tspan class="si-ink" fill="#FFFFFF">d</tspan><tspan class="si-slot" fill="none">n</tspan><tspan fill="#138808">a</tspan><tspan class="si-ink" font-size="88" fill="#FFFFFF">.ai</tspan>
     </text>
     <!-- Ashoka Chakra: positioned onto the reserved slot at runtime -->
     <g class="si-chakra" fill="none" stroke="#1B3A8F" stroke-width="1.6">
@@ -224,7 +93,7 @@
   <g class="si-tagline">
     <rect class="si-rule si-rule-l" x="120" y="445.5" width="92" height="2" fill="url(#siSaffronRule)"/>
     <rect class="si-rule si-rule-r" x="788" y="445.5" width="92" height="2" fill="url(#siGreenRule)"/>
-    <text x="503" y="453" text-anchor="middle" font-size="18" letter-spacing="6.4" fill="#E9E4DA">BRINGING AI AND PEOPLE TOGETHER</text>
+    <text class="si-ink-2" x="503" y="453" text-anchor="middle" font-size="18" letter-spacing="6.4" fill="#E9E4DA">BRINGING AI AND PEOPLE TOGETHER</text>
   </g>
 </svg>
 </template>
@@ -279,15 +148,16 @@
     <span>Start a Project</span>
   </a>
 
-  <button class="themer" id="themer" type="button" aria-label="Switch to dark theme" aria-pressed="false">
+  <button class="themer" id="themer" type="button" aria-label="Switch to normal template" aria-pressed="true" title="3D template">
     <span class="themer__track" aria-hidden="true">
       <span class="themer__knob">
-        <svg class="themer__sun" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="12" r="4.6"/>
-          <g><path d="M12 1.6v3M12 19.4v3M1.6 12h3M19.4 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M19.4 4.6l-2.1 2.1M6.7 17.3l-2.1 2.1"/></g>
+        <svg class="themer__flat" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4.4" y="6.4" width="15.2" height="11.2" rx="1.8"/>
         </svg>
-        <svg class="themer__moon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M20.5 14.6A8.8 8.8 0 019.4 3.5a8.8 8.8 0 1011.1 11.1z"/>
+        <svg class="themer__cube" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3.2l7.6 4.3v8.8L12 20.8l-7.6-4.5V7.5z"/>
+          <path d="M4.4 7.5L12 12l7.6-4.5"/>
+          <path d="M12 12v8.8"/>
         </svg>
       </span>
     </span>
@@ -322,7 +192,6 @@
      ══════════════════════════════════════════════════════════════ -->
 <section class="hero" id="hero">
   <canvas id="hero-canvas" class="hero__canvas" aria-hidden="true"></canvas>
-  <div class="hero__skyline" id="hero-skyline" aria-hidden="true"></div>
   <div class="hero__veil" aria-hidden="true"></div>
 
   <div class="hero__inner">
@@ -767,7 +636,7 @@
     </nav>
   </div>
   <div class="wrap foot__base">
-    <p>© <span id="year">2025</span> SmartIndia.ai · Tiruppur, Tamil Nadu, India</p>
+    <p>© <span id="year">2025</span> SmartIndia.ai · India</p>
     <p>Founded 2025</p>
   </div>
 </footer>
@@ -807,10 +676,74 @@
 
 </div>
 
+<!-- ══════════════════════════════════════════════════════════════
+     LIVE PREVIEW
+     The portfolio cards stay plain links: this opens over them on a normal
+     left click, and the anchor's own href still carries a middle-click,
+     ctrl-click or a visitor with no JS straight out to the site.
+     One iframe serves all ten. Its src is set on open and returned to
+     about:blank on close, so a client's site is never left running behind
+     the page burning memory and network.
+     ══════════════════════════════════════════════════════════════ -->
+<div class="peek" id="peek" hidden>
+  <div class="peek__scrim" data-peek-close></div>
+
+  <div class="peek__win" role="dialog" aria-modal="true" aria-labelledby="peek-name">
+    <header class="peek__bar">
+      <span class="peek__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+
+      <span class="peek__id">
+        <span class="peek__name" id="peek-name"></span>
+        <span class="peek__url" id="peek-url"></span>
+      </span>
+
+      <!-- the site at a phone's width vs. a desktop's. The frame is the
+           viewport here, so this is the site's own responsive behaviour
+           being shown, not a mock-up of it. -->
+      <span class="peek__sizes" role="group" aria-label="Preview width">
+        <button type="button" class="peek__size is-on" data-peek-size="desk" aria-pressed="true">Desktop</button>
+        <button type="button" class="peek__size" data-peek-size="phone" aria-pressed="false">Phone</button>
+      </span>
+
+      <a class="peek__out" id="peek-out" href="#" target="_blank" rel="noopener">
+        <span>Open site</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+
+      <button type="button" class="peek__x" data-peek-close aria-label="Close preview">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+
+    <div class="peek__stage">
+      <div class="peek__wait" id="peek-wait">
+        <span class="peek__spin" aria-hidden="true"></span>
+        <p>Loading the live site&hellip;</p>
+      </div>
+
+      <iframe class="peek__frame" id="peek-frame" title="Live preview"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
+              referrerpolicy="strict-origin-when-cross-origin"></iframe>
+
+      <!-- shown when the site has not loaded in time. It is not proof the
+           site is down — a frame the server refused looks identical from
+           out here — so the wording claims only what we can actually see. -->
+      <div class="peek__stall" id="peek-stall" hidden>
+        <p class="peek__stall-t">This one will not preview here.</p>
+        <p class="peek__stall-p">The site is taking longer than expected, or its
+          server does not allow being shown inside another page. It is running
+          normally either way.</p>
+        <a class="btn btn--ghost" id="peek-stall-out" href="#" target="_blank" rel="noopener"><span>Open the site</span></a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="cursor" id="cursor" aria-hidden="true"><i></i></div>
 
 <script src="js/data.js"></script>
-<!-- boot.js loads draw / reveal / scene / site / flow, in that order, once it
+<!-- boot.js loads draw / reveal / scene / site / flow / float, in that order,
+     once it
      has had its brief chance to pull published content over the built-in copy
      in data.js. They are not listed here as their own tags because site.js
      renders as soon as it is parsed, so hydration has to happen before it

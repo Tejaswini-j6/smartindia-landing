@@ -19,7 +19,10 @@
 (function () {
   'use strict';
 
-  var SCRIPTS = ['js/draw.js', 'js/reveal.js', 'js/scene.js', 'js/site.js', 'js/flow.js'];
+  /* float.js is last on purpose: it wraps the words inside the line boxes
+     that flow.js builds, so it has to see them already there. */
+  var SCRIPTS = ['js/draw.js', 'js/reveal.js', 'js/scene.js', 'js/site.js',
+                 'js/flow.js', 'js/float.js'];
   var BUDGET = 1200;        /* ms before the built-in content wins by default */
 
   function run() {

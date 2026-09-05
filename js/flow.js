@@ -42,13 +42,17 @@
   const $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
   const clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
 
-  root.classList.add('flow-on');
-
   /* Parallax, the receding exit and velocity drag are the expensive third:
      they repaint large areas every frame. On a weak device the page keeps the
-     free half — sequenced entries and the line-by-line headings. */
+     free half — sequenced entries and the line-by-line headings. The classes
+     themselves only go on in the 3D template. */
   const RICH = !PROFILE.low;
-  if (RICH) root.classList.add('flow-rich');
+  function applyMode() {
+    const on = root.getAttribute('data-mode') !== 'normal';
+    root.classList.toggle('flow-on', on);
+    root.classList.toggle('flow-rich', on && RICH);
+    if (on) kick();
+  }
 
   /* ══════════════════════════════════════════════════════════════════════
      1.  Headings arrive a line at a time
@@ -167,7 +171,6 @@
      behind it (further away). None of these carry an entry on `translate`,
      so the property is theirs alone. */
   const PAR = [
-    ['.hero__skyline',            70],
     ['.hero__scroll',             34],
     ['.about__arches',           -54],
     ['.sect-head__note',         -30],
@@ -284,9 +287,12 @@
   scan();
   collect();
   measure();
-  kick();
+  applyMode();
+  window.addEventListener('si:mode', applyMode);
 
-  window.addEventListener('scroll', kick, { passive: true });
+  window.addEventListener('scroll', function () {
+    if (root.getAttribute('data-mode') !== 'normal') kick();
+  }, { passive: true });
 
   let rz = 0;
   window.addEventListener('resize', function () {

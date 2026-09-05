@@ -281,6 +281,16 @@ window.SI = (function () {
        c  category chip   p  one-line description
        u  optional — a deeper link than the domain's front page. The card
           still *reads* as `d`, so a long path never breaks the layout.
+       frame  optional — set false for a site that refuses to be embedded.
+          Clicking such a card skips the preview and opens the site directly,
+          which is the honest outcome: a browser that is sent
+          `X-Frame-Options: SAMEORIGIN` renders its own error page inside the
+          iframe, and same-origin policy means our JS cannot see that it did.
+          The flags below were set by reading each domain's live response
+          headers, not guessed. Re-check with:
+            curl -sSLI https://<domain>/ | grep -i 'x-frame-options\|frame-ancestors'
+          A site of ours that we want previewable is fixed at the server,
+          by dropping that header — not by flipping this flag.
      `c` must be one of the FILTER_ORDER keys for the chip to read properly. */
   const PORTFOLIO = [
     { n: 'Paakhi Jewels', d: 'paakhijewels.com', c: 'ecom',
@@ -292,17 +302,17 @@ window.SI = (function () {
       p: 'Booking platform for handpicked hotels, homestays and villas across India.' },
     { n: 'Deal Confirm', d: 'dealconfirm.com', c: 'dynamic',
       p: 'Real-estate services platform with dynamic listings and enquiry routing.' },
-    { n: 'Englady', d: 'englady.com', c: 'ecom',
+    { n: 'Englady', d: 'englady.com', c: 'ecom', frame: false,
       p: 'Fashion storefront built around a seasonal, frequently refreshed catalogue.' },
-    { n: 'Transcova', d: 'transcova.com', c: 'dynamic',
+    { n: 'Transcova', d: 'transcova.com', c: 'dynamic', frame: false,
       p: 'Innovation platform connecting innovators, engineers and manufacturers worldwide.' },
-    { n: 'Ambika Divine Essence', d: 'ambikadivineessence.com', c: 'ecom',
+    { n: 'Ambika Divine Essence', d: 'ambikadivineessence.com', c: 'ecom', frame: false,
       p: 'Fragrance and incense storefront with catalogue, cart and checkout.' },
     { n: 'Arowin Lubricants', d: 'arowinlubricants.com', c: 'web',
       p: 'Product and distribution platform for an automotive lubricants brand.' },
-    { n: 'Bendito Group', d: 'benditogroup.co.in', c: 'ecom',
+    { n: 'Bendito Group', d: 'benditogroup.co.in', c: 'ecom', frame: false,
       p: 'Premium makhana storefront, trading online as PopNest.' },
-    { n: 'S7 Millet Co', d: 's7milletco.com', c: 'ecom',
+    { n: 'S7 Millet Co', d: 's7milletco.com', c: 'ecom', frame: false,
       p: 'Millet breakfast mixes sold direct — instant idli, dosa and pesarattu.' }
   ];
 
