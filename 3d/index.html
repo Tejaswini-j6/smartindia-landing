@@ -687,12 +687,11 @@ chakras.push(hero);
 /* ---------- opposing smoke: orange L→R (top), green R→L (bottom) ---------- */
 const ribbonVert = `
   varying vec2 vUv;
-  varying vec3 vWorldPos;
+  varying float vAlong;
   void main() {
     vUv = uv;
-    vec4 world = modelMatrix * vec4(position, 1.0);
-    vWorldPos = world.xyz;
-    gl_Position = projectionMatrix * viewMatrix * world;
+    vAlong = uv.x;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
 const ribbonFrag = `
@@ -701,7 +700,7 @@ const ribbonFrag = `
   uniform float uEnergy;
   uniform float uDir;
   varying vec2 vUv;
-  varying vec3 vWorldPos;
+  varying float vAlong;
 
   float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
   float noise(vec2 p){
@@ -718,38 +717,26 @@ const ribbonFrag = `
 
   void main() {
     float edge = abs(vUv.y - 0.5) * 2.0;
-    float soft = pow(1.0 - smoothstep(0.05, 1.0, edge), 1.4);
+    float soft = 1.0 - smoothstep(0.15, 1.0, edge);
 
-    /* denser at the emit side, thinning as smoke travels */
-    float along = uDir > 0.0 ? vUv.x : (1.0 - vUv.x);
-    float emit = smoothstep(0.0, 0.22, along) * (1.0 - smoothstep(0.55, 1.0, along) * 0.65);
+    float along = uDir > 0.0 ? vAlong : (1.0 - vAlong);
+    float emit = mix(1.0, 0.35, smoothstep(0.15, 1.0, along));
 
-    vec2 np = vec2(vUv.x * 5.5 - uTime * 0.85 * uDir, vUv.y * 2.4 + uTime * 0.12);
+    vec2 np = vec2(vAlong * 5.0 - uTime * 0.9 * uDir, vUv.y * 2.0);
     float n = fbm(np);
-    float n2 = fbm(np * 1.7 + 2.3);
-    float smoke = smoothstep(0.2, 0.85, n * 0.55 + n2 * 0.5);
-    float wave = 0.5 + 0.5 * sin(vUv.x * 16.0 - uTime * 2.4 * uDir + n * 4.0);
+    float smoke = 0.45 + 0.55 * n;
+    float wave = 0.55 + 0.45 * sin(vAlong * 14.0 - uTime * 2.2 * uDir + n * 3.0);
 
-    float alpha = soft * smoke * emit * (0.5 + 0.28 * wave) * (0.8 + 0.25 * uEnergy);
+    float alpha = soft * smoke * emit * (0.72 + 0.2 * wave) * (0.85 + 0.2 * uEnergy);
 
-    /* bright-dark smoke: deep base with a lit crest */
-    vec3 deep = uColor * 0.45;
-    vec3 lit = uColor * 1.15;
-    vec3 col = mix(deep, lit, 0.3 + 0.7 * n * wave);
+    vec3 deep = uColor * 0.5;
+    vec3 lit = uColor * 1.2;
+    vec3 col = mix(deep, lit, 0.35 + 0.65 * n * wave);
     gl_FragColor = vec4(col, alpha);
   }
 `;
 
-const RIBBON_POINTS = 42;
-const ribbonShape = (() => {
-  const s = new THREE.Shape();
-  s.moveTo(0, -0.78);
-  s.lineTo(0.1, -0.78);
-  s.lineTo(0.1, 0.78);
-  s.lineTo(0, 0.78);
-  s.closePath();
-  return s;
-})();
+const RIBBON_POINTS = 36;
 
 function createRibbon(color, phase, yBias, dir) {
   const points = [];
@@ -769,55 +756,59 @@ function createRibbon(color, phase, yBias, dir) {
     side: THREE.DoubleSide
   });
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);
+  mesh.renderOrder = 2;
   scene.add(mesh);
   return { points, mesh, phase, yBias, dir };
 }
 
 /* Bright-dark smoke tones */
-const SMOKE_ORANGE = 0xC45A12;
-const SMOKE_GREEN = 0x0F6B36;
+const SMOKE_ORANGE = 0xD46518;
+const SMOKE_GREEN = 0x148A42;
 
 /* Orange: top-left → right | Green: bottom-right → left */
 const ribbons = [
-  createRibbon(SMOKE_ORANGE, 0.0,  3.4,  1),
-  createRibbon(SMOKE_GREEN,  2.4, -3.4, -1)
+  createRibbon(SMOKE_ORANGE, 0.0,  3.2,  1),
+  createRibbon(SMOKE_GREEN,  2.4, -3.2, -1)
 ];
 
 function updateRibbon(r, time, energy) {
-  /* Smoke waveform streaming from each side */
-  const flow = time * (1.05 + energy * 0.4) * r.dir + r.phase;
-  const x0 = r.dir > 0 ? -20 : 20;
-  const x1 = r.dir > 0 ? 18 : -18;
+  const flow = time * (1.1 + energy * 0.4) * r.dir + r.phase;
+  const x0 = r.dir > 0 ? -16 : 16;
+  const x1 = r.dir > 0 ? 16 : -16;
 
   for (let i = 0; i < r.points.length; i++) {
     const t = i / Math.max(r.points.length - 1, 1);
     const x = THREE.MathUtils.lerp(x0, x1, t);
-    /* billowing smoke waves — stronger near emit side */
-    const birth = 1.0 - t * 0.45;
-    const wave = Math.sin(x * 0.38 + flow) * (1.9 + energy * 0.7) * birth
-               + Math.sin(x * 0.85 + flow * 1.5) * 0.75 * birth
-               + Math.sin(x * 1.4 - flow * 0.8 + r.phase) * 0.35;
+    const birth = 1.0 - t * 0.35;
+    const wave = Math.sin(x * 0.42 + flow) * (1.7 + energy * 0.6) * birth
+               + Math.sin(x * 0.9 + flow * 1.45) * 0.7 * birth
+               + Math.sin(x * 1.5 - flow * 0.75 + r.phase) * 0.35;
     const y = r.yBias + wave
-            + Math.sin(time * 0.55 + r.phase + t * 2.5) * 0.45;
-    const z = -6.0
-            + Math.cos(x * 0.3 + flow * 0.9) * (2.6 + energy) * birth
-            + Math.sin(t * Math.PI + flow) * 1.1;
+            + Math.sin(time * 0.5 + r.phase + t * 2.2) * 0.4;
+    /* Keep smoke in front of the Chakra so it reads in the hero */
+    const z = 5.5
+            + Math.cos(x * 0.28 + flow * 0.85) * (1.8 + energy * 0.6) * birth
+            + Math.sin(t * Math.PI + flow) * 0.7;
     r.points[i].set(x, y, z);
   }
 
   const curve = new THREE.CatmullRomCurve3(r.points);
-  const geo = new THREE.ExtrudeGeometry(ribbonShape, {
-    steps: 150,
-    bevelEnabled: false,
-    extrudePath: curve
-  });
+  const radius = 0.55 + energy * 0.18;
+  const geo = new THREE.TubeGeometry(curve, 120, radius, 10, false);
 
   const posAttr = geo.attributes.position;
+  const normAttr = geo.attributes.normal;
+  const uvAttr = geo.attributes.uv;
   for (let vi = 0; vi < posAttr.count; vi++) {
-    const px = posAttr.getX(vi), py = posAttr.getY(vi), pz = posAttr.getZ(vi);
-    const flutter = Math.sin(px * 0.6 - time * 2.2 * r.dir + r.phase) * 0.07
-                  + Math.sin(pz * 0.45 + time * 1.5) * 0.04;
-    posAttr.setXYZ(vi, px, py + flutter, pz);
+    const u = uvAttr.getX(vi), v = uvAttr.getY(vi);
+    const flutter = Math.sin(u * 12.0 - time * 2.0 * r.dir + r.phase) * 0.08
+                  + Math.sin(v * Math.PI * 2.0 + time) * 0.04;
+    posAttr.setXYZ(
+      vi,
+      posAttr.getX(vi) + normAttr.getX(vi) * flutter,
+      posAttr.getY(vi) + normAttr.getY(vi) * flutter,
+      posAttr.getZ(vi) + normAttr.getZ(vi) * flutter
+    );
   }
   posAttr.needsUpdate = true;
   geo.computeVertexNormals();
