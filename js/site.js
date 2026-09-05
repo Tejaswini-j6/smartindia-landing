@@ -420,15 +420,14 @@
   })();
 
   /* — template switch —
-     The head script has already stamped data-mode before first paint. This
-     only wires the control: left is the flat page, right is the 3D template.
-     Theme no longer lives here. */
+     This page is the normal template. The 3D side will load the extracted
+     HTML pack once it is in the repo. Theme no longer lives here. */
   (function themer() {
     const btn = $('#themer');
     const root = document.documentElement;
 
     function current() {
-      return root.getAttribute('data-mode') === 'normal' ? 'normal' : '3d';
+      return root.getAttribute('data-mode') === '3d' ? '3d' : 'normal';
     }
     function label(mode) {
       if (!btn) return;
@@ -440,9 +439,6 @@
     function apply(mode) {
       root.setAttribute('data-mode', mode);
       label(mode);
-      if (mode === 'normal') {
-        $$('.tilt, .magnetic').forEach(function (el) { el.style.transform = ''; });
-      }
       window.dispatchEvent(new CustomEvent('si:mode', { detail: mode }));
     }
 
@@ -450,7 +446,7 @@
     if (btn) {
       btn.addEventListener('click', function () {
         const next = current() === '3d' ? 'normal' : '3d';
-        try { localStorage.setItem('si-mode', next); } catch (e) {}
+        try { localStorage.setItem('si-template', next); } catch (e) {}
         apply(next);
       });
     }
@@ -880,7 +876,6 @@
         el.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
       });
       el.addEventListener('pointermove', function (e) {
-        if (document.documentElement.getAttribute('data-mode') === 'normal') return;
         rectOf(el, box);
         move(e.clientX, e.clientY);
       }, { passive: true });
@@ -899,7 +894,6 @@
           (x * 6).toFixed(2) + 'deg) translateZ(6px)';
       });
       el.addEventListener('pointermove', function (e) {
-        if (document.documentElement.getAttribute('data-mode') === 'normal') return;
         rectOf(el, box);
         move(e.clientX, e.clientY);
       }, { passive: true });

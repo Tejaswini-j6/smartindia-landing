@@ -50,20 +50,13 @@
   const $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
   const clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
 
+  root.classList.add('float-on');
+
   /* The drifting words are free — a compositor animation on a handful of
      on-screen spans. The pointer parallax and the decorative bodies are not:
-     they move large blurred areas. A weak device keeps the words. Classes
-     only go on in the 3D template. */
+     they move large blurred areas. A weak device keeps the words. */
   const RICH = !PROFILE.low;
-  function applyMode() {
-    const on = root.getAttribute('data-mode') !== 'normal';
-    root.classList.toggle('float-on', on);
-    root.classList.toggle('float-rich', on && RICH);
-    if (!on) {
-      root.style.removeProperty('--fl-mx');
-      root.style.removeProperty('--fl-my');
-    }
-  }
+  if (RICH) root.classList.add('float-rich');
 
   /* ══════════════════════════════════════════════════════════════════════
      1.  The words float
@@ -284,8 +277,6 @@
      ══════════════════════════════════════════════════════════════════════ */
   words();
   if (RICH) { bodies(); depth(); pointer(); }
-  applyMode();
-  window.addEventListener('si:mode', applyMode);
 
   /* flow.js measures the page in document space; the bodies are absolutely
      positioned and the word spans do not change a single line box, so nothing

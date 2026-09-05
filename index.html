@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" data-mode="3d">
+<html lang="en" data-theme="light" data-mode="normal">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -30,10 +30,12 @@
     document.documentElement.setAttribute('data-theme', 'light');
   }
   try {
-    var mode = localStorage.getItem('si-mode');
-    document.documentElement.setAttribute('data-mode', mode === 'normal' ? 'normal' : '3d');
+    /* si-template, not the old si-mode key: that one stored this page as
+       '3d'. This page is the normal side. */
+    var mode = localStorage.getItem('si-template');
+    document.documentElement.setAttribute('data-mode', mode === '3d' ? '3d' : 'normal');
   } catch (e) {
-    document.documentElement.setAttribute('data-mode', '3d');
+    document.documentElement.setAttribute('data-mode', 'normal');
   }
 })();
 </script>
@@ -148,7 +150,7 @@
     <span>Start a Project</span>
   </a>
 
-  <button class="themer" id="themer" type="button" aria-label="Switch to normal template" aria-pressed="true" title="3D template">
+  <button class="themer" id="themer" type="button" aria-label="Switch to 3D template" aria-pressed="false" title="Normal template">
     <span class="themer__track" aria-hidden="true">
       <span class="themer__knob">
         <svg class="themer__flat" viewBox="0 0 24 24" aria-hidden="true">

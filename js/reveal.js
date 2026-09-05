@@ -164,16 +164,6 @@
 
   if (!root || !faceHost) { document.body.classList.remove('is-booting'); return; }
 
-  /* Normal template: hand the page over immediately. Do not write the
-     "seen" key — a later visit in 3D should still get the intro. */
-  if (document.documentElement.getAttribute('data-mode') === 'normal') {
-    document.body.classList.remove('is-booting');
-    root.classList.add('is-done', 'is-gone');
-    root.setAttribute('aria-hidden', 'true');
-    window.dispatchEvent(new CustomEvent('si:revealed'));
-    return;
-  }
-
   const faceSvg = mountLogo(faceHost, {});
 
   /* ── real 3D extrusion: the wheel, in shells receding in Z ────────────
@@ -687,9 +677,6 @@
 
   const bail = function () { finish(true); };
   if (skipBtn) skipBtn.addEventListener('click', bail);
-  window.addEventListener('si:mode', function (e) {
-    if (e.detail === 'normal' && !finished) bail();
-  });
   window.addEventListener('keydown', function (e) {
     if (!finished && (e.key === 'Escape' || e.key === 'Enter')) bail();
   });

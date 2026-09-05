@@ -646,9 +646,8 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
 .nav__links a:hover::after,.nav__links a.is-active::after{ transform:scaleX(1); }
 
 /* — template switch —
-   Same sliding knob as before: left is the flat page, right is the 3D
-   template. Both glyphs live in the knob and cross-fade, so the knob is
-   never empty mid-travel. */
+   Left is this site (the normal template). Right is the 3D template, loaded
+   from the extracted HTML pack. Both glyphs live in the knob and cross-fade. */
 .themer{
   flex:none; margin-left:14px;
   width:62px; height:32px; padding:0;
@@ -681,24 +680,6 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
 :root[data-mode="3d"] .themer__knob{ transform:translateX(30px); }
 :root[data-mode="3d"] .themer__flat{ opacity:0; transform:rotate(60deg); }
 :root[data-mode="3d"] .themer__cube{ opacity:1; transform:rotate(0deg); }
-
-/* Normal template: the 3D intro, canvases and floating bodies stay out of
-   the way so the page is just the copy. Content must still be visible if
-   JS has not yet cleared is-booting. */
-:root[data-mode="normal"] .reveal{ display:none !important; }
-:root[data-mode="normal"] .hero__canvas,
-:root[data-mode="normal"] .contact__bg,
-:root[data-mode="normal"] .fl-orb,
-:root[data-mode="normal"] .cursor{ display:none; }
-:root[data-mode="normal"] body.is-booting{ overflow:auto; }
-:root[data-mode="normal"] body.is-booting main,
-:root[data-mode="normal"] body.is-booting .foot,
-:root[data-mode="normal"] body.is-booting .nav,
-:root[data-mode="normal"] body.is-booting .hero__inner,
-:root[data-mode="normal"] body.is-booting .dock{
-  opacity:1; visibility:visible; transform:none;
-}
-:root[data-mode="normal"] .tilt{ transform-style:flat; }
 
 /* The ground, the text and every pane ease between themes together. Scoped to
    a class the switch adds for the length of the change, so the transition is

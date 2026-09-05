@@ -556,13 +556,7 @@
   /* ══════════════════════════════════════════════════════════════════════
      boot
      ══════════════════════════════════════════════════════════════════════ */
-  let started = false;
-  function mode3d() {
-    return document.documentElement.getAttribute('data-mode') !== 'normal';
-  }
   function start() {
-    if (started || !mode3d()) return;
-    started = true;
     if (PROFILE.reduced) {
       /* still paint one static frame so the composition is not empty */
       heroScene();
@@ -576,17 +570,11 @@
 
   /* Hold every scene until the reveal hands the page over. Running five
      canvases behind an intro nobody can see steals the frame budget from
-     the one animation that is actually on screen. Normal template never
-     starts the canvases; switching to 3D later picks them up here. */
+     the one animation that is actually on screen. */
   function boot() {
-    const tryStart = function () { if (mode3d()) start(); };
-    window.addEventListener('si:mode', function (e) {
-      if (e.detail === '3d') tryStart();
-    });
-    if (!mode3d()) return;
-    if (!document.body.classList.contains('is-booting')) { tryStart(); return; }
+    if (!document.body.classList.contains('is-booting')) { start(); return; }
     let done = false;
-    const go = function () { if (!done) { done = true; tryStart(); } };
+    const go = function () { if (!done) { done = true; start(); } };
     window.addEventListener('si:revealed', go, { once: true });
     setTimeout(go, 12000);              /* never depend on the reveal alone */
   }

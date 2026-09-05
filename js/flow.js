@@ -42,17 +42,13 @@
   const $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
   const clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
 
+  root.classList.add('flow-on');
+
   /* Parallax, the receding exit and velocity drag are the expensive third:
      they repaint large areas every frame. On a weak device the page keeps the
-     free half — sequenced entries and the line-by-line headings. The classes
-     themselves only go on in the 3D template. */
+     free half — sequenced entries and the line-by-line headings. */
   const RICH = !PROFILE.low;
-  function applyMode() {
-    const on = root.getAttribute('data-mode') !== 'normal';
-    root.classList.toggle('flow-on', on);
-    root.classList.toggle('flow-rich', on && RICH);
-    if (on) kick();
-  }
+  if (RICH) root.classList.add('flow-rich');
 
   /* ══════════════════════════════════════════════════════════════════════
      1.  Headings arrive a line at a time
@@ -287,12 +283,9 @@
   scan();
   collect();
   measure();
-  applyMode();
-  window.addEventListener('si:mode', applyMode);
+  kick();
 
-  window.addEventListener('scroll', function () {
-    if (root.getAttribute('data-mode') !== 'normal') kick();
-  }, { passive: true });
+  window.addEventListener('scroll', kick, { passive: true });
 
   let rz = 0;
   window.addEventListener('resize', function () {
