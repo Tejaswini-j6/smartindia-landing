@@ -681,6 +681,34 @@ body.is-booting .nav{ opacity:0; transform:translateY(-14px); }
 :root[data-mode="3d"] .themer__flat{ opacity:0; transform:rotate(60deg); }
 :root[data-mode="3d"] .themer__cube{ opacity:1; transform:rotate(0deg); }
 
+/* The 3D pack is framed over the page. The switch stays on top so those
+   files never have to be edited. */
+:root[data-mode="3d"],
+:root[data-mode="3d"] body{ overflow:hidden; }
+.tpl-3d{
+  position:fixed; inset:0; z-index:6500;
+  width:100%; height:100%; border:0; background:#050505;
+}
+.tpl-3d[hidden]{ display:none; }
+:root[data-mode="3d"] .nav{
+  transform:none !important; opacity:1 !important;
+  background:none; box-shadow:none; border-color:transparent;
+  pointer-events:none;
+}
+:root[data-mode="3d"] .nav__brand,
+:root[data-mode="3d"] .nav__links,
+:root[data-mode="3d"] .nav__cta,
+:root[data-mode="3d"] .nav__burger{ visibility:hidden; }
+:root[data-mode="3d"] .themer{ pointer-events:auto; position:relative; z-index:6600; }
+:root[data-mode="3d"] .reveal,
+:root[data-mode="3d"] main,
+:root[data-mode="3d"] .foot,
+:root[data-mode="3d"] .menu,
+:root[data-mode="3d"] .dock,
+:root[data-mode="3d"] .scrollbar,
+:root[data-mode="3d"] .cursor{ visibility:hidden; pointer-events:none; }
+:root[data-mode="3d"] body.is-booting{ overflow:auto; }
+
 /* The ground, the text and every pane ease between themes together. Scoped to
    a class the switch adds for the length of the change, so the transition is
    never paid for during normal scrolling or on first paint. */

@@ -420,11 +420,12 @@
   })();
 
   /* — template switch —
-     This page is the normal template. The 3D side will load the extracted
-     HTML pack once it is in the repo. Theme no longer lives here. */
+     This page is the normal template. 3D is the extracted HTML pack in /3d,
+     shown as-is in a full-page frame so those files stay untouched. */
   (function themer() {
     const btn = $('#themer');
     const root = document.documentElement;
+    const SRC = '3d/SmartIndia%20Site.dc.html';
 
     function current() {
       return root.getAttribute('data-mode') === '3d' ? '3d' : 'normal';
@@ -436,13 +437,32 @@
       btn.setAttribute('aria-pressed', three ? 'true' : 'false');
       btn.setAttribute('title', three ? '3D template' : 'Normal template');
     }
+    function frame3d(on) {
+      let frame = $('#tpl-3d');
+      if (on) {
+        if (!frame) {
+          frame = document.createElement('iframe');
+          frame.id = 'tpl-3d';
+          frame.className = 'tpl-3d';
+          frame.title = 'SmartIndia.ai 3D template';
+          frame.src = SRC;
+          document.body.appendChild(frame);
+        }
+        frame.removeAttribute('hidden');
+        document.body.classList.add('is-3d');
+      } else if (frame) {
+        frame.setAttribute('hidden', '');
+        document.body.classList.remove('is-3d');
+      }
+    }
     function apply(mode) {
       root.setAttribute('data-mode', mode);
       label(mode);
+      frame3d(mode === '3d');
       window.dispatchEvent(new CustomEvent('si:mode', { detail: mode }));
     }
 
-    label(current());
+    apply(current());
     if (btn) {
       btn.addEventListener('click', function () {
         const next = current() === '3d' ? 'normal' : '3d';
