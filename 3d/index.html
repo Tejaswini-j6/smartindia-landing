@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lithos — Ashoka Chakra Tunnel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,500;1,600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #02040A; }
+  body { height: 100%; overflow-x: hidden; font-family: 'Inter', sans-serif; }
+  #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+  #scroll-host { position: relative; }
+  #scroll-hint {
+    position: fixed; right: 28px; bottom: 18px; left: auto; transform: none;
+    color: rgba(255,255,255,.5); font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; font-family: sans-serif; pointer-events: none;
+    transition: opacity .4s ease; z-index: 40; writing-mode: vertical-rl;
+  }
+  a { color: #e8702a; text-decoration: none; }
+  a:hover { color: #d2611f; }
+
+  .lithos-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 40px; background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .lithos-wordmark { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 600; font-size: 22px; color: #fff; }
+  .lithos-nav-links { display: flex; align-items: center; gap: 30px; }
+  .lithos-nav-links a { color: rgba(255,255,255,0.75); font-size: 14px; font-weight: 500; transition: color .2s ease; }
+  .lithos-nav-links a:hover { color: #e8702a; }
+  .lithos-nav-cta { color: #fff !important; border: 1px solid rgba(255,255,255,0.3); padding: 8px 18px; border-radius: 999px; }
+  .lithos-nav-cta:hover { border-color: #e8702a !important; color: #e8702a !important; }
+  .lithos-nav-toggle { display: none; }
+
+  .lithos-hero {
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 36px; padding: 120px 32px 140px;
+    background: linear-gradient(180deg, rgba(2,4,10,0.25) 0%, rgba(2,4,10,0.05) 45%, rgba(2,4,10,0.45) 100%);
+  }
+  .lithos-hero h1 { margin: 0; line-height: 1.05; color: #fff; }
+  .lithos-hero h1 .serif { display: block; font-family: 'Playfair Display', serif; font-style: italic; font-weight: 500; font-size: clamp(38px, 6vw, 74px); color: #f4ede6; }
+  .lithos-hero h1 .sans { display: block; font-family: 'Inter', sans-serif; font-weight: 700; font-size: clamp(38px, 6vw, 74px); letter-spacing: -0.02em; margin-top: 4px; }
+  .lithos-hero-copy { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 40px; max-width: 880px; width: 100%; }
+  .lithos-hero-copy p { margin: 0; text-align: left; color: rgba(255,255,255,0.65); font-size: 16px; line-height: 1.7; }
+  .lithos-cta-btn { display: inline-flex; align-items: center; gap: 8px; background: #e8702a; color: #0a0a0b; font-weight: 600; font-size: 15px; padding: 15px 32px; border-radius: 999px; transition: background .2s ease, box-shadow .2s ease; }
+  .lithos-cta-btn:hover { background: #d2611f !important; box-shadow: 0 0 24px rgba(232,112,42,0.4); }
+
+  .lithos-section {
+    min-height: 62vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 18px; padding: 80px 32px;
+    background: rgba(4,7,14,0.62); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .lithos-section .kicker { font-family: 'Playfair Display', serif; font-style: italic; color: #e8702a; font-size: 15px; letter-spacing: 0.04em; }
+  .lithos-section h2 { margin: 0; font-family: 'Inter', sans-serif; font-weight: 600; font-size: clamp(28px, 4vw, 46px); color: #fff; letter-spacing: -0.01em; }
+  .lithos-section .rule { width: 48px; height: 1px; background: rgba(255,255,255,0.25); }
+
+  .lithos-footer {
+    position: relative; z-index: 1; background: #050608; padding: 64px 40px 40px;
+    display: flex; flex-direction: column; gap: 40px; border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .lithos-footer-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+  .lithos-footer-links { display: flex; gap: 28px; flex-wrap: wrap; }
+  .lithos-footer-links a { color: rgba(255,255,255,0.6); font-size: 14px; }
+  .lithos-footer-links a:hover { color: #e8702a; }
+  .lithos-footer-bottom { color: rgba(255,255,255,0.35); font-size: 12px; }
+
+  @media (max-width: 720px) {
+    .lithos-nav-links { gap: 16px; }
+    .lithos-nav-links a:not(.lithos-nav-cta) { display: none; }
+    .lithos-hero-copy { grid-template-columns: 1fr; }
+  }
+
+  .si-wrap { max-width: 1120px; margin: 0 auto; width: 100%; }
+  .lithos-section .si-lede { max-width: 640px; margin: 0; color: rgba(255,255,255,0.6); font-size: 16px; line-height: 1.7; }
+  .si-outline-btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.3); color: #fff; font-weight: 600; font-size: 15px; padding: 14px 30px; border-radius: 999px; transition: border-color .2s ease, color .2s ease; }
+  .si-outline-btn:hover { border-color: #e8702a !important; color: #e8702a !important; }
+  .si-cta-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .si-facts { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+  .si-facts .fact { color: rgba(255,255,255,0.55); font-size: 13px; letter-spacing: 0.03em; text-transform: uppercase; }
+  .si-facts .fact b { display: block; color: #fff; font-family: 'Playfair Display', serif; font-style: italic; font-size: 20px; font-weight: 600; text-transform: none; letter-spacing: 0; margin-bottom: 4px; }
+
+  .si-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 28px; width: 100%; }
+  .si-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 24px; width: 100%; }
+  .si-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 24px; width: 100%; }
+  .si-grid-5 { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 24px; width: 100%; }
+  .si-grid-6 { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 20px; width: 100%; }
+
+  .si-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 26px; text-align: left; }
+  .si-card .num { font-family: 'Playfair Display', serif; font-style: italic; color: #e8702a; font-size: 14px; display: block; margin-bottom: 10px; }
+  .si-card h3 { margin: 0 0 10px; font-size: 17px; font-weight: 600; color: #fff; }
+  .si-card p { margin: 0; color: rgba(255,255,255,0.6); font-size: 14px; line-height: 1.65; }
+  .si-card ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .si-card ul li { color: rgba(255,255,255,0.6); font-size: 14px; padding-left: 14px; position: relative; }
+  .si-card ul li::before { content: ''; position: absolute; left: 0; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: #e8702a; }
+
+  .si-stat { text-align: center; }
+  .si-stat .num { font-size: clamp(28px, 3.4vw, 42px); font-weight: 700; color: #fff; font-family: 'Inter', sans-serif; }
+  .si-stat .num span { color: #e8702a; }
+  .si-stat .label { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 8px; }
+
+  .si-logo-slot { width: 100%; aspect-ratio: 3/2; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; }
+
+  .si-quote-row { display: flex; gap: 20px; overflow-x: auto; padding: 4px 4px 16px; scroll-snap-type: x mandatory; width: 100%; }
+  .si-quote { flex: 0 0 300px; scroll-snap-align: start; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 24px; text-align: left; }
+  .si-quote p { margin: 0 0 16px; color: rgba(255,255,255,0.72); font-size: 14px; line-height: 1.65; }
+  .si-quote span { color: #e8702a; font-size: 13px; font-weight: 600; }
+
+  .si-form { background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; padding: 44px; max-width: 640px; width: 100%; text-align: left; display: flex; flex-direction: column; gap: 20px; }
+  .si-field label { display: block; font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 7px; }
+  .si-field input, .si-field textarea { width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px 14px; color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; }
+  .si-field input::placeholder, .si-field textarea::placeholder { color: rgba(255,255,255,0.3); }
+  .si-field input:focus, .si-field textarea:focus { outline: none; border-color: #e8702a; }
+  .si-chip-group { display: flex; flex-wrap: wrap; gap: 10px; }
+  .si-chip { display: flex; align-items: center; gap: 7px; border: 1px solid rgba(255,255,255,0.18); border-radius: 999px; padding: 8px 14px; font-size: 13px; color: rgba(255,255,255,0.7); cursor: pointer; }
+  .si-chip input { accent-color: #e8702a; }
+  .si-submit-btn { align-self: flex-start; }
+  .si-note { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+  .si-footer-grid { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 32px; text-align: left; width: 100%; }
+  .si-footer-col h4 { margin: 0 0 14px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+  .si-footer-col a, .si-footer-col p { display: block; color: rgba(255,255,255,0.65); font-size: 14px; margin: 0 0 8px; }
+  .si-footer-col a:hover { color: #e8702a; }
+  .si-footer-tagline { font-family: 'Playfair Display', serif; font-style: italic; color: #f4ede6; font-size: 18px; margin: 0 0 8px; }
+
+  @media (max-width: 900px) {
+    .si-grid-2, .si-grid-3, .si-grid-4, .si-grid-5, .si-grid-6 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .si-footer-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width: 560px) {
+    .si-grid-2, .si-grid-3, .si-grid-4, .si-grid-5, .si-grid-6, .si-footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.143.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.143.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<nav class="lithos-nav">
+  <div class="lithos-wordmark">SmartIndia.ai</div>
+  <div class="lithos-nav-links">
+    <a href="#about">About</a>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#capabilities">Capabilities</a>
+    <a href="#clients">Clients</a>
+    <a href="#contact">Contact</a>
+    <a href="#contact" class="lithos-nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<div id="scroll-host">
+
+  <section class="lithos-hero">
+    <h1><span class="serif">Explore. Discover.</span><span class="sans">Connect. With AI.</span></h1>
+    <div class="lithos-hero-copy" style="grid-template-columns: 1fr; max-width: 680px;">
+      <p style="text-align: center;">SmartIndia.ai brings the power of artificial intelligence and the world of information together in one intelligent platform — and builds the web platforms that businesses run on.</p>
+    </div>
+    <div class="si-cta-row">
+      <a href="#portfolio" class="lithos-cta-btn">Explore SmartIndia.ai</a>
+      <a href="#contact" class="si-outline-btn">Get Started</a>
+    </div>
+    <div class="si-facts">
+      <div class="fact"><b>2025</b>Founded</div>
+      <div class="fact"><b>—</b>Live Platforms</div>
+      <div class="fact"><b>—</b>Customers Served</div>
+      <div class="fact"><b>India</b>Built with an India-first vision</div>
+    </div>
+  </section>
+
+  <section class="lithos-section" id="about">
+    <span class="kicker">About SmartIndia.ai</span>
+    <h2>Making information smarter, simpler and more accessible.</h2>
+    <div class="rule"></div>
+    <div class="si-wrap" style="max-width: 760px; display: flex; flex-direction: column; gap: 16px;">
+      <p class="si-lede" style="max-width: none; margin: 0 auto; text-align: center;">SmartIndia.ai is an AI-powered platform designed to bring people and artificial intelligence closer together. Our goal is to make discovering information more intelligent, convenient and accessible. By combining AI capabilities with multiple sources of information, SmartIndia.ai helps users explore the digital world through a smarter search experience.</p>
+      <p class="si-lede" style="max-width: none; margin: 0 auto; text-align: center;">Founded in 2025 and based in Tiruppur, Tamil Nadu, SmartIndia.ai is focused on building technology that makes AI more useful in everyday life — and on engineering the dynamic websites, e-commerce systems and multi-vendor platforms that carry our clients' businesses online.</p>
+    </div>
+    <div class="si-grid-2" style="max-width: 760px; margin-top: 12px;">
+      <div class="si-card">
+        <h3>Mission</h3>
+        <p>To make AI-powered information discovery simple, accessible and useful for everyone.</p>
+      </div>
+      <div class="si-card">
+        <h3>Vision</h3>
+        <p>To build an intelligent digital ecosystem where people can seamlessly interact with information through AI.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="lithos-section" id="portfolio">
+    <span class="kicker">Portfolio</span>
+    <h2>One intelligent surface for everything you look for.</h2>
+    <div class="rule"></div>
+    <p class="si-lede" style="text-align: center; margin: 0 auto;">Three connected experiences that make up SmartIndia.ai.</p>
+    <div class="si-grid-3" style="max-width: 960px; margin-top: 8px;">
+      <div class="si-card">
+        <h3>Smart Search</h3>
+        <p>AI-powered search designed to help users explore information efficiently.</p>
+      </div>
+      <div class="si-card">
+        <h3>AI Discovery</h3>
+        <p>A smarter way to discover information and explore different topics.</p>
+      </div>
+      <div class="si-card">
+        <h3>Intelligent Digital Experience</h3>
+        <p>A user-friendly interface connecting people with AI-powered information.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="lithos-section" id="our-portfolio">
+    <span class="kicker">Our Portfolio</span>
+    <h2>Websites we have designed and built.</h2>
+    <div class="rule"></div>
+    <p class="si-lede" style="text-align: center; margin: 0 auto;">A selection of the work — each one open to visit.</p>
+    <div class="si-grid-3" style="max-width: 960px; margin-top: 8px;">
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+    </div>
+  </section>
+
+  <section class="lithos-section" id="selected-work">
+    <span class="kicker">Selected Work</span>
+    <h2>Everything else we run.</h2>
+    <div class="rule"></div>
+    <p class="si-lede" style="text-align: center; margin: 0 auto;">The Portfolio above leads with ten. This is the rest of the estate — every one a running production platform, none of them a concept.</p>
+    <a href="#" class="si-outline-btn">Show all platforms</a>
+  </section>
+
+  <section class="lithos-section" id="vendors">
+    <span class="kicker">Vendors</span>
+    <h2>The suppliers behind the build.</h2>
+    <div class="rule"></div>
+    <div class="si-grid-6" style="max-width: 960px; margin-top: 8px;">
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+    </div>
+    <p class="si-note">Placeholder entries — replace with the real vendor list.</p>
+  </section>
+
+  <section class="lithos-section" id="why-us">
+    <span class="kicker">Why SmartIndia.ai</span>
+    <h2>Five reasons this holds up at scale.</h2>
+    <div class="rule"></div>
+    <div class="si-grid-5" style="max-width: 1080px; margin-top: 8px;">
+      <div class="si-card">
+        <span class="num">01</span>
+        <h3>AI First</h3>
+        <p>Built around artificial intelligence to create smarter digital experiences.</p>
+      </div>
+      <div class="si-card">
+        <span class="num">02</span>
+        <h3>Simple &amp; Accessible</h3>
+        <p>Technology designed to be easy to understand and use.</p>
+      </div>
+      <div class="si-card">
+        <span class="num">03</span>
+        <h3>Information Focused</h3>
+        <p>Helping users explore and discover information more efficiently.</p>
+      </div>
+      <div class="si-card">
+        <span class="num">04</span>
+        <h3>Innovation Driven</h3>
+        <p>Focused on developing new ways to connect people with technology.</p>
+      </div>
+      <div class="si-card">
+        <span class="num">05</span>
+        <h3>Built For The Future</h3>
+        <p>Creating an evolving platform for the growing AI-powered digital ecosystem.</p>
+      </div>
+    </div>
+    <div class="si-grid-4" style="max-width: 760px; margin-top: 24px;">
+      <div class="si-stat"><div class="num">—</div><div class="label">Platforms Delivered</div></div>
+      <div class="si-stat"><div class="num">—</div><div class="label">Happy Customers</div></div>
+      <div class="si-stat"><div class="num"><span>4.8</span>/5</div><div class="label">Average Client Rating</div></div>
+      <div class="si-stat"><div class="num"><span>102</span></div><div class="label">Verified Reviews</div></div>
+    </div>
+    <p class="si-note">Rating and review counts as published on Google and Capterra for SmartIndia Digital.</p>
+  </section>
+
+  <section class="lithos-section" id="capabilities">
+    <span class="kicker">Capabilities</span>
+    <h2>How the work gets delivered.</h2>
+    <div class="rule"></div>
+    <p class="si-lede" style="text-align: center; margin: 0 auto;">A four-step delivery process, repeated across every platform we ship.</p>
+    <div class="si-grid-4" style="max-width: 1080px; margin-top: 8px;">
+      <div class="si-card">
+        <h3>Build</h3>
+        <ul>
+          <li>Responsive web development</li>
+          <li>Dynamic website platforms</li>
+          <li>iOS &amp; Android applications</li>
+          <li>UI / UX design</li>
+          <li>Visual identity &amp; graphics</li>
+        </ul>
+      </div>
+      <div class="si-card">
+        <h3>Commerce</h3>
+        <ul>
+          <li>E-commerce storefronts</li>
+          <li>Multi-vendor marketplaces</li>
+          <li>Catalogue &amp; inventory</li>
+          <li>Cart, checkout &amp; orders</li>
+          <li>Seller management</li>
+        </ul>
+      </div>
+      <div class="si-card">
+        <h3>Intelligence</h3>
+        <ul>
+          <li>AI-powered search</li>
+          <li>Smart information discovery</li>
+          <li>AI &amp; web exploration</li>
+          <li>Intelligent user experience</li>
+          <li>Continuous R&amp;D</li>
+        </ul>
+      </div>
+      <div class="si-card">
+        <h3>Operate</h3>
+        <ul>
+          <li>SmartIndia CMS</li>
+          <li>Domain &amp; hosting setup</li>
+          <li>Ongoing maintenance</li>
+          <li>Content updates</li>
+          <li>Mon–Sat support, 8:00–18:30 IST</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lithos-section" id="clients">
+    <span class="kicker">Clients &amp; Partners</span>
+    <h2>The brands we build for.</h2>
+    <div class="rule"></div>
+    <div class="si-grid-6" style="max-width: 960px; margin-top: 8px;">
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+      <div class="si-logo-slot"></div>
+    </div>
+    <div class="si-stat" style="margin-top: 16px;">
+      <div class="num">4.8/5</div>
+      <div class="label">Across 102 verified reviews on Google &amp; Capterra</div>
+    </div>
+  </section>
+
+  <section class="lithos-section" id="testimonials" style="padding-left: 0; padding-right: 0;">
+    <span class="kicker">Testimonials</span>
+    <h2>What clients say.</h2>
+    <div class="rule"></div>
+    <div class="si-quote-row si-wrap" style="max-width: 1080px; margin-top: 8px;">
+      <div class="si-quote"><p>"Excellent experience working with this team! They created a professional, modern, and user-friendly website that perfectly matched my requirements. Communication was smooth throughout the project, they delivered everything on time, and their pricing was fair and transparent."</p><span>— Syed Adnan Ahmed</span></div>
+      <div class="si-quote"><p>"Outstanding service! Smart India AI built our NGO website exactly as we envisioned. The design is modern, mobile-friendly, fast, and easy to use. We are very satisfied with the final website."</p><span>— Dravin Devgan</span></div>
+      <div class="si-quote"><p>"Working with Smartindia.ai to build our website for Basava Ayurvedaa was a fantastic experience. They were professional, responsive, and understood the exact vision we had for our brand."</p><span>— Kartik Lokapur</span></div>
+      <div class="si-quote"><p>"A great service. I strongly recommend them. Very helpful and very supportive team they have. They will guide completely to build your business online."</p><span>— Tanmoy Pradhan</span></div>
+      <div class="si-quote"><p>"Thank you for your support and hard work throughout the website development process. The communication was professional, and the website was deployed as promised."</p><span>— Ashok Prajapati</span></div>
+      <div class="si-quote"><p>"Excellent website development service by SmartIndia.ai. Professional team, great design, timely delivery, and smooth communication. Highly recommended!"</p><span>— Rohit Garg</span></div>
+      <div class="si-quote"><p>"Highly recommended! Amazing website development service. They delivered exactly what we needed, on time, and with great professionalism."</p><span>— Accessorieszone</span></div>
+      <div class="si-quote"><p>"I appreciate a wonderful job done by the team. I am fully satisfied. Very cooperative, talented and hardworking team."</p><span>— Naseem Banoo</span></div>
+      <div class="si-quote"><p>"There are very good service and they fulfill our commitment and also trustable agency and I am fully satisfied our work."</p><span>— Ashish Singh</span></div>
+      <div class="si-quote"><p>"Best work from team side thank you team."</p><span>— Yash Sadariya</span></div>
+      <div class="si-quote"><p>"Excellent work and helpful service."</p><span>— The Solutionpath</span></div>
+    </div>
+  </section>
+
+  <section class="lithos-section" id="contact">
+    <span class="kicker">Let's Talk</span>
+    <h2>Let's build something exceptional.</h2>
+    <div class="rule"></div>
+    <form class="si-form" onsubmit="return false;">
+      <div class="si-field"><label>Your name *</label><input type="text" required placeholder="Full name"></div>
+      <div class="si-field"><label>Contact number *</label><input type="tel" required placeholder="+91"></div>
+      <div class="si-field"><label>Email address *</label><input type="email" required placeholder="you@company.com"></div>
+      <div class="si-field">
+        <label>What do you need?</label>
+        <div class="si-chip-group">
+          <label class="si-chip"><input type="checkbox">Dynamic website</label>
+          <label class="si-chip"><input type="checkbox">E-commerce platform</label>
+          <label class="si-chip"><input type="checkbox">Multi-vendor marketplace</label>
+          <label class="si-chip"><input type="checkbox">Mobile application</label>
+          <label class="si-chip"><input type="checkbox">AI search &amp; discovery</label>
+          <label class="si-chip"><input type="checkbox">Support &amp; maintenance</label>
+          <label class="si-chip"><input type="checkbox">Something else</label>
+        </div>
+      </div>
+      <div class="si-field"><label>About your business / type of business *</label><input type="text" required placeholder="e.g. NGO, retail, healthcare"></div>
+      <div class="si-field"><label>Your requirement *</label><textarea rows="4" required placeholder="Tell us what you're building"></textarea></div>
+      <button type="submit" class="lithos-cta-btn si-submit-btn" style="border: none; cursor: pointer;">Send enquiry</button>
+      <p class="si-note">Fields marked * are required.</p>
+    </form>
+  </section>
+
+  <footer class="lithos-footer">
+    <div class="si-footer-grid">
+      <div class="si-footer-col">
+        <p class="si-footer-tagline">SmartIndia.ai</p>
+        <p>Bringing AI and People Together.</p>
+        <p style="margin-top: 16px;">Arun Towers, MR Nagar,<br>K N P Colony, Karatangadu,<br>Tiruppur, Tamil Nadu 641604, India</p>
+      </div>
+      <div class="si-footer-col">
+        <h4>Direct</h4>
+        <a href="mailto:info@smartindia.ai">info@smartindia.ai</a>
+        <a href="tel:+919994900470">+91 99949 00470</a>
+        <h4 style="margin-top: 18px;">Hours</h4>
+        <p>Mon – Sat · 8:00 – 18:30 IST</p>
+        <p>Sunday closed</p>
+      </div>
+      <div class="si-footer-col">
+        <h4>Platforms</h4>
+        <a href="#">smartindia.digital</a>
+        <a href="#">cms.smartindia.ai</a>
+      </div>
+      <div class="si-footer-col">
+        <h4>Company</h4>
+        <a href="#about">About</a>
+        <a href="#why-us">Why Us</a>
+        <a href="#capabilities">Capabilities</a>
+      </div>
+      <div class="si-footer-col">
+        <h4>Work</h4>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#our-portfolio">Solutions</a>
+        <a href="#selected-work">Live Platforms</a>
+        <a href="#vendors">Vendors</a>
+        <h4 style="margin-top: 18px;">Contact</h4>
+        <a href="#contact">Start a Project</a>
+      </div>
+    </div>
+    <div class="lithos-footer-bottom">© 2025 SmartIndia.ai · Tiruppur, Tamil Nadu, India — Founded 2025</div>
+  </footer>
+
+</div>
+<div id="scroll-hint">SCROLL ↓</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { GammaCorrectionShader } from 'three/addons/shaders/GammaCorrectionShader.js';
+import { CopyShader } from 'three/addons/shaders/CopyShader.js';
+
+/* ---------- palette ---------- */
+const BG = 0x02040A;
+const CHAKRA_PRIMARY = 0x071A3A;
+const CHAKRA_HIGHLIGHT = 0x163B70;
+const CHAKRA_EDGE = 0x2B5C96;
+const METAL_REFLECT = 0x8FA7C5;
+const SAFFRON = 0xFF8C20;
+const WHITE_C = 0xF4F7FA;
+const GREEN_C = 0x18A957;
+const CYAN = 0x72DFFF;
+
+/* ---------- basics ---------- */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGL1Renderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight, false);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace ?? renderer.outputColorSpace;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(BG, 5, 100);
+
+/* procedural radial-gradient background so corners stay dark, center faintly lit */
+function makeBackgroundTexture() {
+  const size = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#02040A';
+  ctx.fillRect(0, 0, size, size);
+  const g = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size*0.62);
+  g.addColorStop(0, 'rgba(43,92,150,0.35)');
+  g.addColorStop(0.35, 'rgba(22,59,112,0.18)');
+  g.addColorStop(0.7, 'rgba(7,26,58,0.06)');
+  g.addColorStop(1, 'rgba(2,4,10,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace ?? tex.colorSpace;
+  return tex;
+}
+scene.background = makeBackgroundTexture();
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 500);
+camera.position.set(0, 0, 20);
+
+/* ---------- lighting ---------- */
+scene.add(new THREE.AmbientLight(0x0e1a30, 0.35));
+const dirLight = new THREE.DirectionalLight(0xbcd4ff, 0.85);
+dirLight.position.set(4, 8, 10);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.set(1024, 1024);
+dirLight.shadow.camera.far = 60;
+scene.add(dirLight);
+
+const rimLight = new THREE.PointLight(0x4fa2ff, 0.5, 40, 2);
+rimLight.position.set(-12, 3, 6);
+scene.add(rimLight);
+
+const saffronLight = new THREE.PointLight(SAFFRON, 0.5, 30, 2);
+saffronLight.position.set(6, 7, 10);
+scene.add(saffronLight);
+const whiteLight = new THREE.PointLight(WHITE_C, 0.35, 30, 2);
+whiteLight.position.set(0, 0, 14);
+scene.add(whiteLight);
+const greenLight = new THREE.PointLight(GREEN_C, 0.5, 30, 2);
+greenLight.position.set(-6, -7, 10);
+scene.add(greenLight);
+
+/* ---------- Chakra factory (shared geometry, instanced groups) ---------- */
+const OUTER_R = 5, TUBE_R = 0.35;
+const rimGeo = new THREE.TorusGeometry(OUTER_R, TUBE_R, 20, 72);
+const bevelGeo = new THREE.TorusGeometry(OUTER_R - TUBE_R * 1.6, TUBE_R * 0.4, 10, 72);
+const HUB_R = 1.15, HUB_DEPTH = 0.95;
+const hubGeo = new THREE.CylinderGeometry(HUB_R, HUB_R, HUB_DEPTH, 36);
+const spokeInnerR = OUTER_R - TUBE_R * 1.6;
+const spokeLen = spokeInnerR - HUB_R;
+const spokeMid = HUB_R + spokeLen / 2;
+const spokeGeo = new THREE.BoxGeometry(spokeLen, 0.26, 0.42);
+
+const bodyMat = new THREE.MeshStandardMaterial({ color: CHAKRA_PRIMARY, metalness: 0.75, roughness: 0.28, emissive: 0x06152F, emissiveIntensity: 0.08 });
+const rimMat = new THREE.MeshStandardMaterial({ color: CHAKRA_EDGE, metalness: 0.85, roughness: 0.22, emissive: 0x06152F, emissiveIntensity: 0.07 });
+const bevelMat = new THREE.MeshStandardMaterial({ color: METAL_REFLECT, metalness: 0.9, roughness: 0.15, emissive: 0x0B2040, emissiveIntensity: 0.05 });
+const hubMat = new THREE.MeshStandardMaterial({ color: CHAKRA_HIGHLIGHT, metalness: 0.8, roughness: 0.25, emissive: 0x06152F, emissiveIntensity: 0.09 });
+
+function createChakraGroup() {
+  const group = new THREE.Group();
+  const spokesGroup = new THREE.Group();
+
+  for (let i = 0; i < 24; i++) {
+    const angle = (i / 24) * Math.PI * 2;
+    const spoke = new THREE.Mesh(spokeGeo, bodyMat);
+    spoke.position.set(Math.cos(angle) * spokeMid, Math.sin(angle) * spokeMid, 0);
+    spoke.rotation.z = angle;
+    spokesGroup.add(spoke);
+  }
+  group.add(spokesGroup);
+
+  const rim = new THREE.Mesh(rimGeo, rimMat);
+  group.add(rim);
+  const bevel = new THREE.Mesh(bevelGeo, bevelMat);
+  group.add(bevel);
+  const hub = new THREE.Mesh(hubGeo, hubMat);
+  hub.rotation.x = Math.PI / 2;
+  group.add(hub);
+
+  group.userData.spokesGroup = spokesGroup;
+  group.userData.rim = rim;
+  group.userData.hoverAmt = 0;
+  return group;
+}
+
+/* ---------- tunnel ---------- */
+const tunnelGroup = new THREE.Group();
+scene.add(tunnelGroup);
+const chakras = [];
+
+const hero = createChakraGroup();
+hero.scale.setScalar(1.6);
+hero.position.set(0, 0, -6);
+hero.userData.dir = 1;
+hero.userData.speedY = 0.06;
+hero.userData.speedZ = 0.02;
+tunnelGroup.add(hero);
+chakras.push(hero);
+
+/* ---------- tricolor ribbons ---------- */
+const ribbonVert = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+const ribbonFrag = `
+  uniform vec3 uColor;
+  uniform float uTime;
+  varying vec2 vUv;
+  void main() {
+    float edge = abs(vUv.y - 0.5) * 2.0;
+    float alpha = smoothstep(1.0, 0.0, edge);
+    alpha *= 0.55 + 0.45 * sin(vUv.x * 40.0 + uTime * 1.5);
+    alpha *= 0.85;
+    gl_FragColor = vec4(uColor, alpha);
+  }
+`;
+
+function createRibbon(color, phase, yBias, count) {
+  const points = [];
+  for (let i = 0; i < count; i++) points.push(new THREE.Vector3(0, 0, 20 - i * 6));
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(color) }, uTime: { value: 0 } },
+    vertexShader: ribbonVert,
+    fragmentShader: ribbonFrag,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide
+  });
+  const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);
+  scene.add(mesh);
+  return { points, mesh, phase, yBias };
+}
+
+const RIBBON_POINTS = 28;
+const ribbons = [
+  createRibbon(SAFFRON, 0.0, 3.2, RIBBON_POINTS),
+  createRibbon(WHITE_C, 2.1, 0.0, RIBBON_POINTS),
+  createRibbon(GREEN_C, 4.2, -3.2, RIBBON_POINTS)
+];
+
+function updateRibbon(r, time, energy) {
+  for (let i = 0; i < r.points.length; i++) {
+    const z = 20 - i * 6;
+    const x = Math.sin(z * 0.12 + time * (0.6 + energy) + r.phase) * (6.5 + energy * 2.5);
+    const y = r.yBias + Math.cos(z * 0.08 + time * (0.5 + energy) + r.phase) * (2.4 + energy * 1.2);
+    r.points[i].set(x, y, z);
+  }
+  const curve = new THREE.CatmullRomCurve3(r.points);
+  const geo = new THREE.TubeGeometry(curve, 120, 0.45 + energy * 0.12, 8, false);
+
+  const posAttr = geo.attributes.position;
+  const normAttr = geo.attributes.normal;
+  const uvAttr = geo.attributes.uv;
+  for (let vi = 0; vi < posAttr.count; vi++) {
+    const u = uvAttr.getX(vi), v = uvAttr.getY(vi);
+    const fold = Math.sin(v * Math.PI * 3 + u * 16 + time * 1.1 + r.phase) * 0.055;
+    const flutter = Math.sin(u * 7 - time * 1.5 + r.phase * 2) * 0.045 * (0.5 + energy * 0.5);
+    const d = fold + flutter;
+    posAttr.setXYZ(vi, posAttr.getX(vi) + normAttr.getX(vi) * d, posAttr.getY(vi) + normAttr.getY(vi) * d, posAttr.getZ(vi) + normAttr.getZ(vi) * d);
+  }
+  posAttr.needsUpdate = true;
+  geo.computeVertexNormals();
+
+  r.mesh.geometry.dispose();
+  r.mesh.geometry = geo;
+  r.mesh.material.uniforms.uTime.value = time;
+}
+
+/* ---------- particle atmosphere ---------- */
+const PARTICLE_COUNT = window.innerWidth < 700 ? 300 : 650;
+const pPositions = new Float32Array(PARTICLE_COUNT * 3);
+const pColors = new Float32Array(PARTICLE_COUNT * 3);
+const cyanC = new THREE.Color(CYAN), whiteC = new THREE.Color(WHITE_C);
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  const ang = Math.random() * Math.PI * 2;
+  const rad = Math.sqrt(Math.random()) * 14;
+  pPositions[i * 3] = Math.cos(ang) * rad;
+  pPositions[i * 3 + 1] = Math.sin(ang) * rad;
+  pPositions[i * 3 + 2] = 20 - Math.random() * 140;
+  const c = cyanC.clone().lerp(whiteC, Math.random());
+  pColors[i * 3] = c.r; pColors[i * 3 + 1] = c.g; pColors[i * 3 + 2] = c.b;
+}
+const particleGeo = new THREE.BufferGeometry();
+particleGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+particleGeo.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
+const particleMat = new THREE.ShaderMaterial({
+  uniforms: { uSize: { value: 60 } },
+  vertexShader: `
+    attribute vec3 color;
+    varying vec3 vColor;
+    uniform float uSize;
+    void main() {
+      vColor = color;
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = uSize / -mv.z;
+      gl_Position = projectionMatrix * mv;
+    }
+  `,
+  fragmentShader: `
+    varying vec3 vColor;
+    void main() {
+      float d = length(gl_PointCoord - vec2(0.5));
+      if (d > 0.5) discard;
+      float alpha = smoothstep(0.5, 0.0, d) * 0.6;
+      gl_FragColor = vec4(vColor, alpha);
+    }
+  `,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending
+});
+const particles = new THREE.Points(particleGeo, particleMat);
+scene.add(particles);
+
+/* ---------- post-processing ---------- */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom1 = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.32, 0.6, 0.15);
+const bloom2 = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.12, 0.2, 0.2);
+composer.addPass(bloom1);
+composer.addPass(bloom2);
+composer.addPass(new ShaderPass(GammaCorrectionShader));
+composer.addPass(new ShaderPass(CopyShader));
+
+/* ---------- scroll & pointer ---------- */
+let scrollTarget = 0, scrollSmooth = 0, scrollCurrent = 0;
+function updateScroll() {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  scrollTarget = max > 0 ? THREE.MathUtils.clamp(window.scrollY / max, 0, 1) : 0;
+}
+window.addEventListener('scroll', updateScroll, { passive: true });
+updateScroll();
+
+const scrollHint = document.getElementById('scroll-hint');
+window.addEventListener('scroll', () => {
+  scrollHint.style.opacity = window.scrollY > 40 ? '0' : '1';
+}, { passive: true });
+
+let mouseTarget = { x: 0, y: 0 }, mouse = { x: 0, y: 0 };
+window.addEventListener('pointermove', (e) => {
+  mouseTarget.x = (e.clientX / innerWidth) * 2 - 1;
+  mouseTarget.y = -((e.clientY / innerHeight) * 2 - 1);
+});
+
+/* ---------- resize ---------- */
+window.addEventListener('resize', () => {
+  const w = innerWidth, h = innerHeight;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  composer.setSize(w, h);
+  updateScroll();
+});
+
+/* ---------- animation loop ---------- */
+const clock = new THREE.Clock();
+let rollPhase = 0;
+const tmpVec = new THREE.Vector3();
+
+function syncSize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  if (canvas.width !== Math.round(w * renderer.getPixelRatio()) || canvas.height !== Math.round(h * renderer.getPixelRatio())) {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    composer.setSize(w, h);
+    updateScroll();
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  syncSize();
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const time = clock.elapsedTime;
+
+  scrollSmooth = THREE.MathUtils.lerp(scrollSmooth, scrollTarget, 0.10);
+  scrollCurrent = THREE.MathUtils.lerp(scrollCurrent, scrollSmooth, 0.06);
+  mouse.x = THREE.MathUtils.lerp(mouse.x, mouseTarget.x, 0.06);
+  mouse.y = THREE.MathUtils.lerp(mouse.y, mouseTarget.y, 0.06);
+
+  const targetZ = 20 - scrollCurrent * 24;
+  camera.position.z = targetZ;
+  camera.position.x = mouse.x * 0.12;
+  camera.position.y = mouse.y * 0.12;
+  camera.lookAt(mouse.x * 0.6, mouse.y * 0.6, camera.position.z - 12);
+
+  rollPhase += dt * (0.045 + scrollCurrent * 0.05);
+  tunnelGroup.rotation.z = rollPhase;
+
+  const energy = scrollCurrent;
+
+  for (const g of chakras) {
+    g.rotation.y += dt * g.userData.speedY * (1 + energy * 0.8);
+    g.rotation.z += dt * g.userData.speedZ * (1 + energy * 0.6);
+
+    tmpVec.copy(g.position).applyMatrix4(tunnelGroup.matrixWorld ?? new THREE.Matrix4());
+    const dx = g.position.x - mouse.x * 8 - camera.position.x;
+    const dy = g.position.y - mouse.y * 8 - camera.position.y;
+    const dz = g.position.z - camera.position.z;
+    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz * 0.05);
+    const hoverTarget = dist < 6 ? THREE.MathUtils.clamp(1 - dist / 6, 0, 1) : 0;
+    g.userData.hoverAmt = THREE.MathUtils.lerp(g.userData.hoverAmt, hoverTarget, 0.08);
+    const s = 1 + g.userData.hoverAmt * 0.1;
+    g.userData.spokesGroup.scale.setScalar(s);
+    g.userData.rim.scale.setScalar(1 + g.userData.hoverAmt * 0.04);
+  }
+
+  for (const r of ribbons) updateRibbon(r, time, energy);
+
+  const posAttr = particleGeo.attributes.position;
+  const speed = (2 + energy * 6) * dt;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    let z = posAttr.array[i * 3 + 2] + speed;
+    if (z > camera.position.z + 5) z -= 140;
+    posAttr.array[i * 3 + 2] = z;
+  }
+  posAttr.needsUpdate = true;
+
+  bloom1.strength = 0.32 + energy * 0.15;
+  bloom2.strength = 0.12 + energy * 0.06;
+
+  composer.render();
+}
+animate();
+</script>
+</body>
+</html>

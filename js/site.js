@@ -425,7 +425,7 @@
   (function themer() {
     const btn = $('#themer');
     const root = document.documentElement;
-    const SRC = '3d/SmartIndia%20Site.dc.html';
+    const SRC = '3d/index.html';
 
     function current() {
       return root.getAttribute('data-mode') === '3d' ? '3d' : 'normal';

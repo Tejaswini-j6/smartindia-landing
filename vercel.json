@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/3d", "destination": "/3d/SmartIndia Site.dc.html" },
-    { "source": "/3d/", "destination": "/3d/SmartIndia Site.dc.html" }
+    { "source": "/3d", "destination": "/3d/index.html" },
+    { "source": "/3d/", "destination": "/3d/index.html" }
   ],
   "headers": [
     {
