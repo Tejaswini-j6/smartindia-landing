@@ -74,6 +74,8 @@
   .lithos-hero-story {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 36px; width: 100%;
+    will-change: opacity;
+    transition: opacity 0.35s ease;
   }
   .lithos-hero h1 { margin: 0; line-height: 1.05; color: #fff; }
   .lithos-hero h1 .serif { display: block; font-family: 'Playfair Display', serif; font-style: italic; font-weight: 500; font-size: clamp(38px, 6vw, 74px); color: #f4ede6; }
@@ -492,7 +494,7 @@
 
 <div class="tunnel-story" id="tunnel-story" aria-live="polite">
   <p class="tunnel-msg tunnel-msg--brand" id="tunnel-msg-1">Smart India AI</p>
-  <p class="tunnel-msg tunnel-msg--line" id="tunnel-msg-2">Bringing AI and People Together</p>
+  <p class="tunnel-msg tunnel-msg--line" id="tunnel-msg-2">Brings AI and People Together</p>
 </div>
 
 <script type="module">
@@ -564,13 +566,13 @@ const rimLight = new THREE.PointLight(0x4fa2ff, 0.5, 40, 2);
 rimLight.position.set(-12, 3, 6);
 scene.add(rimLight);
 
-const saffronLight = new THREE.PointLight(SAFFRON, 0.5, 30, 2);
+const saffronLight = new THREE.PointLight(SAFFRON, 0.18, 30, 2);
 saffronLight.position.set(6, 7, 10);
 scene.add(saffronLight);
-const whiteLight = new THREE.PointLight(WHITE_C, 0.35, 30, 2);
+const whiteLight = new THREE.PointLight(WHITE_C, 0.12, 30, 2);
 whiteLight.position.set(0, 0, 14);
 scene.add(whiteLight);
-const greenLight = new THREE.PointLight(GREEN_C, 0.5, 30, 2);
+const greenLight = new THREE.PointLight(GREEN_C, 0.18, 30, 2);
 greenLight.position.set(-6, -7, 10);
 scene.add(greenLight);
 
@@ -684,10 +686,11 @@ const ribbonFrag = `
     float dust = smoothstep(0.28, 0.78, n * 0.65 + n2 * 0.45);
 
     float wisps = smoothstep(0.35, 0.85, noise(np * 2.4 + uTime * 0.12));
-    float alpha = soft * dust * (0.40 + 0.42 * wisps);
-    alpha *= 0.82 + 0.28 * uEnergy;
+    float alpha = soft * dust * (0.10 + 0.16 * wisps);
+    alpha *= 0.28 + 0.12 * uEnergy;
 
-    vec3 col = mix(uColor * 1.05, uColor * 1.45, 0.5 + 0.5 * n);
+    /* muted dark smoke — no bright glow */
+    vec3 col = mix(uColor * 0.28, uColor * 0.55, 0.4 + 0.6 * n);
     gl_FragColor = vec4(col, alpha);
   }
 `;
@@ -705,7 +708,7 @@ function createRibbon(color, phase, yBias, count) {
     fragmentShader: ribbonFrag,
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    blending: THREE.NormalBlending,
     side: THREE.DoubleSide
   });
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);
@@ -714,10 +717,14 @@ function createRibbon(color, phase, yBias, count) {
 }
 
 const RIBBON_POINTS = 24;
+/* Dark muted tricolor smoke (not lit / additive) */
+const SMOKE_SAFFRON = 0x4A2E14;
+const SMOKE_ASH = 0x4A4E52;
+const SMOKE_GREEN = 0x0C2E1A;
 const ribbons = [
-  createRibbon(SAFFRON, 0.0, 2.4, RIBBON_POINTS),
-  createRibbon(WHITE_C, 2.1, 0.15, RIBBON_POINTS),
-  createRibbon(GREEN_C, 4.2, -2.4, RIBBON_POINTS)
+  createRibbon(SMOKE_SAFFRON, 0.0, 2.4, RIBBON_POINTS),
+  createRibbon(SMOKE_ASH, 2.1, 0.15, RIBBON_POINTS),
+  createRibbon(SMOKE_GREEN, 4.2, -2.4, RIBBON_POINTS)
 ];
 
 function updateRibbon(r, time, energy) {
@@ -827,6 +834,7 @@ let scrollTarget = 0, scrollSmooth = 0, scrollCurrent = 0;
 
 const msg1 = document.getElementById('tunnel-msg-1');
 const msg2 = document.getElementById('tunnel-msg-2');
+const heroStory = document.getElementById('lithos-hero-story');
 const heroEl = document.getElementById('lithos-hero');
 const rootEl = document.documentElement;
 
@@ -930,15 +938,26 @@ function setFlipMsg(el, amt, dir) {
   el.style.transform =
     'translateZ(' + z.toFixed(1) + 'px) rotateY(' + rotY.toFixed(2) + 'deg) rotateX(' +
     rotX.toFixed(2) + 'deg) scale(' + sc.toFixed(4) + ')';
-  el.style.filter = 'blur(' + blur.toFixed(2) + 'px) brightness(' + (0.85 + a * 0.35).toFixed(3) + ')';
+  el.style.filter = 'blur(' + blur.toFixed(2) + 'px)';
 }
 
 function applyStoryVisuals(s) {
-  const inHero = s < 0.995;
-  const a1 = inHero ? pulse(s, 0.06, 0.18, 0.38, 0.50) : 0;
-  const a2 = inHero ? pulse(s, 0.52, 0.64, 0.86, 0.98) : 0;
-  setFlipMsg(msg1, a1, 1);
-  setFlipMsg(msg2, a2, -1);
+  /*
+    Beat 1: hide all hero copy → only SMART INDIA AI
+    Beat 2: hide hero + SMART INDIA AI → only Brings AI and People Together
+    After hero story: restore hero copy for normal exit into the next section
+  */
+  const beat1 = smoothstep(0.05, 0.16, s) * (1 - smoothstep(0.46, 0.54, s));
+  const beat2 = smoothstep(0.50, 0.60, s) * (1 - smoothstep(0.92, 0.995, s));
+  const hideHero = Math.max(beat1, beat2);
+
+  setFlipMsg(msg1, beat1, 1);
+  setFlipMsg(msg2, beat2, -1);
+
+  if (heroStory) {
+    heroStory.style.opacity = (1 - hideHero).toFixed(4);
+    heroStory.style.pointerEvents = hideHero > 0.5 ? 'none' : 'auto';
+  }
 }
 
 function animate() {
@@ -963,7 +982,6 @@ function animate() {
   mouse.x = THREE.MathUtils.lerp(mouse.x, mouseTarget.x, 0.06);
   mouse.y = THREE.MathUtils.lerp(mouse.y, mouseTarget.y, 0.06);
 
-  /* Camera depth driven only by hero story; hold after leaving hero */
   camera.position.z = cameraZForStory(storyCurrent);
   camera.position.x = mouse.x * 0.12;
   camera.position.y = mouse.y * 0.12;
@@ -973,10 +991,10 @@ function animate() {
     pulse(storyCurrent, 0.10, 0.20, 0.30, 0.42) +
     pulse(storyCurrent, 0.56, 0.66, 0.78, 0.90);
 
-  rollPhase += dt * (0.045 + storyCurrent * 0.055 + flipKick * 0.08);
+  rollPhase += dt * (0.045 + storyCurrent * 0.055 + flipKick * 0.06);
   tunnelGroup.rotation.z = rollPhase;
 
-  const energy = storyCurrent + flipKick * 0.35;
+  const energy = storyCurrent * 0.75 + flipKick * 0.2;
 
   for (const g of chakras) {
     g.rotation.y += dt * g.userData.speedY * (1 + energy * 0.85);
@@ -1005,8 +1023,8 @@ function animate() {
   }
   posAttr.needsUpdate = true;
 
-  bloom1.strength = 0.34 + energy * 0.18 + flipKick * 0.22;
-  bloom2.strength = 0.14 + energy * 0.08 + flipKick * 0.12;
+  bloom1.strength = 0.28 + energy * 0.08;
+  bloom2.strength = 0.10 + energy * 0.04;
 
   applyStoryVisuals(storyCurrent);
 
