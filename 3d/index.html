@@ -633,109 +633,150 @@ hero.userData.speedZ = 0.02;
 tunnelGroup.add(hero);
 chakras.push(hero);
 
-/* ---------- single tricolor flag (smoky, waving) ---------- */
-const FLAG_W = 14;
-const FLAG_H = 7.2;
-const FLAG_SEG_X = 48;
-const FLAG_SEG_Y = 24;
+/* ---------- tricolor smoke ribbons (L→R and R→L) ---------- */
+const ribbonVert = `
+  varying vec2 vUv;
+  varying vec3 vWorldPos;
+  void main() {
+    vUv = uv;
+    vec4 world = modelMatrix * vec4(position, 1.0);
+    vWorldPos = world.xyz;
+    gl_Position = projectionMatrix * viewMatrix * world;
+  }
+`;
+const ribbonFrag = `
+  uniform vec3 uColor;
+  uniform float uTime;
+  uniform float uEnergy;
+  varying vec2 vUv;
+  varying vec3 vWorldPos;
 
-const flagGeo = new THREE.PlaneGeometry(FLAG_W, FLAG_H, FLAG_SEG_X, FLAG_SEG_Y);
-const flagMat = new THREE.ShaderMaterial({
-  uniforms: {
-    uTime: { value: 0 },
-    uEnergy: { value: 0 },
-    uSaffron: { value: new THREE.Color(0x7A3F12) },
-    uWhite: { value: new THREE.Color(0x8A8E94) },
-    uGreen: { value: new THREE.Color(0x145C32) }
-  },
-  vertexShader: `
-    uniform float uTime;
-    uniform float uEnergy;
-    varying vec2 vUv;
-    varying float vWave;
-    void main() {
-      vUv = uv;
-      vec3 p = position;
-      /* free edge waves harder; hoist edge (u≈0) stays calmer — flag cloth */
-      float flap = smoothstep(0.05, 1.0, uv.x);
-      float amp = (0.55 + uEnergy * 0.45) * flap;
-      float w1 = sin(uv.x * 6.5 - uTime * 2.4) * amp;
-      float w2 = sin(uv.x * 11.0 - uTime * 3.1 + uv.y * 2.0) * amp * 0.35;
-      float w3 = cos(uv.x * 4.0 - uTime * 1.6 + uv.y * 3.5) * amp * 0.22;
-      p.z += w1 + w2;
-      p.y += w3 * 0.45;
-      vWave = w1 + w2;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+  }
+  float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+  }
+  float fbm(vec2 p) {
+    float v = 0.0;
+    float a = 0.5;
+    for (int i = 0; i < 4; i++) {
+      v += a * noise(p);
+      p *= 2.03;
+      a *= 0.5;
     }
-  `,
-  fragmentShader: `
-    uniform vec3 uSaffron;
-    uniform vec3 uWhite;
-    uniform vec3 uGreen;
-    uniform float uTime;
-    uniform float uEnergy;
-    varying vec2 vUv;
-    varying float vWave;
+    return v;
+  }
 
-    float hash(vec2 p) {
-      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-    }
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      float a = hash(i);
-      float b = hash(i + vec2(1.0, 0.0));
-      float c = hash(i + vec2(0.0, 1.0));
-      float d = hash(i + vec2(1.0, 1.0));
-      vec2 u = f * f * (3.0 - 2.0 * f);
-      return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
-    }
-    float fbm(vec2 p) {
-      float v = 0.0;
-      float a = 0.5;
-      for (int i = 0; i < 3; i++) {
-        v += a * noise(p);
-        p *= 2.1;
-        a *= 0.5;
-      }
-      return v;
-    }
+  void main() {
+    float edge = abs(vUv.y - 0.5) * 2.0;
+    float soft = pow(1.0 - smoothstep(0.05, 1.0, edge), 1.35);
 
-    void main() {
-      /* three equal bands — one flag, not repeated ribbons */
-      vec3 band =
-        vUv.y > 0.666 ? uSaffron :
-        vUv.y > 0.333 ? uWhite : uGreen;
+    vec2 np = vec2(vUv.x * 4.0 - uTime * 0.35, vUv.y * 2.2 + uTime * 0.08);
+    float n = fbm(np + vWorldPos.xz * 0.03);
+    float n2 = fbm(np * 1.8 + 3.1);
+    float smoke = smoothstep(0.18, 0.82, n * 0.55 + n2 * 0.45);
+    float grain = 0.7 + 0.3 * noise(np * 6.0);
 
-      float softEdge = smoothstep(0.0, 0.04, vUv.x) * smoothstep(0.0, 0.04, 1.0 - vUv.x)
-                     * smoothstep(0.0, 0.035, vUv.y) * smoothstep(0.0, 0.035, 1.0 - vUv.y);
+    float alpha = soft * smoke * grain * (0.42 + 0.22 * uEnergy);
+    alpha *= 0.78;
 
-      vec2 np = vec2(vUv.x * 3.5 - uTime * 0.4, vUv.y * 2.0);
-      float smoke = 0.55 + 0.45 * fbm(np);
-      float shade = 0.72 + 0.28 * smoke + vWave * 0.08;
+    /* deeper smoky tricolor — readable, not neon */
+    vec3 deep = uColor * 0.55;
+    vec3 mid = uColor * 0.95;
+    vec3 col = mix(deep, mid, 0.35 + 0.65 * n);
+    gl_FragColor = vec4(col, alpha);
+  }
+`;
 
-      float alpha = softEdge * (0.55 + 0.2 * uEnergy) * smoke;
-      vec3 col = band * shade;
+const RIBBON_POINTS = 36;
 
-      gl_FragColor = vec4(col, alpha);
-    }
-  `,
-  transparent: true,
-  depthWrite: false,
-  side: THREE.DoubleSide,
-  blending: THREE.NormalBlending
-});
+function createRibbon(color, phase, yBias, zBias, dir) {
+  const points = [];
+  for (let i = 0; i < RIBBON_POINTS; i++) points.push(new THREE.Vector3(0, 0, 0));
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(color) },
+      uTime: { value: 0 },
+      uEnergy: { value: 0 }
+    },
+    vertexShader: ribbonVert,
+    fragmentShader: ribbonFrag,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.NormalBlending,
+    side: THREE.DoubleSide
+  });
+  const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);
+  scene.add(mesh);
+  return { points, mesh, phase, yBias, zBias, dir };
+}
 
-const flagMesh = new THREE.Mesh(flagGeo, flagMat);
-flagMesh.position.set(1.2, 0.2, 3.5);
-flagMesh.rotation.y = -0.18;
-scene.add(flagMesh);
+/* Deeper smoky tricolor — dark but visible ribbon tones */
+const SMOKE_SAFFRON = 0x7A3F12;
+const SMOKE_ASH = 0x7C8086;
+const SMOKE_GREEN = 0x145C32;
 
-function updateFlag(time, energy) {
-  flagMat.uniforms.uTime.value = time;
-  flagMat.uniforms.uEnergy.value = energy;
-  flagMesh.position.y = 0.2 + Math.sin(time * 0.35) * 0.12;
-  flagMesh.rotation.z = Math.sin(time * 0.22) * 0.04;
+/* Three L→R and three R→L bands */
+const ribbons = [
+  createRibbon(SMOKE_SAFFRON, 0.0,  3.2,  4.0,  1),
+  createRibbon(SMOKE_ASH,     1.2,  0.4,  1.5, -1),
+  createRibbon(SMOKE_GREEN,   2.4, -3.0, -1.0,  1),
+  createRibbon(SMOKE_SAFFRON, 3.1, -1.6,  6.5, -1),
+  createRibbon(SMOKE_ASH,     4.0,  2.0, -3.5,  1),
+  createRibbon(SMOKE_GREEN,   5.2,  1.1,  8.0, -1)
+];
+
+function updateRibbon(r, time, energy) {
+  const flow = time * (0.85 + energy * 0.35) * r.dir + r.phase;
+  const span = 17;
+
+  for (let i = 0; i < r.points.length; i++) {
+    const t = i / Math.max(r.points.length - 1, 1);
+    /* ribbon runs across the frame; dir flips L→R vs R→L */
+    const x = THREE.MathUtils.lerp(-span * r.dir, span * r.dir, t);
+    const wave = Math.sin(x * 0.22 + flow) * (1.35 + energy * 0.5)
+               + Math.sin(x * 0.55 + flow * 1.4 + r.phase) * 0.55;
+    const y = r.yBias + wave;
+    const z = r.zBias
+            + Math.cos(x * 0.16 + flow * 0.75) * (2.2 + energy)
+            + Math.sin(t * Math.PI * 2.0 + flow) * 0.8;
+    r.points[i].set(x, y, z);
+  }
+
+  const curve = new THREE.CatmullRomCurve3(r.points);
+  /* flat ribbon thickness — readable band, not a fat tunnel tube */
+  const radius = 0.32 + energy * 0.1;
+  const geo = new THREE.TubeGeometry(curve, 140, radius, 8, false);
+
+  const posAttr = geo.attributes.position;
+  const normAttr = geo.attributes.normal;
+  const uvAttr = geo.attributes.uv;
+  for (let vi = 0; vi < posAttr.count; vi++) {
+    const u = uvAttr.getX(vi), v = uvAttr.getY(vi);
+    const flutter = Math.sin(u * 14.0 - time * 1.8 * r.dir + r.phase) * 0.06;
+    const soft = Math.sin(v * Math.PI) * flutter;
+    posAttr.setXYZ(
+      vi,
+      posAttr.getX(vi) + normAttr.getX(vi) * soft,
+      posAttr.getY(vi) + normAttr.getY(vi) * soft,
+      posAttr.getZ(vi) + normAttr.getZ(vi) * soft
+    );
+  }
+  posAttr.needsUpdate = true;
+  geo.computeVertexNormals();
+
+  r.mesh.geometry.dispose();
+  r.mesh.geometry = geo;
+  r.mesh.material.uniforms.uTime.value = time;
+  r.mesh.material.uniforms.uEnergy.value = energy;
 }
 
 /* ---------- particle atmosphere ---------- */
@@ -980,7 +1021,7 @@ function animate() {
     g.userData.rim.scale.setScalar(1 + g.userData.hoverAmt * 0.04);
   }
 
-  updateFlag(time, energy);
+  for (const r of ribbons) updateRibbon(r, time, energy);
 
   const posAttr = particleGeo.attributes.position;
   const speed = (2 + energy * 6) * dt;
