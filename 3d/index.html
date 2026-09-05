@@ -566,31 +566,68 @@ const rimLight = new THREE.PointLight(0x4fa2ff, 0.5, 40, 2);
 rimLight.position.set(-12, 3, 6);
 scene.add(rimLight);
 
-const saffronLight = new THREE.PointLight(SAFFRON, 0.18, 30, 2);
-saffronLight.position.set(6, 7, 10);
+const saffronLight = new THREE.PointLight(SAFFRON, 0.42, 36, 2);
+saffronLight.position.set(6, 7, 4);
 scene.add(saffronLight);
-const whiteLight = new THREE.PointLight(WHITE_C, 0.12, 30, 2);
-whiteLight.position.set(0, 0, 14);
+const whiteLight = new THREE.PointLight(WHITE_C, 0.28, 36, 2);
+whiteLight.position.set(0, 0, 8);
 scene.add(whiteLight);
-const greenLight = new THREE.PointLight(GREEN_C, 0.18, 30, 2);
-greenLight.position.set(-6, -7, 10);
+const greenLight = new THREE.PointLight(GREEN_C, 0.42, 36, 2);
+greenLight.position.set(-6, -7, 4);
 scene.add(greenLight);
 
-/* ---------- Chakra factory (shared geometry, instanced groups) ---------- */
-const OUTER_R = 5, TUBE_R = 0.35;
-const rimGeo = new THREE.TorusGeometry(OUTER_R, TUBE_R, 20, 72);
-const bevelGeo = new THREE.TorusGeometry(OUTER_R - TUBE_R * 1.6, TUBE_R * 0.4, 10, 72);
-const HUB_R = 1.15, HUB_DEPTH = 0.95;
-const hubGeo = new THREE.CylinderGeometry(HUB_R, HUB_R, HUB_DEPTH, 36);
-const spokeInnerR = OUTER_R - TUBE_R * 1.6;
-const spokeLen = spokeInnerR - HUB_R;
-const spokeMid = HUB_R + spokeLen / 2;
-const spokeGeo = new THREE.BoxGeometry(spokeLen, 0.26, 0.42);
+/* ---------- Ashoka Chakra — matched to Flow film model ---------- */
+const OUTER_R = 5.05;
+const TUBE_R = 0.42;
+const HUB_R = 1.05;
+const HUB_DEPTH = 0.88;
+const SPOKE_LEN = OUTER_R - TUBE_R * 1.55 - HUB_R * 0.92;
 
-const bodyMat = new THREE.MeshStandardMaterial({ color: CHAKRA_PRIMARY, metalness: 0.75, roughness: 0.28, emissive: 0x06152F, emissiveIntensity: 0.08 });
-const rimMat = new THREE.MeshStandardMaterial({ color: CHAKRA_EDGE, metalness: 0.85, roughness: 0.22, emissive: 0x06152F, emissiveIntensity: 0.07 });
-const bevelMat = new THREE.MeshStandardMaterial({ color: METAL_REFLECT, metalness: 0.9, roughness: 0.15, emissive: 0x0B2040, emissiveIntensity: 0.05 });
-const hubMat = new THREE.MeshStandardMaterial({ color: CHAKRA_HIGHLIGHT, metalness: 0.8, roughness: 0.25, emissive: 0x06152F, emissiveIntensity: 0.09 });
+const rimGeo = new THREE.TorusGeometry(OUTER_R, TUBE_R, 28, 96);
+const bevelGeo = new THREE.TorusGeometry(OUTER_R - TUBE_R * 1.55, TUBE_R * 0.28, 12, 96);
+const hubGeo = new THREE.CylinderGeometry(HUB_R, HUB_R, HUB_DEPTH, 48);
+const hubCapGeo = new THREE.CylinderGeometry(HUB_R * 0.72, HUB_R * 0.72, HUB_DEPTH * 0.35, 48);
+
+/* Tapered spoke: wider at hub, thinner at rim — as in the Flow model */
+function makeSpokeGeo() {
+  const shape = new THREE.Shape();
+  const w0 = 0.28, w1 = 0.11;
+  shape.moveTo(0, -w0);
+  shape.lineTo(SPOKE_LEN, -w1);
+  shape.lineTo(SPOKE_LEN, w1);
+  shape.lineTo(0, w0);
+  shape.closePath();
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.4,
+    bevelEnabled: true,
+    bevelThickness: 0.045,
+    bevelSize: 0.035,
+    bevelSegments: 2
+  });
+  geo.translate(0, 0, -0.2);
+  return geo;
+}
+const spokeGeo = makeSpokeGeo();
+
+/* Inner-rim scallops between spokes */
+const scallopGeo = new THREE.TorusGeometry(0.26, 0.075, 10, 18, Math.PI);
+
+const bodyMat = new THREE.MeshStandardMaterial({
+  color: 0x0A1E48, metalness: 0.55, roughness: 0.42,
+  emissive: 0x040E24, emissiveIntensity: 0.12
+});
+const rimMat = new THREE.MeshStandardMaterial({
+  color: 0x122A5C, metalness: 0.62, roughness: 0.38,
+  emissive: 0x061530, emissiveIntensity: 0.1
+});
+const bevelMat = new THREE.MeshStandardMaterial({
+  color: 0x6E8BB0, metalness: 0.85, roughness: 0.22,
+  emissive: 0x0A1C38, emissiveIntensity: 0.06
+});
+const hubMat = new THREE.MeshStandardMaterial({
+  color: 0x163B70, metalness: 0.58, roughness: 0.4,
+  emissive: 0x061530, emissiveIntensity: 0.11
+});
 
 function createChakraGroup() {
   const group = new THREE.Group();
@@ -599,9 +636,18 @@ function createChakraGroup() {
   for (let i = 0; i < 24; i++) {
     const angle = (i / 24) * Math.PI * 2;
     const spoke = new THREE.Mesh(spokeGeo, bodyMat);
-    spoke.position.set(Math.cos(angle) * spokeMid, Math.sin(angle) * spokeMid, 0);
+    spoke.position.set(Math.cos(angle) * HUB_R * 0.95, Math.sin(angle) * HUB_R * 0.95, 0);
     spoke.rotation.z = angle;
     spokesGroup.add(spoke);
+
+    /* scallop on inner rim between this spoke and the next */
+    const mid = angle + Math.PI / 24;
+    const rr = OUTER_R - TUBE_R * 1.15;
+    const scallop = new THREE.Mesh(scallopGeo, rimMat);
+    scallop.position.set(Math.cos(mid) * rr, Math.sin(mid) * rr, 0);
+    scallop.rotation.z = mid + Math.PI / 2;
+    scallop.rotation.y = Math.PI / 2;
+    group.add(scallop);
   }
   group.add(spokesGroup);
 
@@ -609,9 +655,14 @@ function createChakraGroup() {
   group.add(rim);
   const bevel = new THREE.Mesh(bevelGeo, bevelMat);
   group.add(bevel);
+
   const hub = new THREE.Mesh(hubGeo, hubMat);
   hub.rotation.x = Math.PI / 2;
   group.add(hub);
+  const hubCap = new THREE.Mesh(hubCapGeo, bevelMat);
+  hubCap.rotation.x = Math.PI / 2;
+  hubCap.position.z = HUB_DEPTH * 0.28;
+  group.add(hubCap);
 
   group.userData.spokesGroup = spokesGroup;
   group.userData.rim = rim;
@@ -625,15 +676,15 @@ scene.add(tunnelGroup);
 const chakras = [];
 
 const hero = createChakraGroup();
-hero.scale.setScalar(1.6);
+hero.scale.setScalar(1.55);
 hero.position.set(0, 0, -6);
 hero.userData.dir = 1;
-hero.userData.speedY = 0.06;
-hero.userData.speedZ = 0.02;
+hero.userData.speedY = 0.045;
+hero.userData.speedZ = 0.012;
 tunnelGroup.add(hero);
 chakras.push(hero);
 
-/* ---------- tricolor silk flow (Flow-film style: 3 bands into the tunnel) ---------- */
+/* ---------- Flow-film tricolor: 3 silk bands, left → right behind the Chakra ---------- */
 const ribbonVert = `
   varying vec2 vUv;
   varying vec3 vWorldPos;
@@ -651,51 +702,51 @@ const ribbonFrag = `
   varying vec2 vUv;
   varying vec3 vWorldPos;
 
-  float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+  float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
+  float noise(vec2 p){
+    vec2 i = floor(p); vec2 f = fract(p);
+    float a = hash(i), b = hash(i+vec2(1.,0.)), c = hash(i+vec2(0.,1.)), d = hash(i+vec2(1.,1.));
+    vec2 u = f*f*(3.-2.*f);
+    return mix(a,b,u.x)+(c-a)*u.y*(1.-u.x)+(d-b)*u.x*u.y;
   }
-  float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
-  }
-  float fbm(vec2 p) {
-    float v = 0.0;
-    float a = 0.5;
-    for (int i = 0; i < 4; i++) {
-      v += a * noise(p);
-      p *= 2.05;
-      a *= 0.5;
-    }
+  float fbm(vec2 p){
+    float v=0., a=0.5;
+    for(int i=0;i<4;i++){ v+=a*noise(p); p*=2.05; a*=0.5; }
     return v;
   }
 
   void main() {
-    /* soft silk edge — like the Flow film cloth bands */
     float edge = abs(vUv.y - 0.5) * 2.0;
-    float soft = pow(1.0 - smoothstep(0.08, 1.0, edge), 1.5);
+    float soft = pow(1.0 - smoothstep(0.02, 1.0, edge), 1.65);
 
-    vec2 np = vec2(vUv.x * 5.5 - uTime * 0.55, vUv.y * 1.8);
-    float n = fbm(np + vWorldPos.xz * 0.025);
-    float flowShade = 0.55 + 0.45 * sin(vUv.x * 28.0 - uTime * 1.8 + n * 4.0);
-    float smoke = 0.5 + 0.5 * n;
+    vec2 np = vec2(vUv.x * 6.0 - uTime * 0.7, vUv.y * 2.2);
+    float n = fbm(np);
+    float silk = 0.45 + 0.55 * sin(vUv.x * 22.0 - uTime * 2.2 + n * 5.0);
+    float smoke = 0.4 + 0.6 * n;
 
-    float alpha = soft * smoke * (0.38 + 0.22 * flowShade) * (0.7 + 0.3 * uEnergy);
-    vec3 col = mix(uColor * 0.5, uColor * 0.95, 0.4 + 0.6 * n);
-    gl_FragColor = vec4(col, alpha);
+    float alpha = soft * smoke * (0.45 + 0.25 * silk) * (0.75 + 0.25 * uEnergy);
+    vec3 col = mix(uColor * 0.65, uColor * 1.05, 0.35 + 0.65 * n);
+    /* soft self-glow like the Flow film cloth */
+    col += uColor * 0.12 * silk;
+    gl_FragColor = vec4(col, alpha * 0.9);
   }
 `;
 
-const RIBBON_POINTS = 32;
+const RIBBON_POINTS = 40;
+const ribbonShape = (() => {
+  const s = new THREE.Shape();
+  /* flat silk cross-section */
+  s.moveTo(0, -0.62);
+  s.lineTo(0.07, -0.62);
+  s.lineTo(0.07, 0.62);
+  s.lineTo(0, 0.62);
+  s.closePath();
+  return s;
+})();
 
 function createRibbon(color, phase, yBias) {
   const points = [];
-  for (let i = 0; i < RIBBON_POINTS; i++) points.push(new THREE.Vector3(0, 0, 0));
+  for (let i = 0; i < RIBBON_POINTS; i++) points.push(new THREE.Vector3());
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       uColor: { value: new THREE.Color(color) },
@@ -714,52 +765,46 @@ function createRibbon(color, phase, yBias) {
   return { points, mesh, phase, yBias };
 }
 
-/* Deeper smoky tricolor — one band each, Flow-style tunnel flow */
-const SMOKE_SAFFRON = 0x8B4A18;
-const SMOKE_ASH = 0x9A9EA4;
-const SMOKE_GREEN = 0x1A6B38;
+/* Flow film palette — saffron / white / green silk */
+const FLOW_SAFFRON = 0xE07020;
+const FLOW_WHITE = 0xE8ECF0;
+const FLOW_GREEN = 0x1A8A48;
 
 const ribbons = [
-  createRibbon(SMOKE_SAFFRON, 0.0,  3.1),
-  createRibbon(SMOKE_ASH,     2.1,  0.15),
-  createRibbon(SMOKE_GREEN,   4.2, -3.1)
+  createRibbon(FLOW_SAFFRON, 0.0,  2.85),
+  createRibbon(FLOW_WHITE,   2.15, 0.05),
+  createRibbon(FLOW_GREEN,   4.3, -2.85)
 ];
 
 function updateRibbon(r, time, energy) {
-  /* Stream into the tunnel depth — same motion language as the Flow reference */
-  const speed = 0.55 + energy * 0.35;
+  /* Horizontal serpentine flow L→R, weaving behind the Chakra (z≈-6) */
+  const flow = time * (0.9 + energy * 0.35) + r.phase;
   for (let i = 0; i < r.points.length; i++) {
     const t = i / Math.max(r.points.length - 1, 1);
-    const z = 22 - i * 5.4;
-    const swirl = time * speed + r.phase;
-    const orbit = 5.8 + energy * 2.2 + Math.sin(swirl * 0.4 + t * 2.0) * 0.9;
-    const x = Math.sin(z * 0.11 + swirl) * orbit
-            + Math.sin(z * 0.19 + swirl * 1.35 + r.phase) * (1.6 + energy * 0.6);
-    const y = r.yBias
-            + Math.cos(z * 0.085 + swirl * 0.9) * (2.2 + energy * 0.9)
-            + Math.sin(time * 0.4 + r.phase + t * 3.0) * 0.7;
+    const x = THREE.MathUtils.lerp(-19, 19, t);
+    const wave = Math.sin(x * 0.32 + flow) * (1.55 + energy * 0.55)
+               + Math.sin(x * 0.72 + flow * 1.35) * 0.55;
+    const y = r.yBias + wave;
+    const z = -6.2
+            + Math.cos(x * 0.28 + flow * 0.85) * (2.4 + energy)
+            + Math.sin(t * Math.PI * 2.0 + flow) * 0.9;
     r.points[i].set(x, y, z);
   }
 
   const curve = new THREE.CatmullRomCurve3(r.points);
-  const radius = 0.42 + energy * 0.14;
-  const geo = new THREE.TubeGeometry(curve, 160, radius, 10, false);
+  const geo = new THREE.ExtrudeGeometry(ribbonShape, {
+    steps: 140,
+    bevelEnabled: false,
+    extrudePath: curve
+  });
 
+  /* extra silk flutter on the free surface */
   const posAttr = geo.attributes.position;
-  const normAttr = geo.attributes.normal;
-  const uvAttr = geo.attributes.uv;
   for (let vi = 0; vi < posAttr.count; vi++) {
-    const u = uvAttr.getX(vi), v = uvAttr.getY(vi);
-    /* silk fold + flutter — Flow cloth feel */
-    const fold = Math.sin(v * Math.PI * 3.0 + u * 18.0 + time * 1.2 + r.phase) * 0.07;
-    const flutter = Math.sin(u * 9.0 - time * 1.7 + r.phase * 2.0) * 0.05 * (0.5 + energy * 0.5);
-    const d = fold + flutter;
-    posAttr.setXYZ(
-      vi,
-      posAttr.getX(vi) + normAttr.getX(vi) * d,
-      posAttr.getY(vi) + normAttr.getY(vi) * d,
-      posAttr.getZ(vi) + normAttr.getZ(vi) * d
-    );
+    const px = posAttr.getX(vi), py = posAttr.getY(vi), pz = posAttr.getZ(vi);
+    const flutter = Math.sin(px * 0.55 - time * 2.0 + r.phase) * 0.045
+                  + Math.sin(pz * 0.4 + time * 1.4) * 0.03;
+    posAttr.setXYZ(vi, px, py + flutter, pz);
   }
   posAttr.needsUpdate = true;
   geo.computeVertexNormals();

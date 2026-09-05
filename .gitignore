@@ -12,3 +12,7 @@ desktop.ini
 # Dependencies (none today, but keep the door shut)
 node_modules/
 npm-debug.log*
+
+# Local Flow reference assets (not shipped)
+3d/ref-flow.mp4
+3d/ref-frames/
