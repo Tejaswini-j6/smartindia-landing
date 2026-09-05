@@ -40,6 +40,31 @@
     text-align: center; gap: 36px; padding: 120px 32px 140px;
     background: linear-gradient(180deg, rgba(2,4,10,0.25) 0%, rgba(2,4,10,0.05) 45%, rgba(2,4,10,0.45) 100%);
   }
+  /* Scroll-story overlays — same type stack as the hero; driven only by JS */
+  .tunnel-story {
+    position: fixed; inset: 0; z-index: 35;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; text-align: center; padding: 0 28px;
+  }
+  .tunnel-msg {
+    position: absolute; margin: 0; max-width: 920px; width: 100%;
+    color: #fff; opacity: 0; will-change: opacity, transform, filter;
+  }
+  .tunnel-msg--brand {
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    font-size: clamp(34px, 6.2vw, 72px); letter-spacing: 0.08em;
+    text-transform: uppercase; line-height: 1.05;
+  }
+  .tunnel-msg--line {
+    font-family: 'Playfair Display', serif; font-style: italic; font-weight: 500;
+    font-size: clamp(26px, 4.4vw, 48px); color: #f4ede6; letter-spacing: -0.01em; line-height: 1.2;
+  }
+  .lithos-hero-story {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 36px; width: 100%;
+    opacity: 0; transform: translateY(18px);
+    will-change: opacity, transform;
+  }
   .lithos-hero h1 { margin: 0; line-height: 1.05; color: #fff; }
   .lithos-hero h1 .serif { display: block; font-family: 'Playfair Display', serif; font-style: italic; font-weight: 500; font-size: clamp(38px, 6vw, 74px); color: #f4ede6; }
   .lithos-hero h1 .sans { display: block; font-family: 'Inter', sans-serif; font-weight: 700; font-size: clamp(38px, 6vw, 74px); letter-spacing: -0.02em; margin-top: 4px; }
@@ -161,19 +186,21 @@
 <div id="scroll-host">
 
   <section class="lithos-hero">
-    <h1><span class="serif">Explore. Discover.</span><span class="sans">Connect. With AI.</span></h1>
-    <div class="lithos-hero-copy" style="grid-template-columns: 1fr; max-width: 680px;">
-      <p style="text-align: center;">SmartIndia.ai brings the power of artificial intelligence and the world of information together in one intelligent platform — and builds the web platforms that businesses run on.</p>
-    </div>
-    <div class="si-cta-row">
-      <a href="#portfolio" class="lithos-cta-btn">Explore SmartIndia.ai</a>
-      <a href="#contact" class="si-outline-btn">Get Started</a>
-    </div>
-    <div class="si-facts">
-      <div class="fact"><b>2025</b>Founded</div>
-      <div class="fact"><b>—</b>Live Platforms</div>
-      <div class="fact"><b>—</b>Customers Served</div>
-      <div class="fact"><b>India</b>Built with an India-first vision</div>
+    <div class="lithos-hero-story" id="lithos-hero-story">
+      <h1><span class="serif">Explore. Discover.</span><span class="sans">Connect. With AI.</span></h1>
+      <div class="lithos-hero-copy" style="grid-template-columns: 1fr; max-width: 680px;">
+        <p style="text-align: center;">SmartIndia.ai brings the power of artificial intelligence and the world of information together in one intelligent platform — and builds the web platforms that businesses run on.</p>
+      </div>
+      <div class="si-cta-row">
+        <a href="#portfolio" class="lithos-cta-btn">Explore SmartIndia.ai</a>
+        <a href="#contact" class="si-outline-btn">Get Started</a>
+      </div>
+      <div class="si-facts">
+        <div class="fact"><b>2025</b>Founded</div>
+        <div class="fact"><b>—</b>Live Platforms</div>
+        <div class="fact"><b>—</b>Customers Served</div>
+        <div class="fact"><b>India</b>Built with an India-first vision</div>
+      </div>
     </div>
   </section>
 
@@ -451,6 +478,11 @@
 </div>
 <div id="scroll-hint">SCROLL ↓</div>
 
+<div class="tunnel-story" id="tunnel-story" aria-live="polite">
+  <p class="tunnel-msg tunnel-msg--brand" id="tunnel-msg-1">Smart India AI</p>
+  <p class="tunnel-msg tunnel-msg--line" id="tunnel-msg-2">Bringing People and AI Together</p>
+</div>
+
 <script type="module">
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -717,7 +749,34 @@ composer.addPass(new ShaderPass(GammaCorrectionShader));
 composer.addPass(new ShaderPass(CopyShader));
 
 /* ---------- scroll & pointer ---------- */
+const INTRO_MS = 3600;
+const STORY_VH = 2.15; /* first ~two scroll beats drive the tunnel narrative */
+let introLock = 1; /* 1 = camera held at hero intro; softens to 0 after INTRO_MS */
+let storySmooth = 0, storyCurrent = 0;
 let scrollTarget = 0, scrollSmooth = 0, scrollCurrent = 0;
+
+const msg1 = document.getElementById('tunnel-msg-1');
+const msg2 = document.getElementById('tunnel-msg-2');
+const heroStory = document.getElementById('lithos-hero-story');
+const rootEl = document.documentElement;
+
+if (window.scrollY > 0) window.scrollTo(0, 0);
+rootEl.style.overflow = 'hidden';
+window.setTimeout(() => {
+  rootEl.style.overflow = '';
+}, INTRO_MS);
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+function smoothstep(edge0, edge1, x) {
+  const t = THREE.MathUtils.clamp((x - edge0) / Math.max(edge1 - edge0, 1e-6), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+function pulse(t, a, b, c, d) {
+  return smoothstep(a, b, t) * (1 - smoothstep(c, d, t));
+}
+
 function updateScroll() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
   scrollTarget = max > 0 ? THREE.MathUtils.clamp(window.scrollY / max, 0, 1) : 0;
@@ -766,27 +825,86 @@ function syncSize() {
   }
 }
 
+function storyFromScroll() {
+  const span = Math.max(innerHeight * STORY_VH, 1);
+  return THREE.MathUtils.clamp(window.scrollY / span, 0, 1);
+}
+
+/* Camera depth keyed to story: hold → enter hub → travel deeper */
+function cameraZForStory(s) {
+  if (s < 0.42) {
+    const t = easeInOutCubic(s / 0.42);
+    return THREE.MathUtils.lerp(20, 8.5, t); /* approach / enter */
+  }
+  if (s < 0.78) {
+    const t = easeInOutCubic((s - 0.42) / 0.36);
+    return THREE.MathUtils.lerp(8.5, -3.5, t); /* through the hub */
+  }
+  const t = easeInOutCubic((s - 0.78) / 0.22);
+  return THREE.MathUtils.lerp(-3.5, -11, t); /* deeper beyond */
+}
+
+function applyStoryVisuals(s) {
+  const a1 = pulse(s, 0.10, 0.22, 0.40, 0.52);
+  const a2 = pulse(s, 0.48, 0.60, 0.82, 0.96);
+  const heroA = smoothstep(0.88, 1.0, s);
+
+  if (msg1) {
+    msg1.style.opacity = a1.toFixed(4);
+    const sc = 0.88 + a1 * 0.14;
+    const blur = (1 - a1) * 10;
+    msg1.style.transform = 'scale(' + sc.toFixed(4) + ') translateZ(0)';
+    msg1.style.filter = 'blur(' + blur.toFixed(2) + 'px)';
+  }
+  if (msg2) {
+    msg2.style.opacity = a2.toFixed(4);
+    const sc = 0.90 + a2 * 0.12;
+    const blur = (1 - a2) * 10;
+    msg2.style.transform = 'scale(' + sc.toFixed(4) + ') translateZ(0)';
+    msg2.style.filter = 'blur(' + blur.toFixed(2) + 'px)';
+  }
+  if (heroStory) {
+    heroStory.style.opacity = heroA.toFixed(4);
+    heroStory.style.transform = 'translateY(' + ((1 - heroA) * 18).toFixed(2) + 'px)';
+  }
+}
+
 function animate() {
   requestAnimationFrame(animate);
   syncSize();
   const dt = Math.min(clock.getDelta(), 0.05);
   const time = clock.elapsedTime;
 
+  /* Intro: keep the Chakra tunnel as the hero for ~3.6s, then hand scroll control over */
+  if (time < INTRO_MS / 1000) {
+    introLock = 1;
+  } else {
+    introLock = THREE.MathUtils.lerp(introLock, 0, 1 - Math.exp(-dt * 3.2));
+  }
+
   scrollSmooth = THREE.MathUtils.lerp(scrollSmooth, scrollTarget, 0.10);
   scrollCurrent = THREE.MathUtils.lerp(scrollCurrent, scrollSmooth, 0.06);
+
+  const storyTarget = storyFromScroll() * (1 - introLock);
+  storySmooth = THREE.MathUtils.lerp(storySmooth, storyTarget, 0.10);
+  storyCurrent = THREE.MathUtils.lerp(storyCurrent, storySmooth, 0.06);
+
   mouse.x = THREE.MathUtils.lerp(mouse.x, mouseTarget.x, 0.06);
   mouse.y = THREE.MathUtils.lerp(mouse.y, mouseTarget.y, 0.06);
 
-  const targetZ = 20 - scrollCurrent * 24;
+  /* After the two story beats, residual page scroll nudges a little deeper */
+  const afterStory = THREE.MathUtils.clamp((scrollCurrent - 0.22) / 0.78, 0, 1);
+  const baseZ = cameraZForStory(storyCurrent);
+  const targetZ = baseZ - afterStory * 6 * (1 - introLock);
   camera.position.z = targetZ;
   camera.position.x = mouse.x * 0.12;
   camera.position.y = mouse.y * 0.12;
   camera.lookAt(mouse.x * 0.6, mouse.y * 0.6, camera.position.z - 12);
 
-  rollPhase += dt * (0.045 + scrollCurrent * 0.05);
+  rollPhase += dt * (0.045 + storyCurrent * 0.05);
   tunnelGroup.rotation.z = rollPhase;
 
-  const energy = scrollCurrent;
+  const energy = Math.max(storyCurrent, scrollCurrent * 0.55);
 
   for (const g of chakras) {
     g.rotation.y += dt * g.userData.speedY * (1 + energy * 0.8);
@@ -817,6 +935,8 @@ function animate() {
 
   bloom1.strength = 0.32 + energy * 0.15;
   bloom2.strength = 0.12 + energy * 0.06;
+
+  applyStoryVisuals(storyCurrent);
 
   composer.render();
 }
