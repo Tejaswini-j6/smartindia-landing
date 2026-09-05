@@ -684,7 +684,7 @@ hero.userData.speedZ = 0.012;
 tunnelGroup.add(hero);
 chakras.push(hero);
 
-/* ---------- Flow-film tricolor: 3 silk bands, left → right behind the Chakra ---------- */
+/* ---------- opposing smoke: orange L→R (top), green R→L (bottom) ---------- */
 const ribbonVert = `
   varying vec2 vUv;
   varying vec3 vWorldPos;
@@ -699,6 +699,7 @@ const ribbonFrag = `
   uniform vec3 uColor;
   uniform float uTime;
   uniform float uEnergy;
+  uniform float uDir;
   varying vec2 vUv;
   varying vec3 vWorldPos;
 
@@ -711,47 +712,54 @@ const ribbonFrag = `
   }
   float fbm(vec2 p){
     float v=0., a=0.5;
-    for(int i=0;i<4;i++){ v+=a*noise(p); p*=2.05; a*=0.5; }
+    for(int i=0;i<4;i++){ v+=a*noise(p); p*=2.1; a*=0.5; }
     return v;
   }
 
   void main() {
     float edge = abs(vUv.y - 0.5) * 2.0;
-    float soft = pow(1.0 - smoothstep(0.02, 1.0, edge), 1.65);
+    float soft = pow(1.0 - smoothstep(0.05, 1.0, edge), 1.4);
 
-    vec2 np = vec2(vUv.x * 6.0 - uTime * 0.7, vUv.y * 2.2);
+    /* denser at the emit side, thinning as smoke travels */
+    float along = uDir > 0.0 ? vUv.x : (1.0 - vUv.x);
+    float emit = smoothstep(0.0, 0.22, along) * (1.0 - smoothstep(0.55, 1.0, along) * 0.65);
+
+    vec2 np = vec2(vUv.x * 5.5 - uTime * 0.85 * uDir, vUv.y * 2.4 + uTime * 0.12);
     float n = fbm(np);
-    float silk = 0.45 + 0.55 * sin(vUv.x * 22.0 - uTime * 2.2 + n * 5.0);
-    float smoke = 0.4 + 0.6 * n;
+    float n2 = fbm(np * 1.7 + 2.3);
+    float smoke = smoothstep(0.2, 0.85, n * 0.55 + n2 * 0.5);
+    float wave = 0.5 + 0.5 * sin(vUv.x * 16.0 - uTime * 2.4 * uDir + n * 4.0);
 
-    float alpha = soft * smoke * (0.45 + 0.25 * silk) * (0.75 + 0.25 * uEnergy);
-    vec3 col = mix(uColor * 0.65, uColor * 1.05, 0.35 + 0.65 * n);
-    /* soft self-glow like the Flow film cloth */
-    col += uColor * 0.12 * silk;
-    gl_FragColor = vec4(col, alpha * 0.9);
+    float alpha = soft * smoke * emit * (0.5 + 0.28 * wave) * (0.8 + 0.25 * uEnergy);
+
+    /* bright-dark smoke: deep base with a lit crest */
+    vec3 deep = uColor * 0.45;
+    vec3 lit = uColor * 1.15;
+    vec3 col = mix(deep, lit, 0.3 + 0.7 * n * wave);
+    gl_FragColor = vec4(col, alpha);
   }
 `;
 
-const RIBBON_POINTS = 40;
+const RIBBON_POINTS = 42;
 const ribbonShape = (() => {
   const s = new THREE.Shape();
-  /* flat silk cross-section */
-  s.moveTo(0, -0.62);
-  s.lineTo(0.07, -0.62);
-  s.lineTo(0.07, 0.62);
-  s.lineTo(0, 0.62);
+  s.moveTo(0, -0.78);
+  s.lineTo(0.1, -0.78);
+  s.lineTo(0.1, 0.78);
+  s.lineTo(0, 0.78);
   s.closePath();
   return s;
 })();
 
-function createRibbon(color, phase, yBias) {
+function createRibbon(color, phase, yBias, dir) {
   const points = [];
   for (let i = 0; i < RIBBON_POINTS; i++) points.push(new THREE.Vector3());
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       uColor: { value: new THREE.Color(color) },
       uTime: { value: 0 },
-      uEnergy: { value: 0 }
+      uEnergy: { value: 0 },
+      uDir: { value: dir }
     },
     vertexShader: ribbonVert,
     fragmentShader: ribbonFrag,
@@ -762,48 +770,53 @@ function createRibbon(color, phase, yBias) {
   });
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);
   scene.add(mesh);
-  return { points, mesh, phase, yBias };
+  return { points, mesh, phase, yBias, dir };
 }
 
-/* Flow film palette — saffron / white / green silk */
-const FLOW_SAFFRON = 0xE07020;
-const FLOW_WHITE = 0xE8ECF0;
-const FLOW_GREEN = 0x1A8A48;
+/* Bright-dark smoke tones */
+const SMOKE_ORANGE = 0xC45A12;
+const SMOKE_GREEN = 0x0F6B36;
 
+/* Orange: top-left → right | Green: bottom-right → left */
 const ribbons = [
-  createRibbon(FLOW_SAFFRON, 0.0,  2.85),
-  createRibbon(FLOW_WHITE,   2.15, 0.05),
-  createRibbon(FLOW_GREEN,   4.3, -2.85)
+  createRibbon(SMOKE_ORANGE, 0.0,  3.4,  1),
+  createRibbon(SMOKE_GREEN,  2.4, -3.4, -1)
 ];
 
 function updateRibbon(r, time, energy) {
-  /* Horizontal serpentine flow L→R, weaving behind the Chakra (z≈-6) */
-  const flow = time * (0.9 + energy * 0.35) + r.phase;
+  /* Smoke waveform streaming from each side */
+  const flow = time * (1.05 + energy * 0.4) * r.dir + r.phase;
+  const x0 = r.dir > 0 ? -20 : 20;
+  const x1 = r.dir > 0 ? 18 : -18;
+
   for (let i = 0; i < r.points.length; i++) {
     const t = i / Math.max(r.points.length - 1, 1);
-    const x = THREE.MathUtils.lerp(-19, 19, t);
-    const wave = Math.sin(x * 0.32 + flow) * (1.55 + energy * 0.55)
-               + Math.sin(x * 0.72 + flow * 1.35) * 0.55;
-    const y = r.yBias + wave;
-    const z = -6.2
-            + Math.cos(x * 0.28 + flow * 0.85) * (2.4 + energy)
-            + Math.sin(t * Math.PI * 2.0 + flow) * 0.9;
+    const x = THREE.MathUtils.lerp(x0, x1, t);
+    /* billowing smoke waves — stronger near emit side */
+    const birth = 1.0 - t * 0.45;
+    const wave = Math.sin(x * 0.38 + flow) * (1.9 + energy * 0.7) * birth
+               + Math.sin(x * 0.85 + flow * 1.5) * 0.75 * birth
+               + Math.sin(x * 1.4 - flow * 0.8 + r.phase) * 0.35;
+    const y = r.yBias + wave
+            + Math.sin(time * 0.55 + r.phase + t * 2.5) * 0.45;
+    const z = -6.0
+            + Math.cos(x * 0.3 + flow * 0.9) * (2.6 + energy) * birth
+            + Math.sin(t * Math.PI + flow) * 1.1;
     r.points[i].set(x, y, z);
   }
 
   const curve = new THREE.CatmullRomCurve3(r.points);
   const geo = new THREE.ExtrudeGeometry(ribbonShape, {
-    steps: 140,
+    steps: 150,
     bevelEnabled: false,
     extrudePath: curve
   });
 
-  /* extra silk flutter on the free surface */
   const posAttr = geo.attributes.position;
   for (let vi = 0; vi < posAttr.count; vi++) {
     const px = posAttr.getX(vi), py = posAttr.getY(vi), pz = posAttr.getZ(vi);
-    const flutter = Math.sin(px * 0.55 - time * 2.0 + r.phase) * 0.045
-                  + Math.sin(pz * 0.4 + time * 1.4) * 0.03;
+    const flutter = Math.sin(px * 0.6 - time * 2.2 * r.dir + r.phase) * 0.07
+                  + Math.sin(pz * 0.45 + time * 1.5) * 0.04;
     posAttr.setXYZ(vi, px, py + flutter, pz);
   }
   posAttr.needsUpdate = true;
