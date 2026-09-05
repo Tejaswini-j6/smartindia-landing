@@ -36,8 +36,18 @@
   .lithos-nav-toggle { display: none; }
 
   .lithos-hero {
-    min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; gap: 36px; padding: 120px 32px 140px;
+    /* Tall scroll runway: two story beats stay inside the hero */
+    height: 300vh;
+    position: relative;
+    display: block;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+  }
+  .lithos-hero-pin {
+    position: sticky; top: 0; height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 36px; padding: 120px 32px 140px; box-sizing: border-box;
     background: linear-gradient(180deg, rgba(2,4,10,0.25) 0%, rgba(2,4,10,0.05) 45%, rgba(2,4,10,0.45) 100%);
   }
   /* Scroll-story overlays — same type stack as the hero; driven only by JS */
@@ -185,21 +195,23 @@
 
 <div id="scroll-host">
 
-  <section class="lithos-hero">
-    <div class="lithos-hero-story" id="lithos-hero-story">
-      <h1><span class="serif">Explore. Discover.</span><span class="sans">Connect. With AI.</span></h1>
-      <div class="lithos-hero-copy" style="grid-template-columns: 1fr; max-width: 680px;">
-        <p style="text-align: center;">SmartIndia.ai brings the power of artificial intelligence and the world of information together in one intelligent platform — and builds the web platforms that businesses run on.</p>
-      </div>
-      <div class="si-cta-row">
-        <a href="#portfolio" class="lithos-cta-btn">Explore SmartIndia.ai</a>
-        <a href="#contact" class="si-outline-btn">Get Started</a>
-      </div>
-      <div class="si-facts">
-        <div class="fact"><b>2025</b>Founded</div>
-        <div class="fact"><b>—</b>Live Platforms</div>
-        <div class="fact"><b>—</b>Customers Served</div>
-        <div class="fact"><b>India</b>Built with an India-first vision</div>
+  <section class="lithos-hero" id="lithos-hero">
+    <div class="lithos-hero-pin">
+      <div class="lithos-hero-story" id="lithos-hero-story">
+        <h1><span class="serif">Explore. Discover.</span><span class="sans">Connect. With AI.</span></h1>
+        <div class="lithos-hero-copy" style="grid-template-columns: 1fr; max-width: 680px;">
+          <p style="text-align: center;">SmartIndia.ai brings the power of artificial intelligence and the world of information together in one intelligent platform — and builds the web platforms that businesses run on.</p>
+        </div>
+        <div class="si-cta-row">
+          <a href="#portfolio" class="lithos-cta-btn">Explore SmartIndia.ai</a>
+          <a href="#contact" class="si-outline-btn">Get Started</a>
+        </div>
+        <div class="si-facts">
+          <div class="fact"><b>2025</b>Founded</div>
+          <div class="fact"><b>—</b>Live Platforms</div>
+          <div class="fact"><b>—</b>Customers Served</div>
+          <div class="fact"><b>India</b>Built with an India-first vision</div>
+        </div>
       </div>
     </div>
   </section>
@@ -809,13 +821,13 @@ composer.addPass(new ShaderPass(CopyShader));
 
 /* ---------- scroll & pointer ---------- */
 const INTRO_MS = 3600;
-const STORY_VH = 3.15; /* three scroll beats: brand → deeper line → site/tunnel */
 let introLock = 1;
 let storySmooth = 0, storyCurrent = 0;
 let scrollTarget = 0, scrollSmooth = 0, scrollCurrent = 0;
 
 const msg1 = document.getElementById('tunnel-msg-1');
 const msg2 = document.getElementById('tunnel-msg-2');
+const heroEl = document.getElementById('lithos-hero');
 const rootEl = document.documentElement;
 
 if (window.scrollY > 0) window.scrollTo(0, 0);
@@ -883,27 +895,27 @@ function syncSize() {
   }
 }
 
+/* Progress 0→1 only while scrolling inside the sticky hero */
 function storyFromScroll() {
-  const span = Math.max(innerHeight * STORY_VH, 1);
-  return THREE.MathUtils.clamp(window.scrollY / span, 0, 1);
+  if (!heroEl) return 0;
+  const total = Math.max(heroEl.offsetHeight - window.innerHeight, 1);
+  const top = heroEl.getBoundingClientRect().top;
+  const scrolled = THREE.MathUtils.clamp(-top, 0, total);
+  return scrolled / total;
 }
 
 /*
-  Beat 1 (0–0.34): enter Chakra → SMART INDIA AI
-  Beat 2 (0.34–0.66): deeper through hub → Bringing AI and People Together
-  Beat 3 (0.66–1.0): settle into tunnel view as the site continues
+  Hero beat 1 (0–0.5): go deeper → SMART INDIA AI
+  Hero beat 2 (0.5–1.0): go deeper still → Bringing AI and People Together
+  Past hero: story stays at 1; page scrolls normally into About+
 */
 function cameraZForStory(s) {
-  if (s < 0.34) {
-    const t = easeInOutCubic(s / 0.34);
-    return THREE.MathUtils.lerp(20, 9.2, t);
+  if (s < 0.5) {
+    const t = easeInOutCubic(s / 0.5);
+    return THREE.MathUtils.lerp(20, 8.5, t);
   }
-  if (s < 0.66) {
-    const t = easeInOutCubic((s - 0.34) / 0.32);
-    return THREE.MathUtils.lerp(9.2, -4.2, t);
-  }
-  const t = easeInOutCubic((s - 0.66) / 0.34);
-  return THREE.MathUtils.lerp(-4.2, -8.5, t);
+  const t = easeInOutCubic((s - 0.5) / 0.5);
+  return THREE.MathUtils.lerp(8.5, -5.5, t);
 }
 
 function setFlipMsg(el, amt, dir) {
@@ -922,12 +934,11 @@ function setFlipMsg(el, amt, dir) {
 }
 
 function applyStoryVisuals(s) {
-  /* 3D flips — brighter peak mid-beat, then clear for the next */
-  const a1 = pulse(s, 0.04, 0.14, 0.28, 0.38);
-  const a2 = pulse(s, 0.36, 0.46, 0.60, 0.70);
+  const inHero = s < 0.995;
+  const a1 = inHero ? pulse(s, 0.06, 0.18, 0.38, 0.50) : 0;
+  const a2 = inHero ? pulse(s, 0.52, 0.64, 0.86, 0.98) : 0;
   setFlipMsg(msg1, a1, 1);
   setFlipMsg(msg2, a2, -1);
-  /* Hero content stays — never removed or faded out */
 }
 
 function animate() {
@@ -952,25 +963,20 @@ function animate() {
   mouse.x = THREE.MathUtils.lerp(mouse.x, mouseTarget.x, 0.06);
   mouse.y = THREE.MathUtils.lerp(mouse.y, mouseTarget.y, 0.06);
 
-  /* After story beats, keep traveling the tunnel while reading the site */
-  const afterStory = THREE.MathUtils.clamp((scrollCurrent - 0.18) / 0.82, 0, 1);
-  const baseZ = cameraZForStory(storyCurrent);
-  const targetZ = baseZ - afterStory * 10 * (1 - introLock);
-  camera.position.z = targetZ;
+  /* Camera depth driven only by hero story; hold after leaving hero */
+  camera.position.z = cameraZForStory(storyCurrent);
   camera.position.x = mouse.x * 0.12;
   camera.position.y = mouse.y * 0.12;
   camera.lookAt(mouse.x * 0.6, mouse.y * 0.6, camera.position.z - 12);
 
-  /* Brighter flip energy on beat edges */
   const flipKick =
-    pulse(storyCurrent, 0.08, 0.16, 0.24, 0.32) +
-    pulse(storyCurrent, 0.40, 0.48, 0.56, 0.64) +
-    pulse(storyCurrent, 0.70, 0.78, 0.88, 0.96);
+    pulse(storyCurrent, 0.10, 0.20, 0.30, 0.42) +
+    pulse(storyCurrent, 0.56, 0.66, 0.78, 0.90);
 
   rollPhase += dt * (0.045 + storyCurrent * 0.055 + flipKick * 0.08);
   tunnelGroup.rotation.z = rollPhase;
 
-  const energy = Math.max(storyCurrent, scrollCurrent * 0.55) + flipKick * 0.35;
+  const energy = storyCurrent + flipKick * 0.35;
 
   for (const g of chakras) {
     g.rotation.y += dt * g.userData.speedY * (1 + energy * 0.85);
