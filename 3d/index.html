@@ -672,11 +672,11 @@ const ribbonFrag = `
     float dust = smoothstep(0.28, 0.78, n * 0.65 + n2 * 0.45);
 
     float wisps = smoothstep(0.35, 0.85, noise(np * 2.4 + uTime * 0.12));
-    float alpha = soft * dust * (0.22 + 0.28 * wisps);
-    alpha *= 0.55 + 0.25 * uEnergy;
-    alpha *= 0.72;
+    float alpha = soft * dust * (0.32 + 0.38 * wisps);
+    alpha *= 0.72 + 0.28 * uEnergy;
+    alpha *= 0.95;
 
-    vec3 col = mix(uColor * 0.55, uColor, 0.55 + 0.45 * n);
+    vec3 col = mix(uColor * 0.9, uColor * 1.25, 0.5 + 0.5 * n);
     gl_FragColor = vec4(col, alpha);
   }
 `;
@@ -694,7 +694,7 @@ function createRibbon(color, phase, yBias, count) {
     fragmentShader: ribbonFrag,
     transparent: true,
     depthWrite: false,
-    blending: THREE.NormalBlending,
+    blending: THREE.AdditiveBlending,
     side: THREE.DoubleSide
   });
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);
