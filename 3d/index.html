@@ -686,11 +686,11 @@ const ribbonFrag = `
     float dust = smoothstep(0.28, 0.78, n * 0.65 + n2 * 0.45);
 
     float wisps = smoothstep(0.35, 0.85, noise(np * 2.4 + uTime * 0.12));
-    float alpha = soft * dust * (0.10 + 0.16 * wisps);
-    alpha *= 0.28 + 0.12 * uEnergy;
+    float alpha = soft * dust * (0.08 + 0.12 * wisps);
+    alpha *= 0.22 + 0.10 * uEnergy;
 
     /* muted dark smoke — no bright glow */
-    vec3 col = mix(uColor * 0.28, uColor * 0.55, 0.4 + 0.6 * n);
+    vec3 col = mix(uColor * 0.18, uColor * 0.40, 0.4 + 0.6 * n);
     gl_FragColor = vec4(col, alpha);
   }
 `;
@@ -718,9 +718,9 @@ function createRibbon(color, phase, yBias, count) {
 
 const RIBBON_POINTS = 24;
 /* Dark muted tricolor smoke (not lit / additive) */
-const SMOKE_SAFFRON = 0x4A2E14;
-const SMOKE_ASH = 0x4A4E52;
-const SMOKE_GREEN = 0x0C2E1A;
+const SMOKE_SAFFRON = 0x2E1A0C;
+const SMOKE_ASH = 0x2A2C2E;
+const SMOKE_GREEN = 0x071A10;
 const ribbons = [
   createRibbon(SMOKE_SAFFRON, 0.0, 2.4, RIBBON_POINTS),
   createRibbon(SMOKE_ASH, 2.1, 0.15, RIBBON_POINTS),
